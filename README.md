@@ -1,3 +1,4 @@
+![icon](https://github.com/OpenByteDev/EZBlocker3/blob/master/EZBlocker3/Icon/Icon128.png)
 # EZBlocker 3
 
 EZBlocker 3 is a Spotify Ad Muter/Blocker for Windows written in C#.
@@ -10,12 +11,12 @@ It is an rewrite of the original [EZBlocker](https://github.com/Xeroday/Spotify-
 
 ## Setup
 
-**[Download for Windows](example.com)**
+**[Download for Windows](https://github.com/OpenByteDev/EZBlocker3/releases/download/0.1.0/EZBlocker3_v0.1.0.zip)**
 
 No need to install as EZBlocker 3 is a portable application.
 
 ## Credits
 
-[Eric Zhang](https://github.com/Xeroday) for the original [EZBlocker](https://github.com/Xeroday/Spotify-Ad-Blocker)
-[Yimeng Wu](https://github.com/Kinnara) for the beautiful [ModernWPF UI Library](https://github.com/Kinnara/ModernWpf)
+- [Eric Zhang](https://github.com/Xeroday) for the original [EZBlocker](https://github.com/Xeroday/Spotify-Ad-Blocker)
+- [Yimeng Wu](https://github.com/Kinnara) for the beautiful [ModernWPF UI Library](https://github.com/Kinnara/ModernWpf)
 
