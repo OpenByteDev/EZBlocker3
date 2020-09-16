@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ApplicationIcon>Icon/icon256.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ModernWpfUI" Version="0.9.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="Icon\Icon256.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <Platforms>x64</Platforms>
+    <TargetFramework>net5.0</TargetFramework>
+    <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
+    <PublishSingleFile>True</PublishSingleFile>
+    <PublishTrimmed>False</PublishTrimmed>
+    <PublishReadyToRun>False</PublishReadyToRun>
+    <PublishReadyToRunShowWarnings>True</PublishReadyToRunShowWarnings>
+    <DeleteExistingFiles>True</DeleteExistingFiles>
+    <Optimize>True</Optimize>
+    <NoStandardLibraries>True</NoStandardLibraries>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <Version>0.1.0</Version>
+    <Authors>OpenByte</Authors>
+    <PackageIcon>Icon256.png</PackageIcon>
+    <NeutralLanguage>en</NeutralLanguage>
+    <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
+    <PackageLicenseExpression>GPL-3.0 License</PackageLicenseExpression>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageProjectUrl>https://github.com/OpenByteDev/EZBlocker3</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/OpenByteDev/EZBlocker3</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>ad blocker;ad muter;spotify</PackageTags>
+  </PropertyGroup>
+
+</Project>
