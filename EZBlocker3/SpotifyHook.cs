@@ -1,9 +1,12 @@
-﻿using System;
+﻿using EZBlocker3.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Timers;
+using System.Windows.Forms;
 using static EZBlocker3.AudioUtils;
+using Timer = System.Timers.Timer;
 
 namespace EZBlocker3 {
     internal class SpotifyHook : IDisposable {
@@ -24,21 +27,16 @@ namespace EZBlocker3 {
         public bool IsPlaying => !IsPaused;
         public bool IsSongPlaying => ActiveSong != null;
         public bool IsAdPlaying { get; private set; }
-        private bool? isMuted;
-        public bool? IsMuted {
-            get {
-                isMuted ??= AudioUtils.IsMuted(VolumeControl?.Control);
-                return isMuted;
-            }
-            private set => isMuted = value;
-        }
+        public bool? IsMuted { get; private set; }
         public SongInfo? ActiveSong { get; private set; }
         public bool IsActive { get; private set; }
 
         public event ActiveSongChangedEventHandler? ActiveSongChanged;
         public delegate void ActiveSongChangedEventHandler(object sender, EventArgs eventArgs);
+        public event SpotifyStateChangedEventHandler? SpotifyStateChanged;
+        public delegate void SpotifyStateChangedEventHandler(object sender, EventArgs eventArgs);
 
-        private readonly Timer RefreshTimer = new Timer(1000);
+        private readonly Timer RefreshTimer = new Timer(100);
         private HashSet<int>? allSpotifyProcessIds;
 
         // private float peak = 0f;
@@ -81,12 +79,16 @@ namespace EZBlocker3 {
                 if (VolumeControl is null)
                     return false;
                 Process = Process.GetProcessById(VolumeControl.ProcessId);
-
-                return false;
+                if (!IsHooked) {
+                    Process = null;
+                    VolumeControl = null;
+                    return false;
+                }
             }
 
             allSpotifyProcessIds = processes.Select(e => e.Id).ToHashSet();
             UpdateInfo();
+            OnSpotifyStateChanged();
 
             return true;
         }
@@ -109,37 +111,45 @@ namespace EZBlocker3 {
         }
 
         private void UpdateInfo() {
+            UpdateMuteStatus();
+
             string? oldWindowName = WindowName;
             string? newWindowName = WindowName = Process?.MainWindowTitle.Trim();
             if (oldWindowName != newWindowName) {
-                SongInfo? prevActiveSong = ActiveSong;
-                if (string.IsNullOrWhiteSpace(newWindowName) || newWindowName.StartsWith("Spotify")) {
+                var prevState = (ActiveSong, IsAdPlaying, IsSongPlaying);
+
+                var volume = AudioUtils.GetPeakVolume(VolumeControl?.Control);
+                if (string.IsNullOrWhiteSpace(newWindowName) || (newWindowName.StartsWith("Spotify") && volume == 0)) {
                     ActiveSong = null;
                     IsPaused = true;
                     IsAdPlaying = false;
                 } else {
                     IsPaused = false;
-                    if (newWindowName == "Advertisement") {
-                        ActiveSong = null;
-                        IsAdPlaying = true;
-                    } else if (newWindowName.Contains('-')) {
+                    if (newWindowName.Contains('-')) {
                         (string artist, string title) = newWindowName.Split('-').Select(e => e.Trim()).ToArray();
                         ActiveSong = new SongInfo(title, artist);
                         IsAdPlaying = false;
-                        RaiseActiveSongChanged();
+                    } else /* if (newWindowName == "Advertisement") */ {
+                        ActiveSong = null;
+                        IsAdPlaying = true;
                     }
                 }
 
-                if (prevActiveSong != ActiveSong) {
-                    RaiseActiveSongChanged();
-                }
+                if (prevState != (ActiveSong, IsAdPlaying, IsSongPlaying))
+                    OnSpotifyStateChanged();
+                if (prevState.ActiveSong != ActiveSong)
+                    OnActiveSongChanged();
             }
+        }
+
+        private void UpdateMuteStatus() {
+            IsMuted ??= AudioUtils.IsMuted(VolumeControl?.Control);
         }
 
         public void Mute() => SetMute(mute: true);
         public void Unmute() => SetMute(mute: false);
         public void SetMute(bool mute) {
-            if (isMuted == mute) {
+            if (IsMuted == mute) {
                 return;
             }
 
@@ -151,8 +161,14 @@ namespace EZBlocker3 {
             }
         }
 
-        private void RaiseActiveSongChanged() {
-            ActiveSongChanged?.Invoke(this, EventArgs.Empty);
+        private void OnActiveSongChanged() => OnActiveSongChanged(EventArgs.Empty);
+        protected virtual void OnActiveSongChanged(EventArgs eventArgs) {
+            ActiveSongChanged?.Invoke(this, eventArgs);
+        }
+
+        private void OnSpotifyStateChanged() => OnSpotifyStateChanged(EventArgs.Empty);
+        protected virtual void OnSpotifyStateChanged(EventArgs eventArgs) {
+            SpotifyStateChanged?.Invoke(this, eventArgs);
         }
 
         private bool _disposed;
