@@ -40,7 +40,7 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <Version>0.1.0</Version>
+    <Version>0.2.0.0</Version>
     <Authors>OpenByte</Authors>
     <PackageIcon>Icon256.png</PackageIcon>
     <NeutralLanguage>en</NeutralLanguage>
@@ -52,6 +52,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>ad blocker;ad muter;spotify</PackageTags>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Description>EZBlocker 3 is a Spotify Ad Muter/Blocker for Windows written in C#. It mutes Spotify while an advertisement is playing. It is an rewrite of the original EZBlocker.</Description>
   </PropertyGroup>
 
 </Project>
