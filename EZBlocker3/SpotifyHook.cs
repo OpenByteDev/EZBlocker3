@@ -78,7 +78,13 @@ namespace EZBlocker3 {
             if (Process is null) {
                 if (VolumeControl is null)
                     return false;
-                Process = Process.GetProcessById(VolumeControl.ProcessId);
+
+                try {
+                    Process = Process.GetProcessById(VolumeControl.ProcessId);
+                } catch(ArgumentException) {
+                    // TODO rework VolumeControl to store Process so that HasExited can be used.
+                    Process = null;
+                }
                 if (!IsHooked) {
                     Process = null;
                     VolumeControl = null;
@@ -106,7 +112,9 @@ namespace EZBlocker3 {
                 return;
 
             // Process.Refresh();
-            Process = Process.GetProcessById(Process.Id);
+            var id = Process.Id;
+            Process.Dispose();
+            Process = Process.GetProcessById(id);
             UpdateInfo();
         }
 
