@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Windows;
 using System.Windows.Forms;
+using static EZBlocker3.SpotifyHook;
 using Application = System.Windows.Application;
 
 namespace EZBlocker3 {
@@ -79,15 +80,26 @@ namespace EZBlocker3 {
 
         private void UpdateStatusLabel() {
             if (!spotifyHook.IsHooked) {
-                StatusLabel.Text = "Spotify is inactive";
-            } else if (spotifyHook.IsPaused) {
-                StatusLabel.Text = "Spotify is paused";
-            } else if (spotifyHook.IsAdPlaying) {
-                StatusLabel.Text = "Ad is playing";
-            } else if (spotifyHook.IsSongPlaying && spotifyHook.ActiveSong is SongInfo song) {
-                StatusLabel.Text = $"Playing {song.Title} by {song.Artist}";
+                StatusLabel.Text = "Spotify is not running";
             } else {
-                StatusLabel.Text = "Unknown State";
+                switch (spotifyHook.State) {
+                    case SpotifyState.Paused:
+                        StatusLabel.Text = "Spotify is paused";
+                        break;
+                    case SpotifyState.PlayingSong:
+                        if (!(spotifyHook.ActiveSong is SongInfo song)) {
+                            // we should never end up here?
+                            return;
+                        }
+                        StatusLabel.Text = $"Playing {song.Title} by {song.Artist}";
+                        break;
+                    case SpotifyState.PlayingAdvertisement:
+                        StatusLabel.Text = "Playing advertisement";
+                        break;
+                    case SpotifyState.Unknown:
+                        StatusLabel.Text = "Spotify is an unknown state";
+                        break;
+                }
             }
         }
     }

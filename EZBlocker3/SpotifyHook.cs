@@ -137,12 +137,10 @@ namespace EZBlocker3 {
                 switch (newWindowName) {
                     // Paused / Default for Free version
                     case "Spotify Free":
-                        SetPausedState();
-                        break;
                     // Paused / Default for Premium version
+                    // Why do you need EZBlocker3 when you have premium?
                     case "Spotify Premium":
-                        // Why do you need EZBlocker3 when you have premium?
-                        SetUnknownState();
+                        SetPausedState();
                         break;
                     // Advertisment Playing
                     case "Spotify": // Spotify Ads
