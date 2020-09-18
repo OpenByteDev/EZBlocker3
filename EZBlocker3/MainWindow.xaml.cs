@@ -66,7 +66,7 @@ namespace EZBlocker3 {
         }
 
         private void SpotifyHook_SpotifyStateChanged(object sender, EventArgs eventArgs) {
-            Debug.WriteLine($"State change: hooked: {spotifyHook.IsAdPlaying}, song: {spotifyHook.IsSongPlaying}, ad: {spotifyHook.IsAdPlaying}");
+            Debug.WriteLine($"State change: hooked={spotifyHook.IsHooked}, state={spotifyHook.State}");
             Dispatcher.Invoke(() => {
                 UpdateStatusLabel();
                 UpdateMuteStatus();

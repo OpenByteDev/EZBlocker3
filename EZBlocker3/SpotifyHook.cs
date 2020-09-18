@@ -4,21 +4,21 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Timers;
-using System.Windows.Forms;
 using static EZBlocker3.AudioUtils;
+using static EZBlocker3.SpotifyHook;
 using Timer = System.Timers.Timer;
 
 namespace EZBlocker3 {
     internal class SpotifyHook : IDisposable {
 
         public Process? Process { get; private set; }
-        private VolumeControl? volumeControl;
+        private VolumeControl? _volumeControl;
         public VolumeControl? VolumeControl {
             get {
-                volumeControl ??= AudioUtils.GetVolumeControl(allSpotifyProcessIds);
-                return volumeControl;
+                _volumeControl ??= AudioUtils.GetVolumeControl(_allSpotifyProcessIds);
+                return _volumeControl;
             }
-            private set => volumeControl = value;
+            private set => _volumeControl = value;
         }
 
         public string? WindowName { get; private set; }
@@ -40,20 +40,19 @@ namespace EZBlocker3 {
             Unknown
         }
 
-
         public event ActiveSongChangedEventHandler? ActiveSongChanged;
-        public delegate void ActiveSongChangedEventHandler(object sender, EventArgs eventArgs);
+        public delegate void ActiveSongChangedEventHandler(object sender, ActiveSongChangedEventArgs eventArgs);
         public event SpotifyStateChangedEventHandler? SpotifyStateChanged;
-        public delegate void SpotifyStateChangedEventHandler(object sender, EventArgs eventArgs);
+        public delegate void SpotifyStateChangedEventHandler(object sender, SpotifyStateChangedEventArgs eventArgs);
 
-        private readonly Timer RefreshTimer = new Timer(100);
-        private HashSet<int>? allSpotifyProcessIds;
+        private readonly Timer _refreshTimer = new Timer(100);
+        private HashSet<int>? _allSpotifyProcessIds;
 
         // private float peak = 0f;
         // private float lastPeak = 0f;
 
         public SpotifyHook() {
-            RefreshTimer.Elapsed += RefreshTimer_Elapsed;
+            _refreshTimer.Elapsed += RefreshTimer_Elapsed;
         }
 
         public void Activate() {
@@ -61,12 +60,12 @@ namespace EZBlocker3 {
 
             HookSpotify();
 
-            RefreshTimer.Start();
+            _refreshTimer.Start();
         }
         public void Deactivate() {
             IsActive = false;
 
-            RefreshTimer.Stop();
+            _refreshTimer.Stop();
 
             ClearHook();
         }
@@ -82,7 +81,7 @@ namespace EZBlocker3 {
         }
 
         private bool HookSpotify() {
-            Process[] processes = Process.GetProcessesByName("spotify");
+            var processes = Process.GetProcessesByName("spotify");
 
             Process = processes.Where(e => !string.IsNullOrWhiteSpace(e.MainWindowTitle)).FirstOrDefault();
             if (Process is null) {
@@ -95,6 +94,7 @@ namespace EZBlocker3 {
                     // TODO rework VolumeControl to store Process so that HasExited can be used.
                     Process = null;
                 }
+
                 if (!IsHooked) {
                     Process = null;
                     VolumeControl = null;
@@ -102,7 +102,7 @@ namespace EZBlocker3 {
                 }
             }
 
-            allSpotifyProcessIds = processes.Select(e => e.Id).ToHashSet();
+            _allSpotifyProcessIds = processes.Select(e => e.Id).ToHashSet();
             UpdateInfo();
 
             return true;
@@ -124,14 +124,15 @@ namespace EZBlocker3 {
             var id = Process.Id;
             Process.Dispose();
             Process = Process.GetProcessById(id);
+
             UpdateInfo();
         }
 
         private void UpdateInfo() {
             UpdateMuteStatus();
 
-            string? oldWindowName = WindowName;
-            string? newWindowName = WindowName = Process?.MainWindowTitle.Trim();
+            var oldWindowName = WindowName;
+            var newWindowName = WindowName = Process?.MainWindowTitle.Trim();
             if (oldWindowName != newWindowName) {
                 switch (newWindowName) {
                     // Paused / Default for Free version
@@ -180,9 +181,9 @@ namespace EZBlocker3 {
             State = newState;
 
             if (prevState != newState)
-                OnSpotifyStateChanged();
+                OnSpotifyStateChanged(prevState, newState);
             if (prevSong != newSong)
-                OnActiveSongChanged();
+                OnActiveSongChanged(prevSong, newSong);
         }
 
         private void UpdateMuteStatus() {
@@ -192,9 +193,8 @@ namespace EZBlocker3 {
         public void Mute() => SetMute(mute: true);
         public void Unmute() => SetMute(mute: false);
         public void SetMute(bool mute) {
-            if (IsMuted == mute) {
+            if (IsMuted == mute)
                 return;
-            }
 
             if (VolumeControl != null) {
                 AudioUtils.SetMute(VolumeControl.Control, mute);
@@ -204,22 +204,22 @@ namespace EZBlocker3 {
             }
         }
 
-        private void OnActiveSongChanged() => OnActiveSongChanged(EventArgs.Empty);
-        protected virtual void OnActiveSongChanged(EventArgs eventArgs) {
+        private void OnActiveSongChanged(SongInfo? previous, SongInfo? current) =>
+            OnActiveSongChanged(new ActiveSongChangedEventArgs(previous, current));
+        protected virtual void OnActiveSongChanged(ActiveSongChangedEventArgs eventArgs) =>
             ActiveSongChanged?.Invoke(this, eventArgs);
-        }
 
-        private void OnSpotifyStateChanged() => OnSpotifyStateChanged(EventArgs.Empty);
-        protected virtual void OnSpotifyStateChanged(EventArgs eventArgs) {
+        private void OnSpotifyStateChanged(SpotifyState previous, SpotifyState current) =>
+            OnSpotifyStateChanged(new SpotifyStateChangedEventArgs(previous, current));
+        protected virtual void OnSpotifyStateChanged(SpotifyStateChangedEventArgs eventArgs) =>
             SpotifyStateChanged?.Invoke(this, eventArgs);
-        }
 
         private bool _disposed;
         protected virtual void Dispose(bool disposing) {
             if (!_disposed) {
                 if (disposing) {
                     // dispose managed state
-                    RefreshTimer?.Dispose();
+                    _refreshTimer?.Dispose();
                     VolumeControl?.Dispose();
                     Process?.Dispose();
                 }
@@ -235,5 +235,29 @@ namespace EZBlocker3 {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+    }
+
+    internal class SpotifyStateChangedEventArgs : EventArgs {
+
+        public SpotifyState PreviousState { get; private set; }
+        public SpotifyState NewState { get; private set; }
+
+        public SpotifyStateChangedEventArgs(SpotifyState previousState, SpotifyState newState) {
+            PreviousState = previousState;
+            NewState = newState;
+        }
+
+    }
+
+    internal class ActiveSongChangedEventArgs : EventArgs {
+
+        public SongInfo? PreviousActiveSong { get; private set; }
+        public SongInfo? NewActiveSong { get; private set; }
+
+        public ActiveSongChangedEventArgs(SongInfo? previousActiveSong, SongInfo? newActiveSong) {
+            PreviousActiveSong = previousActiveSong;
+            NewActiveSong = newActiveSong;
+        }
+
     }
 }
