@@ -17,6 +17,10 @@
     <Resource Include="Icon\Icon256.png" />
     <Resource Include="Icon\Icon32.ico" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="System.Globalization.Invariant" Value="true" />
+  </ItemGroup>
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
