@@ -47,6 +47,7 @@
     <RepositoryUrl>https://github.com/OpenByteDev/EZBlocker3</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageTags>ad blocker;ad muter;spotify</PackageTags>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
 
 </Project>
