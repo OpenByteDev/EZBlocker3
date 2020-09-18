@@ -22,14 +22,24 @@ namespace EZBlocker3 {
         }
 
         public string? WindowName { get; private set; }
+
         public bool IsHooked => Process != null && !Process.HasExited;
-        public bool IsPaused { get; private set; }
-        public bool IsPlaying => !IsPaused;
-        public bool IsSongPlaying => ActiveSong != null;
-        public bool IsAdPlaying { get; private set; }
-        public bool? IsMuted { get; private set; }
-        public SongInfo? ActiveSong { get; private set; }
+        public bool IsPaused => State == SpotifyState.Paused;
+        public bool IsPlaying => IsSongPlaying || IsAdPlaying;
+        public bool IsSongPlaying => State == SpotifyState.PlayingSong;
+        public bool IsAdPlaying => State == SpotifyState.PlayingAdvertisement;
+        public bool? IsMuted { get; private set; } = null;
+        public SongInfo? ActiveSong { get;  private set; }
         public bool IsActive { get; private set; }
+        public SpotifyState State { get; private set; }
+
+        public enum SpotifyState {
+            PlayingSong,
+            PlayingAdvertisement,
+            Paused,
+            Unknown
+        }
+
 
         public event ActiveSongChangedEventHandler? ActiveSongChanged;
         public delegate void ActiveSongChangedEventHandler(object sender, EventArgs eventArgs);
@@ -94,7 +104,6 @@ namespace EZBlocker3 {
 
             allSpotifyProcessIds = processes.Select(e => e.Id).ToHashSet();
             UpdateInfo();
-            OnSpotifyStateChanged();
 
             return true;
         }
@@ -124,30 +133,56 @@ namespace EZBlocker3 {
             string? oldWindowName = WindowName;
             string? newWindowName = WindowName = Process?.MainWindowTitle.Trim();
             if (oldWindowName != newWindowName) {
-                var prevState = (ActiveSong, IsAdPlaying, IsSongPlaying);
-
-                var volume = AudioUtils.GetPeakVolume(VolumeControl?.Control);
-                if (string.IsNullOrWhiteSpace(newWindowName) || (newWindowName.StartsWith("Spotify") && volume == 0)) {
-                    ActiveSong = null;
-                    IsPaused = true;
-                    IsAdPlaying = false;
-                } else {
-                    IsPaused = false;
-                    if (newWindowName.Contains('-')) {
-                        (string artist, string title) = newWindowName.Split('-').Select(e => e.Trim()).ToArray();
-                        ActiveSong = new SongInfo(title, artist);
-                        IsAdPlaying = false;
-                    } else /* if (newWindowName == "Advertisement") */ {
-                        ActiveSong = null;
-                        IsAdPlaying = true;
-                    }
+                switch (newWindowName) {
+                    // Paused / Default for Free version
+                    case "Spotify Free":
+                        SetPausedState();
+                        break;
+                    // Paused / Default for Premium version
+                    case "Spotify Premium":
+                        // Why do you need EZBlocker3 when you have premium?
+                        SetUnknownState();
+                        break;
+                    // Advertisment Playing
+                    case "Spotify": // Spotify Ads
+                    case "Advertisement": // Other Ads
+                        SetPlayingAdState();
+                        break;
+                    // Song Playing: "[artist] - [title]"
+                    case var name when name?.Contains('-') == true:
+                        var (artist, title) = name.Split('-').Select(e => e.Trim()).ToArray();
+                        SetPlayingSongState(new SongInfo(title, artist));
+                        break;
+                    // What is happening?
+                    default:
+                        SetUnknownState();
+                        break;
                 }
-
-                if (prevState != (ActiveSong, IsAdPlaying, IsSongPlaying))
-                    OnSpotifyStateChanged();
-                if (prevState.ActiveSong != ActiveSong)
-                    OnActiveSongChanged();
             }
+            /*
+            var volume = AudioUtils.GetPeakVolume(VolumeControl?.Control);
+            if (IsPaused && volume > 0) {
+                Debug.WriteLine(volume);
+                SetPlayingAdState();
+            }
+            */
+        }
+
+        private void SetUnknownState() => UpdateState(SpotifyState.Unknown, newSong: null);
+        private void SetPlayingSongState(SongInfo song) => UpdateState(SpotifyState.PlayingSong, newSong: song);
+        private void SetPlayingAdState() => UpdateState(SpotifyState.PlayingAdvertisement, newSong: null);
+        private void SetPausedState() => UpdateState(SpotifyState.Paused, newSong: null);
+
+        private void UpdateState(SpotifyState newState, SongInfo? newSong) {
+            var prevSong = ActiveSong;
+            var prevState = State;
+            ActiveSong = newSong;
+            State = newState;
+
+            if (prevState != newState)
+                OnSpotifyStateChanged();
+            if (prevSong != newSong)
+                OnActiveSongChanged();
         }
 
         private void UpdateMuteStatus() {
