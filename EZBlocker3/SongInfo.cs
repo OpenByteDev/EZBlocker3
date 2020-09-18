@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace EZBlocker3 {
     public readonly struct SongInfo {
@@ -20,7 +21,11 @@ namespace EZBlocker3 {
         }
 
         public override int GetHashCode() {
-            return HashCode.Combine(Title, Artist);
+            // return HashCode.Combine(Title, Artist);
+            int hashCode = -1370019569;
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Title);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(Artist);
+            return hashCode;
         }
 
         public static bool operator ==(SongInfo left, SongInfo right) {
