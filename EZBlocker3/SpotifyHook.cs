@@ -33,7 +33,16 @@ namespace EZBlocker3 {
 
         public string? WindowName { get; private set; }
 
-        public bool IsHooked => Process != null && !Process.HasExited;
+        public bool IsHooked {
+            get {
+                try {
+                    return Process != null && !Process.HasExited;
+                } catch (InvalidOperationException) { // throws on unassociated process.
+                    Process = null; // avoid the exception next time
+                    return false;
+                }
+            }
+        }
         public bool IsPaused => State == SpotifyState.Paused;
         public bool IsPlaying => IsSongPlaying || IsAdPlaying;
         public bool IsSongPlaying => State == SpotifyState.PlayingSong;
