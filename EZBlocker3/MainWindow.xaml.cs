@@ -87,10 +87,8 @@ namespace EZBlocker3 {
                         StatusLabel.Text = "Spotify is paused";
                         break;
                     case SpotifyState.PlayingSong:
-                        if (!(spotifyHook.ActiveSong is SongInfo song)) {
-                            // we should never end up here?
-                            return;
-                        }
+                        if (!(spotifyHook.ActiveSong is SongInfo song))
+                            throw new IllegalStateException();
                         StatusLabel.Text = $"Playing {song.Title} by {song.Artist}";
                         break;
                     case SpotifyState.PlayingAdvertisement:
