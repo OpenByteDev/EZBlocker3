@@ -1,4 +1,5 @@
 ﻿using EZBlocker3.Extensions;
+using EZBlocker3.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -77,7 +78,7 @@ namespace EZBlocker3 {
             if (IsActive)
                 return;
 
-            Trace.TraceInformation($"SpotifyHook: Activated");
+            Logger.LogDebug("SpotifyHook: Activated");
 
             IsActive = true;
 
@@ -96,7 +97,7 @@ namespace EZBlocker3 {
 
             ClearHook();
 
-            Trace.TraceInformation($"SpotifyHook: Deactivated");
+            Logger.LogInfo($"SpotifyHook: Deactivated");
         }
 
         private void RefreshTimer_Elapsed(object sender, ElapsedEventArgs e) {
@@ -126,7 +127,7 @@ namespace EZBlocker3 {
                     // TODO rework VolumeControl to store Process so that HasExited can be used.
                     Process = null;
 
-                    Trace.TraceInformation($"SpotifyHook: Failed to recover hook using volume control.");
+                    Logger.LogInfo($"SpotifyHook: Failed to recover hook using volume control.");
                 }
 
                 if (!IsHooked) {
@@ -149,13 +150,14 @@ namespace EZBlocker3 {
             Process = null;
             VolumeControl = null;
 
-            Trace.TraceInformation($"SpotifyHook: Cleared");
+            Logger.LogInfo($"SpotifyHook: Cleared");
         }
 
         private void RefreshHook() {
             if (Process is null)
                 return;
-            // Trace.TraceInformation($"Start refreshing Spotify Hook");
+            }
+            // Logger.LogInfo($"Start refreshing Spotify Hook");
 
             // Process.Refresh();
             var prevProcess = Process;
@@ -164,7 +166,7 @@ namespace EZBlocker3 {
 
             UpdateInfo();
 
-            // Trace.TraceInformation($"Refreshed Spotify Hook");
+            // Logger.LogInfo($"Refreshed Spotify Hook");
         }
 
         private void UpdateInfo() {
@@ -173,7 +175,7 @@ namespace EZBlocker3 {
             var oldWindowName = WindowName;
             var newWindowName = WindowName = Process?.MainWindowTitle.Trim();
             if (oldWindowName != newWindowName) {
-                Trace.TraceInformation($"SpotifyHook: Current window name is \"{newWindowName}\"");
+                Logger.LogInfo($"SpotifyHook: Current window name is \"{newWindowName}\"");
                 switch (newWindowName) {
                     case null:
                         // Shuting down
@@ -240,33 +242,36 @@ namespace EZBlocker3 {
             if (VolumeControl != null) {
                 AudioUtils.SetMute(VolumeControl.Control, mute);
                 IsMuted = mute;
-                Trace.TraceInformation($"SpotifyHook: Spotify {(mute ? "muted" : "unmuted")}.");
+                Logger.LogInfo($"SpotifyHook: Spotify {(mute ? "muted" : "unmuted")}.");
                 return true;
             } else {
                 IsMuted = null;
-                Trace.TraceWarning($"SpotifyHook: Failed to {(mute ? "mute" : "unmute")} Spotify due to missing volume control.");
+                Logger.LogWarning($"SpotifyHook: Failed to {(mute ? "mute" : "unmute")} Spotify due to missing volume control.");
                 return false;
             }
         }
 
         private void OnActiveSongChanged(SongInfo? previous, SongInfo? current) =>
             OnActiveSongChanged(new ActiveSongChangedEventArgs(previous, current));
+
         protected virtual void OnActiveSongChanged(ActiveSongChangedEventArgs eventArgs) {
-            Trace.TraceInformation($"SpotifyHook: Active song: \"{eventArgs.NewActiveSong}\"");
+            Logger.LogInfo($"SpotifyHook: Active song: \"{eventArgs.NewActiveSong}\"");
             ActiveSongChanged?.Invoke(this, eventArgs);
         }
 
         private void OnHookChanged() =>
            OnHookChanged(EventArgs.Empty);
+
         protected virtual void OnHookChanged(EventArgs eventArgs) {
-            Trace.TraceInformation($"SpotifyHook: Spotify {(IsHooked ? "hooked" : "unhooked")}.");
+            Logger.LogInfo($"SpotifyHook: Spotify {(IsHooked ? "hooked" : "unhooked")}.");
             HookChanged?.Invoke(this, eventArgs);
         }
 
         private void OnSpotifyStateChanged(SpotifyState previous, SpotifyState current) =>
             OnSpotifyStateChanged(new SpotifyStateChangedEventArgs(previous, current));
+
         protected virtual void OnSpotifyStateChanged(SpotifyStateChangedEventArgs eventArgs) {
-            Trace.TraceInformation($"SpotifyHook: Spotify is in {eventArgs.NewState} state.");
+            Logger.LogInfo($"SpotifyHook: Spotify is in {eventArgs.NewState} state.");
             SpotifyStateChanged?.Invoke(this, eventArgs);
         }
 
