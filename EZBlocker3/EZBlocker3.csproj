@@ -33,10 +33,16 @@
     <PublishReadyToRun>True</PublishReadyToRun>
     <PublishReadyToRunShowWarnings>True</PublishReadyToRunShowWarnings>
     <DeleteExistingFiles>True</DeleteExistingFiles>
-    <Optimize>True</Optimize>
     <SelfContained>False</SelfContained>
     <NoStandardLibraries>True</NoStandardLibraries>
     <TieredCompilationQuickJit>True</TieredCompilationQuickJit>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <Optimize>True</Optimize>
   </PropertyGroup>
   
   <PropertyGroup>
