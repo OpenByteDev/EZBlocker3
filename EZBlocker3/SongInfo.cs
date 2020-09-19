@@ -25,6 +25,8 @@ namespace EZBlocker3 {
             return hashCode;
         }
 
+        public override string ToString() => $"{Title} by {Artist}";
+
         public static bool operator ==(SongInfo left, SongInfo right)
             => left.Equals(right);
         public static bool operator !=(SongInfo left, SongInfo right)

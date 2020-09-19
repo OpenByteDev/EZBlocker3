@@ -74,9 +74,8 @@ namespace EZBlocker3 {
             });
         }
 
-        private void UpdateMuteStatus() {
-            spotifyHook.SetMute(mute: !spotifyHook.IsSongPlaying);
-        }
+        private void UpdateMuteStatus() =>
+            spotifyHook.SetMute(mute: spotifyHook.IsAdPlaying);
 
         private void UpdateStatusLabel() {
             if (!spotifyHook.IsHooked) {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO.Pipes;
 using System.Reflection;
 using System.Threading;
@@ -13,7 +12,7 @@ namespace EZBlocker3 {
         public static readonly string PipeName = AppName + "_IPC";
 
         [STAThread]
-        public static int Main(string[] args) {
+        public static int Main() {
             using var mutex = new Mutex(true, SingletonMutexName, out var notAlreadyRunning);
             if (notAlreadyRunning) { // we are the only one around :(
                 using var server = new NamedPipeServerStream(PipeName, PipeDirection.Out, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
