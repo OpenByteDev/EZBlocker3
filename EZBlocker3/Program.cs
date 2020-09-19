@@ -17,6 +17,7 @@ namespace EZBlocker3 {
             if (notAlreadyRunning) { // we are the only one around :(
                 using var server = new NamedPipeServerStream(PipeName, PipeDirection.Out, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
                 server.BeginWaitForConnection(ConnectionHandler, server);
+
                 var exitCode = RunApp();
 
                 server.Close();
@@ -44,7 +45,7 @@ namespace EZBlocker3 {
                 });
             });
         }
-        
+
         private static int RunApp() {
             var app = new App();
             app.InitializeComponent();

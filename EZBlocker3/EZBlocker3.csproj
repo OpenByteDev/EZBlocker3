@@ -48,7 +48,7 @@
   <PropertyGroup>
     <Version>0.3.0.0</Version>
     <Authors>OpenByte</Authors>
-    <PackageIcon>Icon256.png</PackageIcon>
+    <PackageIcon>Icon\Icon256.png</PackageIcon>
     <NeutralLanguage>en</NeutralLanguage>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <PackageLicenseExpression>GPL-3.0 License</PackageLicenseExpression>

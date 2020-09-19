@@ -20,6 +20,7 @@ namespace EZBlocker3 {
                 _process = value;
                 if (IsHooked != _wasHooked)
                     OnHookChanged();
+
                 _wasHooked = IsHooked;
             }
         }
@@ -49,7 +50,7 @@ namespace EZBlocker3 {
         public bool IsSongPlaying => State == SpotifyState.PlayingSong;
         public bool IsAdPlaying => State == SpotifyState.PlayingAdvertisement;
         public bool? IsMuted { get; private set; } = null;
-        public SongInfo? ActiveSong { get;  private set; }
+        public SongInfo? ActiveSong { get; private set; }
         public bool IsActive { get; private set; }
         public SpotifyState State { get; private set; } = SpotifyState.Unknown;
 
@@ -73,6 +74,7 @@ namespace EZBlocker3 {
         public SpotifyHook() {
             _refreshTimer.Elapsed += RefreshTimer_Elapsed;
         }
+
 
         public void Activate() {
             if (IsActive)
@@ -101,7 +103,7 @@ namespace EZBlocker3 {
         }
 
         private void RefreshTimer_Elapsed(object sender, ElapsedEventArgs e) {
-            lock (this) {
+            lock (_refreshTimer) {
                 if (!IsHooked) {
                     HookSpotify();
                 } else {
@@ -123,7 +125,7 @@ namespace EZBlocker3 {
 
                 try {
                     Process = Process.GetProcessById(VolumeControl.ProcessId);
-                } catch(ArgumentException) {
+                } catch (ArgumentException) {
                     // TODO rework VolumeControl to store Process so that HasExited can be used.
                     Process = null;
 
@@ -223,7 +225,6 @@ namespace EZBlocker3 {
                 OnSpotifyStateChanged(prevState, newState);
             if (prevSong != newSong)
                 OnActiveSongChanged(prevSong, newSong);
-
         }
 
         private void UpdateMuteStatus() {
