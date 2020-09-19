@@ -67,20 +67,27 @@ namespace EZBlocker3 {
         public void Activate() {
             if (IsActive)
                 return;
+
+            Trace.TraceInformation($"SpotifyHook: Activated");
+
             IsActive = true;
 
             HookSpotify();
 
             _refreshTimer.Start();
+
         }
         public void Deactivate() {
             if (!IsActive)
                 return;
+
             IsActive = false;
 
             _refreshTimer.Stop();
 
             ClearHook();
+
+            Trace.TraceInformation($"SpotifyHook: Deactivated");
         }
 
         private void RefreshTimer_Elapsed(object sender, ElapsedEventArgs e) {
@@ -109,6 +116,8 @@ namespace EZBlocker3 {
                 } catch(ArgumentException) {
                     // TODO rework VolumeControl to store Process so that HasExited can be used.
                     Process = null;
+
+                    Trace.TraceInformation($"SpotifyHook: Failed to recover hook using volume control.");
                 }
 
                 if (!IsHooked) {
@@ -130,11 +139,14 @@ namespace EZBlocker3 {
 
             Process = null;
             VolumeControl = null;
+
+            Trace.TraceInformation($"SpotifyHook: Cleared");
         }
 
         private void RefreshHook() {
             if (Process is null)
                 return;
+            // Trace.TraceInformation($"Start refreshing Spotify Hook");
 
             // Process.Refresh();
             var prevProcess = Process;
@@ -142,6 +154,8 @@ namespace EZBlocker3 {
             prevProcess.Dispose();
 
             UpdateInfo();
+
+            // Trace.TraceInformation($"Refreshed Spotify Hook");
         }
 
         private void UpdateInfo() {
@@ -150,6 +164,7 @@ namespace EZBlocker3 {
             var oldWindowName = WindowName;
             var newWindowName = WindowName = Process?.MainWindowTitle.Trim();
             if (oldWindowName != newWindowName) {
+                Trace.TraceInformation($"SpotifyHook: Current window name is \"{newWindowName}\"");
                 switch (newWindowName) {
                     case null:
                         // Shuting down
@@ -216,14 +231,19 @@ namespace EZBlocker3 {
             if (VolumeControl != null) {
                 AudioUtils.SetMute(VolumeControl.Control, mute);
                 IsMuted = mute;
+                Trace.TraceInformation($"SpotifyHook: Spotify {(mute ? "muted" : "unmuted")}.");
+                return true;
             } else {
                 IsMuted = null;
+                Trace.TraceWarning($"SpotifyHook: Failed to {(mute ? "mute" : "unmute")} Spotify due to missing volume control.");
+                return false;
             }
         }
 
         private void OnActiveSongChanged(SongInfo? previous, SongInfo? current) =>
             OnActiveSongChanged(new ActiveSongChangedEventArgs(previous, current));
         protected virtual void OnActiveSongChanged(ActiveSongChangedEventArgs eventArgs) {
+            Trace.TraceInformation($"SpotifyHook: Active song: \"{eventArgs.NewActiveSong}\"");
             ActiveSongChanged?.Invoke(this, eventArgs);
         }
 
@@ -237,6 +257,7 @@ namespace EZBlocker3 {
         private void OnSpotifyStateChanged(SpotifyState previous, SpotifyState current) =>
             OnSpotifyStateChanged(new SpotifyStateChangedEventArgs(previous, current));
         protected virtual void OnSpotifyStateChanged(SpotifyStateChangedEventArgs eventArgs) {
+            Trace.TraceInformation($"SpotifyHook: Spotify is in {eventArgs.NewState} state.");
             SpotifyStateChanged?.Invoke(this, eventArgs);
         }
 
