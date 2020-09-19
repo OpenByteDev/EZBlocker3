@@ -22,11 +22,12 @@ namespace EZBlocker3 {
             SetupNotifyIcon();
 
             UpdateStatusLabel();
-            UpdateMuteStatus();
+            // UpdateMuteStatus();
         }
 
         private void SetupSpotifyHook() {
-            spotifyHook.SpotifyStateChanged += SpotifyHook_SpotifyStateChanged;
+            spotifyHook.SpotifyStateChanged += (_, __) => SpotifyHookStateChanged();
+            spotifyHook.HookChanged += (_, __) => SpotifyHookStateChanged();
             spotifyHook.Activate();
         }
 
@@ -66,8 +67,7 @@ namespace EZBlocker3 {
             VolumeMixer.Open();
         }
 
-        private void SpotifyHook_SpotifyStateChanged(object sender, EventArgs eventArgs) {
-            Debug.WriteLine($"State change: hooked={spotifyHook.IsHooked}, state={spotifyHook.State}");
+        private void SpotifyHookStateChanged() {
             Dispatcher.Invoke(() => {
                 UpdateStatusLabel();
                 UpdateMuteStatus();

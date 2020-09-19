@@ -11,7 +11,17 @@ using Timer = System.Timers.Timer;
 namespace EZBlocker3 {
     internal class SpotifyHook : IDisposable {
 
-        public Process? Process { get; private set; }
+        private Process? _process;
+        private bool _wasHooked = false;
+        public Process? Process {
+            get => _process;
+            set {
+                _process = value;
+                if (IsHooked != _wasHooked)
+                    OnHookChanged();
+                _wasHooked = IsHooked;
+            }
+        }
         private VolumeControl? _volumeControl;
         public VolumeControl? VolumeControl {
             get {
@@ -42,6 +52,8 @@ namespace EZBlocker3 {
 
         public event ActiveSongChangedEventHandler? ActiveSongChanged;
         public delegate void ActiveSongChangedEventHandler(object sender, ActiveSongChangedEventArgs eventArgs);
+        public event HookChangedEventHandler? HookChanged;
+        public delegate void HookChangedEventHandler(object sender, EventArgs eventArgs);
         public event SpotifyStateChangedEventHandler? SpotifyStateChanged;
         public delegate void SpotifyStateChangedEventHandler(object sender, SpotifyStateChangedEventArgs eventArgs);
 
@@ -206,6 +218,12 @@ namespace EZBlocker3 {
             OnActiveSongChanged(new ActiveSongChangedEventArgs(previous, current));
         protected virtual void OnActiveSongChanged(ActiveSongChangedEventArgs eventArgs) =>
             ActiveSongChanged?.Invoke(this, eventArgs);
+        private void OnHookChanged() =>
+           OnHookChanged(EventArgs.Empty);
+        protected virtual void OnHookChanged(EventArgs eventArgs) {
+            Trace.TraceInformation($"SpotifyHook: Spotify {(IsHooked ? "hooked" : "unhooked")}.");
+            HookChanged?.Invoke(this, eventArgs);
+        }
 
         private void OnSpotifyStateChanged(SpotifyState previous, SpotifyState current) =>
             OnSpotifyStateChanged(new SpotifyStateChangedEventArgs(previous, current));
