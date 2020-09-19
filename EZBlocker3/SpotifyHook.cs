@@ -198,8 +198,8 @@ namespace EZBlocker3 {
                         SetPlayingAdState();
                         break;
                     // Song Playing: "[artist] - [title]"
-                    case var name when name?.Contains('-') == true:
-                        var (artist, title) = name.Split('-').Select(e => e.Trim()).ToArray();
+                    case var name when name?.Contains(" - ") == true:
+                        (var artist, var title) = name.Split(" - ", 2).Select(e => e.Trim()).ToArray();
                         SetPlayingSongState(new SongInfo(title, artist));
                         break;
                     // What is happening?
