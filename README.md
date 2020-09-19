@@ -11,7 +11,7 @@ It is an rewrite of the original [EZBlocker](https://github.com/Xeroday/Spotify-
 
 ## Setup
 
-**[Download for Windows](https://github.com/OpenByteDev/EZBlocker3/releases/download/0.1.0/EZBlocker3_v0.1.0.zip)**
+**[Download for Windows](https://github.com/OpenByteDev/EZBlocker3/releases/download/0.3.0.0/EZBlocker3_v0.3.0.0.zip)**
 
 No need to install as EZBlocker 3 is a portable application.
 
