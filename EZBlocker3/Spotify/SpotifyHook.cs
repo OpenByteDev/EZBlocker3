@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Timers;
 using static EZBlocker3.AudioUtils;
 using static EZBlocker3.SpotifyHook;
@@ -152,23 +153,41 @@ namespace EZBlocker3 {
             Process = null;
             VolumeControl = null;
 
-            Logger.LogInfo($"SpotifyHook: Cleared");
+            Logger.LogDebug($"SpotifyHook: Cleared");
         }
 
+        private Action<Process>? _invalidateProcessMainWindowName;
         private void RefreshHook() {
             if (Process is null)
                 return;
+            // Logger.LogDebug($"Start refreshing Spotify Hook");
+
+            if (_invalidateProcessMainWindowName is null) {
+                var processParamter = Expression.Parameter(typeof(Process), "process");
+                var mainWindowField = Expression.Field(processParamter, "mainWindowTitle");
+                var assignment = Expression.Assign(mainWindowField, Expression.Constant(null, typeof(string)));
+                var lambda = Expression.Lambda<Action<Process>>(assignment, processParamter);
+                _invalidateProcessMainWindowName = lambda.Compile();
             }
-            // Logger.LogInfo($"Start refreshing Spotify Hook");
+            try {
+                // invalidate MainWindowTitle by setting the backing field to null (does not happen by calling .Refresh())
+                _invalidateProcessMainWindowName(Process);
 
-            // Process.Refresh();
-            var prevProcess = Process;
-            Process = Process.GetProcessById(prevProcess.Id);
-            prevProcess.Dispose();
+                // invalidate other cached information
+                Process.Refresh();
+            } catch (Exception e) {
+                Logger.LogError("SpotifyHook: Exception during fast invalidation of MainWindowTitle:\n" + e);
 
+                // custom invalidation failed -> fall back to slower workaround.
+                var prevProcess = Process;
+                Process = Process.GetProcessById(prevProcess.Id);
+                prevProcess.Dispose();
+            }
+
+            // inspect updated process information
             UpdateInfo();
 
-            // Logger.LogInfo($"Refreshed Spotify Hook");
+            // Logger.LogDebug($"Refreshed Spotify Hook");
         }
 
         private void UpdateInfo() {
@@ -177,7 +196,7 @@ namespace EZBlocker3 {
             var oldWindowName = WindowName;
             var newWindowName = WindowName = Process?.MainWindowTitle.Trim();
             if (oldWindowName != newWindowName) {
-                Logger.LogInfo($"SpotifyHook: Current window name is \"{newWindowName}\"");
+                Logger.LogDebug($"SpotifyHook: Current window name is \"{newWindowName}\"");
                 switch (newWindowName) {
                     case null:
                         // Shuting down
