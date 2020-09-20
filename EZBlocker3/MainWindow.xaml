@@ -28,7 +28,7 @@
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBlock x:Name="StatusLabel" Grid.Column="0" Text="Loading..." HorizontalAlignment="Stretch" Height="Auto" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+            <TextBlock x:Name="StateLabel" Grid.Column="0" Text="Loading..." HorizontalAlignment="Stretch" Height="Auto" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
         </Grid>
     </Grid>
 </Window>

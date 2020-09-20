@@ -17,7 +17,7 @@ namespace EZBlocker3 {
         private bool _wasHooked = false;
         public Process? Process {
             get => _process;
-            set {
+            private set {
                 _process = value;
                 if (IsHooked != _wasHooked)
                     OnHookChanged();
@@ -26,6 +26,7 @@ namespace EZBlocker3 {
             }
         }
         private VolumeControl? _volumeControl;
+        private HashSet<int>? _allSpotifyProcessIds;
         public VolumeControl? VolumeControl {
             get {
                 _volumeControl ??= AudioUtils.GetVolumeControl(_allSpotifyProcessIds);
@@ -34,7 +35,7 @@ namespace EZBlocker3 {
             private set => _volumeControl = value;
         }
 
-        public string? WindowName { get; private set; }
+        public string? WindowTitle { get; private set; }
 
         public bool IsHooked {
             get {
@@ -70,12 +71,10 @@ namespace EZBlocker3 {
         public delegate void SpotifyStateChangedEventHandler(object sender, SpotifyStateChangedEventArgs eventArgs);
 
         private readonly Timer _refreshTimer = new Timer(100);
-        private HashSet<int>? _allSpotifyProcessIds;
 
         public SpotifyHook() {
             _refreshTimer.Elapsed += RefreshTimer_Elapsed;
         }
-
 
         public void Activate() {
             if (IsActive)
@@ -114,7 +113,7 @@ namespace EZBlocker3 {
         }
 
         private bool HookSpotify() {
-            Process?.Dispose();
+            ClearHook();
 
             var processes = Process.GetProcessesByName("spotify");
             // TODO: dispose processes not stored
@@ -147,13 +146,14 @@ namespace EZBlocker3 {
         }
 
         private void ClearHook() {
-            VolumeControl?.Dispose();
             Process?.Dispose();
+            VolumeControl?.Dispose();
 
             Process = null;
             VolumeControl = null;
+            IsMuted = null;
 
-            Logger.LogDebug($"SpotifyHook: Cleared");
+            // Logger.LogDebug($"SpotifyHook: Cleared");
         }
 
         private Action<Process>? _invalidateProcessMainWindowName;
@@ -193,48 +193,44 @@ namespace EZBlocker3 {
         private void UpdateInfo() {
             UpdateMuteStatus();
 
-            var oldWindowName = WindowName;
-            var newWindowName = WindowName = Process?.MainWindowTitle.Trim();
-            if (oldWindowName != newWindowName) {
-                Logger.LogDebug($"SpotifyHook: Current window name is \"{newWindowName}\"");
-                switch (newWindowName) {
                     case null:
                         // Shuting down
                         // SetShutingDownState();
                         SetUnknownState();
+            var oldWindowTitle = WindowTitle;
+            var newWindowTitle = WindowTitle = Process?.MainWindowTitle.Trim();
+            if (oldWindowTitle != newWindowTitle) {
+                Logger.LogDebug($"SpotifyHook: Current window name is \"{newWindowTitle}\"");
+                switch (newWindowTitle) {
                         break;
                     // Paused / Default for Free version
                     case "Spotify Free":
                     // Paused / Default for Premium version
                     // Why do you need EZBlocker3 when you have premium?
                     case "Spotify Premium":
-                        SetPausedState();
+                        UpdateState(SpotifyState.Paused);
                         break;
                     // Advertisment Playing
                     case "Spotify": // Spotify Ads
                     case "Advertisement": // Other Ads
                         // TODO Spotify is also the title on startup
-                        SetPlayingAdState();
+                        UpdateState(SpotifyState.PlayingAdvertisement);
                         break;
                     // Song Playing: "[artist] - [title]"
                     case var name when name?.Contains(" - ") == true:
                         (var artist, var title) = name.Split(" - ", 2).Select(e => e.Trim()).ToArray();
-                        SetPlayingSongState(new SongInfo(title, artist));
+                        UpdateState(SpotifyState.PlayingSong, newSong: new SongInfo(title, artist));
                         break;
                     // What is happening?
                     default:
-                        SetUnknownState();
+                        UpdateState(SpotifyState.Unknown);
+                        Logger.LogWarning($"SpotifyHook: Spotify entered an unknown state. (WindowTitle={newWindowTitle})");
                         break;
                 }
             }
         }
 
-        private void SetUnknownState() => UpdateState(SpotifyState.Unknown, newSong: null);
-        private void SetPlayingSongState(SongInfo song) => UpdateState(SpotifyState.PlayingSong, newSong: song);
-        private void SetPlayingAdState() => UpdateState(SpotifyState.PlayingAdvertisement, newSong: null);
-        private void SetPausedState() => UpdateState(SpotifyState.Paused, newSong: null);
-
-        private void UpdateState(SpotifyState newState, SongInfo? newSong) {
+        private void UpdateState(SpotifyState newState, SongInfo? newSong = null) {
             var prevSong = ActiveSong;
             var prevState = State;
             ActiveSong = newSong;
@@ -273,7 +269,6 @@ namespace EZBlocker3 {
 
         private void OnActiveSongChanged(SongInfo? previous, SongInfo? current) =>
             OnActiveSongChanged(new ActiveSongChangedEventArgs(previous, current));
-
         protected virtual void OnActiveSongChanged(ActiveSongChangedEventArgs eventArgs) {
             Logger.LogInfo($"SpotifyHook: Active song: \"{eventArgs.NewActiveSong}\"");
             ActiveSongChanged?.Invoke(this, eventArgs);
@@ -281,7 +276,6 @@ namespace EZBlocker3 {
 
         private void OnHookChanged() =>
            OnHookChanged(EventArgs.Empty);
-
         protected virtual void OnHookChanged(EventArgs eventArgs) {
             Logger.LogInfo($"SpotifyHook: Spotify {(IsHooked ? "hooked" : "unhooked")}.");
             HookChanged?.Invoke(this, eventArgs);
@@ -289,12 +283,12 @@ namespace EZBlocker3 {
 
         private void OnSpotifyStateChanged(SpotifyState previous, SpotifyState current) =>
             OnSpotifyStateChanged(new SpotifyStateChangedEventArgs(previous, current));
-
         protected virtual void OnSpotifyStateChanged(SpotifyStateChangedEventArgs eventArgs) {
             Logger.LogInfo($"SpotifyHook: Spotify is in {eventArgs.NewState} state.");
             SpotifyStateChanged?.Invoke(this, eventArgs);
         }
 
+        #region IDisposable
         private bool _disposed;
 
         protected virtual void Dispose(bool disposing) {
@@ -317,8 +311,10 @@ namespace EZBlocker3 {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }
+        #endregion
     }
 
+    #region EventArgs
     internal class SpotifyStateChangedEventArgs : EventArgs {
 
         public SpotifyState PreviousState { get; private set; }
@@ -342,4 +338,5 @@ namespace EZBlocker3 {
         }
 
     }
+    #endregion
 }

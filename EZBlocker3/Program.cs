@@ -23,6 +23,7 @@ namespace EZBlocker3 {
 
                 if (args.Contains("/debug"))
                     Logger.EnableLogFile = true;
+
                 var exitCode = RunApp();
 
                 server.Close();

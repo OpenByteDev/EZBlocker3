@@ -99,24 +99,28 @@ namespace EZBlocker3 {
             spotifyHook.SetMute(mute: spotifyHook.IsAdPlaying);
 
         private void UpdateStatusLabel() {
+            StateLabel.Text = GetStateText();
+            
+        }
+
+        private string GetStateText() {
             if (!spotifyHook.IsHooked) {
-                StatusLabel.Text = "Spotify is not running";
+                return "Spotify is not running.";
             } else {
                 switch (spotifyHook.State) {
                     case SpotifyState.Paused:
-                        StatusLabel.Text = "Spotify is paused";
-                        break;
+                        return "Spotify is paused.";
                     case SpotifyState.PlayingSong:
-                        if (!(spotifyHook.ActiveSong is SongInfo song))
+                        if (!(spotifyHook.ActiveSong is SongInfo song)) {
+                            Logger.LogError("SpotifyHook: Active song is undefined in PlayingSong state.");
                             throw new IllegalStateException();
-                        StatusLabel.Text = $"Playing {song.Title} by {song.Artist}";
-                        break;
+                        }
+                        return $"Playing {song.Title} by {song.Artist}";
                     case SpotifyState.PlayingAdvertisement:
-                        StatusLabel.Text = "Playing advertisement";
-                        break;
+                        return "Playing advertisement...";
                     case SpotifyState.Unknown:
-                        StatusLabel.Text = "Spotify is an unknown state";
-                        break;
+                    default:
+                        return "Spotify is an unknown state.";
                 }
             }
         }
