@@ -60,6 +60,8 @@ namespace EZBlocker3 {
             PlayingSong,
             PlayingAdvertisement,
             Paused,
+            StartingUp,
+            ShuttingDown,
             Unknown
         }
 
@@ -193,15 +195,14 @@ namespace EZBlocker3 {
         private void UpdateInfo() {
             UpdateMuteStatus();
 
-                    case null:
-                        // Shuting down
-                        // SetShutingDownState();
-                        SetUnknownState();
             var oldWindowTitle = WindowTitle;
             var newWindowTitle = WindowTitle = Process?.MainWindowTitle.Trim();
             if (oldWindowTitle != newWindowTitle) {
                 Logger.LogDebug($"SpotifyHook: Current window name is \"{newWindowTitle}\"");
                 switch (newWindowTitle) {
+                    // Shutting down
+                    case "":
+                        UpdateState(SpotifyState.ShuttingDown);
                         break;
                     // Paused / Default for Free version
                     case "Spotify Free":
@@ -211,10 +212,15 @@ namespace EZBlocker3 {
                         UpdateState(SpotifyState.Paused);
                         break;
                     // Advertisment Playing
-                    case "Spotify": // Spotify Ads
                     case "Advertisement": // Other Ads
-                        // TODO Spotify is also the title on startup
                         UpdateState(SpotifyState.PlayingAdvertisement);
+                        break;
+                    // Advertisment Playing or starting up
+                    case "Spotify": // Spotify Ads
+                        if (oldWindowTitle == "") // Starting up
+                            UpdateState(SpotifyState.StartingUp);
+                        else // Playing ad
+                            UpdateState(SpotifyState.PlayingAdvertisement);
                         break;
                     // Song Playing: "[artist] - [title]"
                     case var name when name?.Contains(" - ") == true:

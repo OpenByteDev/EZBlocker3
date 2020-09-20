@@ -118,6 +118,10 @@ namespace EZBlocker3 {
                         return $"Playing {song.Title} by {song.Artist}";
                     case SpotifyState.PlayingAdvertisement:
                         return "Playing advertisement...";
+                    case SpotifyState.StartingUp:
+                        return "Spotify is starting...";
+                    case SpotifyState.ShuttingDown:
+                        return "Spotify is shutting down...";
                     case SpotifyState.Unknown:
                     default:
                         return "Spotify is an unknown state.";
