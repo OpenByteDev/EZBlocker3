@@ -1,5 +1,8 @@
-﻿using System;
+﻿using EZBlocker3.Logging;
+using System;
 using System.IO.Pipes;
+using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Windows;
@@ -47,6 +50,8 @@ namespace EZBlocker3 {
         }
 
         private static int RunApp() {
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12; // enable all protocols
+
             var app = new App();
             app.InitializeComponent();
             return app.Run();

@@ -1,5 +1,8 @@
-﻿using System;
+﻿using EZBlocker3.AutoUpdate;
+using EZBlocker3.Logging;
+using System;
 using System.Drawing;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using static EZBlocker3.SpotifyHook;
@@ -22,6 +25,24 @@ namespace EZBlocker3 {
 
             UpdateStatusLabel();
             // UpdateMuteStatus();
+
+            Task.Run(() => RunUpdateCheck());
+        }
+
+        private async Task RunUpdateCheck() {
+            try {
+                var result = await UpdateChecker.CheckForUpdate();
+                if (!(result is UpdateInfo update)) // No update found
+                    return;
+
+                Dispatcher.Invoke(() => {
+                    var updateWindow = new UpdateWindow(update);
+                    updateWindow.Show();
+                    Closed += (_, __) => updateWindow.Close();
+                });
+            } catch (Exception e) {
+                Logger.LogError($"Auto update failed: {e}");
+            }
         }
 
         private void SetupSpotifyHook() {
