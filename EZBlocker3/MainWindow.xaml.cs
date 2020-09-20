@@ -47,6 +47,7 @@ namespace EZBlocker3 {
 
         private void SetupSpotifyHook() {
             spotifyHook.SpotifyStateChanged += (_, __) => SpotifyHookStateChanged();
+            spotifyHook.ActiveSongChanged += (_, __) => SpotifyHookStateChanged();
             spotifyHook.HookChanged += (_, __) => SpotifyHookStateChanged();
             spotifyHook.Activate();
         }
