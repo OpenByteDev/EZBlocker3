@@ -25,7 +25,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0" x:Name="acceptDownloadButton" Content="Download" IsEnabled="True" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
-            <Button Grid.Column="2" x:Name="restartButton" Content="Restart" IsEnabled="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+            <Button Grid.Column="2" x:Name="restartButton" Content="Install" IsEnabled="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
         </Grid>
     </Grid>
 </Window>

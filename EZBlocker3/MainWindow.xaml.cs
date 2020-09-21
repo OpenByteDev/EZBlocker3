@@ -85,7 +85,7 @@ namespace EZBlocker3 {
         }
 
         private void OpenVolumeControlButton_Click(object sender, RoutedEventArgs e) {
-            VolumeMixer.Open();
+            Task.Run(() => VolumeMixer.Open());
         }
 
         private void SpotifyHookStateChanged() {

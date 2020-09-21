@@ -17,7 +17,7 @@ namespace EZBlocker3.AutoUpdate {
         private const string RELEASES_ENDPOINT = API_BASE_URL+"repos/OpenByteDev/EZBlocker3/releases";
 
         private static Version GetCurrentVersion() {
-            // return new Version("0.2.0.0");
+            // return new Version("0.0.0.0");
             return Assembly.GetEntryAssembly().GetName().Version;
         }
 
