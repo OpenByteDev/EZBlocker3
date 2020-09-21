@@ -1,7 +1,9 @@
-﻿using EZBlocker3.Logging;
+﻿using EZBlocker3.Interop;
+using EZBlocker3.Logging;
 using System;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Shell;
 
 namespace EZBlocker3.AutoUpdate {
     public partial class UpdateWindow : Window {
@@ -22,7 +24,13 @@ namespace EZBlocker3.AutoUpdate {
             var download = new UpdateDownloader(Update);
             download.Progress += (s, e) => {
                 Dispatcher.Invoke(() => {
-                    downloadProgress.Value = e.DownloadPercentage * 100;
+                    var normalizedPercentage = e.DownloadPercentage;
+                    var percentage = normalizedPercentage * 100;
+                    downloadProgress.Value = percentage;
+                    TaskbarItemInfo = new TaskbarItemInfo() {
+                        ProgressValue = normalizedPercentage,
+                        ProgressState = TaskbarItemProgressState.Normal
+                    };
                 });
             };
 
@@ -41,6 +49,8 @@ namespace EZBlocker3.AutoUpdate {
                     UpdateInstaller.InstallUpdateAndRestart(downloadedUpdate);
                     restartButton.IsEnabled = false;
                 };
+                TaskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
+                TaskbarItemFlashHelper.FlashUntilFocused(this);
             });
         }
     }
