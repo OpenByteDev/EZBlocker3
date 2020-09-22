@@ -6,7 +6,7 @@
         xmlns:ui="http://schemas.modernwpf.com/2019"
         xmlns:local="clr-namespace:EZBlocker3"
         mc:Ignorable="d"
-        Title="Update Found" Height="140" Width="350"
+        Title="Update Found" Height="170" Width="350" ResizeMode="CanMinimize"
         ui:WindowHelper.UseModernWindowStyle="True">
     <Grid Margin="10 5 10 10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Grid.RowDefinitions>
@@ -15,10 +15,13 @@
             <RowDefinition Height="auto" />
             <RowDefinition Height="10" />
             <RowDefinition Height="auto" />
+            <RowDefinition Height="10" />
+            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
         <TextBlock Grid.Row="0" Text="A new version of EZBlocker 3 is available!" />
         <ui:ProgressBar Grid.Row="2" x:Name="downloadProgress" Height="20" />
-        <Grid Grid.Row="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        <TextBlock Grid.Row="4" x:Name="downloadState" />
+        <Grid Grid.Row="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="10" />

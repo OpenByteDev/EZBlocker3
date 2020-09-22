@@ -1,8 +1,11 @@
-﻿using EZBlocker3.Interop;
+﻿using EZBlocker3.Extensions;
+using EZBlocker3.Interop;
 using EZBlocker3.Logging;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Shell;
 
 namespace EZBlocker3.AutoUpdate {
@@ -27,6 +30,7 @@ namespace EZBlocker3.AutoUpdate {
                     var normalizedPercentage = e.DownloadPercentage;
                     var percentage = normalizedPercentage * 100;
                     downloadProgress.Value = percentage;
+                    downloadState.Text = $"{Math.Round(percentage)}%";
                     TaskbarItemInfo = new TaskbarItemInfo() {
                         ProgressValue = normalizedPercentage,
                         ProgressState = TaskbarItemProgressState.Normal
@@ -37,13 +41,16 @@ namespace EZBlocker3.AutoUpdate {
             DownloadedUpdate? downloadedUpdate = null;
             try {
                 downloadedUpdate = await download.Download(Update);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 Logger.LogError("AutoUpdate: Update download failed:\n" + e);
-                Close();
+                Dispatcher.Invoke(() => {
+                    downloadState.Text = $"Download failed";
+                });
                 return;
             }
 
             Dispatcher.Invoke(() => {
+                downloadState.Text = $"Download finished";
                 restartButton.IsEnabled = true;
                 restartButton.Click += (_, __) => {
                     TaskbarItemInfo = new TaskbarItemInfo() {
