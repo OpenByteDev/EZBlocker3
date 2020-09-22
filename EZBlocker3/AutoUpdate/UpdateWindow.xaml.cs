@@ -46,10 +46,16 @@ namespace EZBlocker3.AutoUpdate {
             Dispatcher.Invoke(() => {
                 restartButton.IsEnabled = true;
                 restartButton.Click += (_, __) => {
+                    TaskbarItemInfo = new TaskbarItemInfo() {
+                        ProgressState = TaskbarItemProgressState.Indeterminate
+                    };
                     UpdateInstaller.InstallUpdateAndRestart(downloadedUpdate);
                     restartButton.IsEnabled = false;
                 };
-                TaskbarItemInfo.ProgressState = TaskbarItemProgressState.None;
+                TaskbarItemInfo = new TaskbarItemInfo() {
+                    ProgressValue = 0,
+                    ProgressState = TaskbarItemProgressState.None
+                };
                 TaskbarItemFlashHelper.FlashUntilFocused(this);
             });
         }
