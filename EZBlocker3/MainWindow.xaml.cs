@@ -46,9 +46,16 @@ namespace EZBlocker3 {
         }
 
         private void SetupSpotifyHook() {
-            spotifyHook.SpotifyStateChanged += (_, __) => SpotifyHookStateChanged();
-            spotifyHook.ActiveSongChanged += (_, __) => SpotifyHookStateChanged();
-            spotifyHook.HookChanged += (_, __) => SpotifyHookStateChanged();
+            spotifyHook.SpotifyStateChanged += (_, __) => {
+                UpdateStatusLabel();
+                UpdateMuteStatus();
+            };
+            spotifyHook.ActiveSongChanged += (_, __) => {
+                UpdateStatusLabel();
+            };
+            spotifyHook.HookChanged += (_, __) => {
+                UpdateStatusLabel();
+            };
             spotifyHook.Activate();
         }
 
@@ -88,19 +95,15 @@ namespace EZBlocker3 {
             Task.Run(() => VolumeMixer.Open());
         }
 
-        private void SpotifyHookStateChanged() {
-            Dispatcher.Invoke(() => {
-                UpdateStatusLabel();
-                UpdateMuteStatus();
-            });
+        private void UpdateMuteStatus() {
+            if (spotifyHook.State != SpotifyState.StartingUp && spotifyHook.State != SpotifyState.ShuttingDown)
+                spotifyHook.SetMute(mute: spotifyHook.IsAdPlaying);
         }
 
-        private void UpdateMuteStatus() =>
-            spotifyHook.SetMute(mute: spotifyHook.IsAdPlaying);
-
         private void UpdateStatusLabel() {
-            StateLabel.Text = GetStateText();
-            
+            Dispatcher.Invoke(() => {
+                StateLabel.Text = GetStateText();
+            });
         }
 
         private string GetStateText() {
