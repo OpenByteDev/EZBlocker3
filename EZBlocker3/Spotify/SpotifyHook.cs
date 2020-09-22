@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Timers;
 using static EZBlocker3.AudioUtils;
 using static EZBlocker3.SpotifyHook;
@@ -78,6 +79,7 @@ namespace EZBlocker3 {
 
         public SpotifyHook() {
             _refreshTimer.Elapsed += RefreshTimer_Elapsed;
+            _refreshTimer.AutoReset = true;
         }
 
         public void Activate() {
@@ -107,14 +109,14 @@ namespace EZBlocker3 {
         }
 
         private void RefreshTimer_Elapsed(object sender, ElapsedEventArgs e) {
-            lock (_refreshTimer) {
-                if (!IsHooked) {
-                    HookSpotify();
-                } else {
-                    RefreshHook();
-                }
-                _refreshTimer.Interval = IsHooked ? HookedRefreshInterval : UnhookedRefreshInterval;
+            if (!IsHooked) {
+                HookSpotify();
+            } else {
+                RefreshHook();
             }
+            _refreshTimer.Interval = IsHooked ? HookedRefreshInterval : UnhookedRefreshInterval;
+
+            _refreshTimer.Enabled = true;
         }
 
         private bool HookSpotify() {
