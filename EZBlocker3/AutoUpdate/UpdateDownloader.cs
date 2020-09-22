@@ -30,15 +30,20 @@ namespace EZBlocker3.AutoUpdate {
             Logger.LogDebug("AutoUpdate: Received response headers");
 
             using var contentStream = await response.Content.ReadAsStreamAsync();
-            var contentLength = response.Content.Headers.ContentLength ?? long.MaxValue; // TODO
+            var contentLength = response.Content.Headers.ContentLength;
 
             // copy to memory stream
             var memoryStream = new MemoryStream();
-            var progressHandler = new Progress<long>(totalBytes => {
-                Progress?.Invoke(this, new DownloadProgressEventArgs(totalBytes, contentLength));
-                Logger.LogDebug($"AutoUpdate: Received {totalBytes}/{contentLength} bytes");
-            });
-            await contentStream.CopyToAsync(memoryStream, progressHandler, cancellationToken);
+            if (contentLength is long totalBytes) {
+                var progressHandler = new Progress<long>(bytesReceived => {
+                    Progress?.Invoke(this, new DownloadProgressEventArgs(bytesReceived, totalBytes));
+                    Logger.LogDebug($"AutoUpdate: Received {totalBytes}/{contentLength} bytes");
+                });
+                await contentStream.CopyToAsync(memoryStream, progressHandler, cancellationToken);
+            } else {
+                Logger.LogWarning($"AutoUpdate: Failed to determine response content length.");
+                await contentStream.CopyToAsync(memoryStream, cancellationToken);
+            }
             memoryStream.Seek(0, SeekOrigin.Begin);
 
             Logger.LogInfo("AutoUpdate: Completed update download");
