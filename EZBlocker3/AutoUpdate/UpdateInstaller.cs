@@ -1,4 +1,5 @@
-﻿using EZBlocker3.Logging;
+﻿using EZBlocker3.Extensions;
+using EZBlocker3.Logging;
 using Ionic.Zip;
 using System.Diagnostics;
 using System.IO;
@@ -19,9 +20,7 @@ namespace EZBlocker3.AutoUpdate {
             var tempNewAppPath = Path.ChangeExtension(appLocation, ".exe.update");
 
             var exeEntry = FindExecutableEntry(zip);
-            using (var tempNewAppFile = File.OpenWrite(tempNewAppPath)) {
-                exeEntry.Extract(tempNewAppFile);
-            }
+            exeEntry.ExtractTo(tempNewAppPath);
 
             Logger.LogDebug("AutoUpdate: Extracted update");
 

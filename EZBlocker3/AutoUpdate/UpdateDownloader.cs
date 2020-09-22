@@ -9,22 +9,16 @@ using System.Threading.Tasks;
 namespace EZBlocker3.AutoUpdate {
     public class UpdateDownloader {
 
-        public UpdateInfo Update { get; }
-
         public event DownloadProgressEventHandler? Progress;
         public delegate void DownloadProgressEventHandler(object sender, DownloadProgressEventArgs eventArgs);
 
-        public UpdateDownloader(UpdateInfo update) {
-            Update = update;
-        }
-
-        public Task<DownloadedUpdate> Run() => Run(CancellationToken.None);
-        public async Task<DownloadedUpdate> Run(CancellationToken cancellationToken) {
+        public Task<DownloadedUpdate> Download(UpdateInfo update) => Download(update, CancellationToken.None);
+        public async Task<DownloadedUpdate> Download(UpdateInfo update, CancellationToken cancellationToken) {
             Logger.LogInfo("AutoUpdate: Start downloading update");
 
             // download file
             var client = GlobalSingletons.HttpClient;
-            var response = await client.GetAsync(Update.DownloadUrl, HttpCompletionOption.ResponseHeadersRead);
+            var response = await client.GetAsync(update.DownloadUrl, HttpCompletionOption.ResponseHeadersRead);
             response.EnsureSuccessStatusCode();
 
             Logger.LogDebug("AutoUpdate: Received response headers");

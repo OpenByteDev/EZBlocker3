@@ -8,7 +8,7 @@ using System.Windows.Shell;
 namespace EZBlocker3.AutoUpdate {
     public partial class UpdateWindow : Window {
 
-        private UpdateInfo Update;
+        private readonly UpdateInfo Update;
 
         public UpdateWindow(UpdateInfo update) {
             Update = update;
@@ -21,7 +21,7 @@ namespace EZBlocker3.AutoUpdate {
         }
 
         private async Task DownloadUpdate() {
-            var download = new UpdateDownloader(Update);
+            var download = new UpdateDownloader();
             download.Progress += (s, e) => {
                 Dispatcher.Invoke(() => {
                     var normalizedPercentage = e.DownloadPercentage;
@@ -36,7 +36,7 @@ namespace EZBlocker3.AutoUpdate {
 
             DownloadedUpdate? downloadedUpdate = null;
             try {
-                downloadedUpdate = await download.Run();
+                downloadedUpdate = await download.Download(Update);
             } catch(Exception e) {
                 Logger.LogError("AutoUpdate: Update download failed:\n" + e);
                 Close();

@@ -168,6 +168,7 @@ namespace EZBlocker3 {
             // Logger.LogDebug($"Start refreshing Spotify Hook");
 
             if (_invalidateProcessMainWindowName is null) {
+                // Expression Trees let us change a private field and are faster than reflection (if called multiple times)
                 var processParamter = Expression.Parameter(typeof(Process), "process");
                 var mainWindowField = Expression.Field(processParamter, "mainWindowTitle");
                 var assignment = Expression.Assign(mainWindowField, Expression.Constant(null, typeof(string)));
@@ -203,10 +204,6 @@ namespace EZBlocker3 {
             if (oldWindowTitle != newWindowTitle) {
                 Logger.LogDebug($"SpotifyHook: Current window name is \"{newWindowTitle}\"");
                 switch (newWindowTitle) {
-                    // Shutting down
-                    case "":
-                        UpdateState(SpotifyState.ShuttingDown);
-                        break;
                     // Paused / Default for Free version
                     case "Spotify Free":
                     // Paused / Default for Premium version
@@ -215,19 +212,21 @@ namespace EZBlocker3 {
                         UpdateState(SpotifyState.Paused);
                         break;
                     // Advertisment Playing
-                    case "Advertisement": // Other Ads
+                    case "Advertisement":
+                    case "Spotify" when oldWindowTitle != "":
                         UpdateState(SpotifyState.PlayingAdvertisement);
                         break;
-                    // Advertisment Playing or starting up
-                    case "Spotify": // Spotify Ads
-                        if (oldWindowTitle == "") // Starting up
-                            UpdateState(SpotifyState.StartingUp);
-                        else // Playing ad
-                            UpdateState(SpotifyState.PlayingAdvertisement);
+                    // Starting up
+                    case "Spotify" when oldWindowTitle == "":
+                        UpdateState(SpotifyState.StartingUp);
+                        break;
+                    // Shutting down
+                    case "":
+                        UpdateState(SpotifyState.ShuttingDown);
                         break;
                     // Song Playing: "[artist] - [title]"
                     case var name when name?.Contains(" - ") == true:
-                        (var artist, var title) = name.Split(" - ", 2).Select(e => e.Trim()).ToArray();
+                        var (artist, title) = name.Split(" - ", maxCount: 2).Select(e => e.Trim()).ToArray();
                         UpdateState(SpotifyState.PlayingSong, newSong: new SongInfo(title, artist));
                         break;
                     // What is happening?

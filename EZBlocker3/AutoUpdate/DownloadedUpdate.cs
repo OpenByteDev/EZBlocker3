@@ -11,7 +11,7 @@ namespace EZBlocker3.AutoUpdate {
         }
 
         public void Dispose() {
-            ((IDisposable)UpdateBytes).Dispose();
+            UpdateBytes.Dispose();
         }
     }
 }
