@@ -36,7 +36,7 @@ namespace EZBlocker3 {
             private set => _volumeControl = value;
         }
 
-        public string? WindowTitle { get; private set; }
+        public string? WindowTitle { get; private set; } = string.Empty;
 
         public bool IsHooked {
             get {
