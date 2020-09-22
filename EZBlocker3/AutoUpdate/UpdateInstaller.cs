@@ -35,9 +35,10 @@ namespace EZBlocker3.AutoUpdate {
 
             // Process.Start(appLocation, "/updateRestart");
             Process.Start(new ProcessStartInfo() {
-                WindowStyle = ProcessWindowStyle.Normal,
+                WindowStyle = ProcessWindowStyle.Hidden,
                 FileName = "cmd.exe",
                 Arguments = $"/C TIMEOUT /T 3 /NOBREAK & START \"\" \"{appLocation}\" /updateRestart",
+                UseShellExecute = true,
                 CreateNoWindow = true
             });
             Application.Current.Dispatcher.Invoke(() => {
