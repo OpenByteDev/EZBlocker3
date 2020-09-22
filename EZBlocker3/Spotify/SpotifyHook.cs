@@ -73,8 +73,8 @@ namespace EZBlocker3 {
         public event SpotifyStateChangedEventHandler? SpotifyStateChanged;
         public delegate void SpotifyStateChangedEventHandler(object sender, SpotifyStateChangedEventArgs eventArgs);
 
-        public const double HookedRefreshInterval = 100;
-        public const double UnhookedRefreshInterval = 1000;
+        public const double HookedRefreshInterval = 500;
+        public const double UnhookedRefreshInterval = 2000;
         private readonly Timer _refreshTimer = new Timer(UnhookedRefreshInterval);
 
         public SpotifyHook() {
