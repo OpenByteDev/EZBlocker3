@@ -7,6 +7,8 @@ using System.Windows;
 using System.Windows.Forms;
 using static EZBlocker3.SpotifyHook;
 using Application = System.Windows.Application;
+using ContextMenu = System.Windows.Controls.ContextMenu;
+using MenuItem = System.Windows.Controls.MenuItem;
 
 namespace EZBlocker3 {
     public partial class MainWindow : Window {
@@ -64,10 +66,32 @@ namespace EZBlocker3 {
             if (sri != null)
                 _notifyIcon.Icon = new Icon(sri.Stream);
             _notifyIcon.Visible = true;
-            _notifyIcon.MouseClick += (_, __) => {
-                WindowState = WindowState.Normal;
-                Activate();
+            _notifyIcon.MouseClick += (_, e) => {
+                switch (e.Button) {
+                    case MouseButtons.Left:
+                        Deminimize();
+                        break;
+                    case MouseButtons.Right:
+                        var contextMenu = new ContextMenu();
+                        var openItem = new MenuItem {
+                            Header = "Show Window"
+                        };
+                        openItem.Click += (_, __) => Deminimize();
+                        contextMenu.Items.Add(openItem);
+                        var exitItem = new MenuItem {
+                            Header = "Exit"
+                        };
+                        exitItem.Click += (_, __) => Application.Current.Shutdown();
+                        contextMenu.Items.Add(exitItem);
+                        contextMenu.IsOpen = true;
+                        break;
+                }
             };
+        }
+
+        public void Deminimize() {
+            WindowState = WindowState.Normal;
+            Activate();
         }
 
         protected override void OnStateChanged(EventArgs e) {
