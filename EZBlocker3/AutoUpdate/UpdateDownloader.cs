@@ -16,6 +16,8 @@ namespace EZBlocker3.AutoUpdate {
         public async Task<DownloadedUpdate> Download(UpdateInfo update, CancellationToken cancellationToken) {
             Logger.LogInfo("AutoUpdate: Start downloading update");
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             // download file
             var client = GlobalSingletons.HttpClient;
             var response = await client.GetAsync(update.DownloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
