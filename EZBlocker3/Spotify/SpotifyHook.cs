@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Timers;
 using static EZBlocker3.AudioUtils;
 using static EZBlocker3.SpotifyHook;
@@ -26,6 +25,7 @@ namespace EZBlocker3 {
                 _wasHooked = IsHooked;
             }
         }
+
         private VolumeControl? _volumeControl;
         private HashSet<int>? _allSpotifyProcessIds;
         public VolumeControl? VolumeControl {
@@ -36,7 +36,11 @@ namespace EZBlocker3 {
             private set => _volumeControl = value;
         }
 
-        public string? WindowTitle { get; private set; } = string.Empty;
+        public string? WindowTitle { get; private set; }
+        /// <summary>
+        /// Should a state change be delayed until the audio fades out.
+        /// </summary>
+        public bool WaitForAudioFade { get; set; } = true;
 
         public bool IsHooked {
             get {
@@ -73,7 +77,7 @@ namespace EZBlocker3 {
         public event SpotifyStateChangedEventHandler? SpotifyStateChanged;
         public delegate void SpotifyStateChangedEventHandler(object sender, SpotifyStateChangedEventArgs eventArgs);
 
-        public const double HookedRefreshInterval = 500;
+        public const double HookedRefreshInterval = 100;
         public const double UnhookedRefreshInterval = 2000;
         private readonly Timer _refreshTimer = new Timer(UnhookedRefreshInterval);
 
@@ -135,8 +139,6 @@ namespace EZBlocker3 {
                     Process = Process.GetProcessById(VolumeControl.ProcessId);
                 } catch (ArgumentException) {
                     // TODO rework VolumeControl to store Process so that HasExited can be used.
-                    Process = null;
-
                     Logger.LogInfo($"SpotifyHook: Failed to recover hook using volume control.");
                 }
 
@@ -210,6 +212,14 @@ namespace EZBlocker3 {
             var oldWindowTitle = WindowTitle;
             var newWindowTitle = WindowTitle = Process?.MainWindowTitle.Trim();
             if (oldWindowTitle != newWindowTitle) {
+                var volumePeak = AudioUtils.GetPeakVolume(VolumeControl?.Control);
+                // if we switch from a playing state into another, we wait until we detect
+                if (WaitForAudioFade && IsPlaying && volumePeak > 0) {
+                    // reset window title to reevaluate later
+                    WindowTitle = oldWindowTitle;
+                    return;
+                }
+
                 Logger.LogDebug($"SpotifyHook: Current window name is \"{newWindowTitle}\"");
                 switch (newWindowTitle) {
                     // Paused / Default for Free version
@@ -221,12 +231,22 @@ namespace EZBlocker3 {
                         break;
                     // Advertisment Playing
                     case "Advertisement":
-                    case "Spotify" when oldWindowTitle != "":
                         UpdateState(SpotifyState.PlayingAdvertisement);
                         break;
-                    // Starting up
-                    case "Spotify" when oldWindowTitle == "":
-                        UpdateState(SpotifyState.StartingUp);
+                    // Advertisment playing or Starting up
+                    case "Spotify":
+                        // first time detecting spotify?
+                        if (oldWindowTitle == null) {
+                            if (Process is null)
+                                throw new IllegalStateException();
+
+                            // did spotify just start?
+                            if ((DateTime.Now - Process.StartTime) < TimeSpan.FromMilliseconds(UnhookedRefreshInterval))
+                                UpdateState(SpotifyState.StartingUp);
+                            else
+                                UpdateState(SpotifyState.PlayingAdvertisement);
+                        } else
+                            UpdateState(SpotifyState.PlayingAdvertisement);
                         break;
                     // Shutting down
                     case "":
