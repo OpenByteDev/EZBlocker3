@@ -1,5 +1,6 @@
 ﻿using EZBlocker3.Logging;
 using System;
+using System.Diagnostics;
 using System.IO.Pipes;
 using System.Linq;
 using System.Net;
@@ -15,18 +16,35 @@ namespace EZBlocker3 {
         public static readonly string PipeName = AppName + "_IPC";
 
         [STAThread]
-        public static int Main() {
-            using var mutex = new Mutex(true, SingletonMutexName, out var notAlreadyRunning);
+        public static int Main(string[] args) {
+            if (args.Contains("/debug"))
+                Logger.EnableLogFile = true;
+
+            using var mutex = new Mutex(initiallyOwned: true, SingletonMutexName, out var notAlreadyRunning);
+
+            if (args.Contains("/updateRestart")) {
+                try {
+                    // wait for old version to exit and release the mutex.
+                    mutex.WaitOne(TimeSpan.FromSeconds(5), exitContext: false);
+                } catch (Exception e) {
+                    Debugger.Launch();
+                    Logger.LogException("Restart failed after update", e);
+                }
+
+                // the application has exited so we are not already running.
+                notAlreadyRunning = true;
+            }
+
             if (notAlreadyRunning) { // we are the only one around :(
                 using var server = new NamedPipeServerStream(PipeName, PipeDirection.Out, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
                 server.BeginWaitForConnection(ConnectionHandler, server);
 
-                if (args.Contains("/debug"))
-                    Logger.EnableLogFile = true;
-
                 var exitCode = RunApp();
 
+                if (server.IsConnected)
+                    server.Disconnect();
                 server.Close();
+                mutex.ReleaseMutex();
                 return exitCode;
             } else { // another instance is already running 
                 using var client = new NamedPipeClientStream(".", PipeName, PipeDirection.In, PipeOptions.Asynchronous);
@@ -57,6 +75,7 @@ namespace EZBlocker3 {
 
             var app = new App();
             app.InitializeComponent();
+            app.ShutdownMode = ShutdownMode.OnMainWindowClose;
             return app.Run();
         }
     }

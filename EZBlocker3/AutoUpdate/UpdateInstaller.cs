@@ -11,13 +11,14 @@ namespace EZBlocker3.AutoUpdate {
     public static class UpdateInstaller {
 
         public static void InstallUpdateAndRestart(DownloadedUpdate update) {
-            // extract executable
+            Logger.LogDebug("AutoUpdate: Begin install");
+
             using var zip = ZipFile.Read(update.UpdateBytes);
 
             var appLocation = Assembly.GetExecutingAssembly().Location;
             var appDirectory = Path.GetDirectoryName(appLocation);
             var tempOldAppPath = Path.ChangeExtension(appLocation, ".exe.bak");
-            var tempNewAppPath = Path.ChangeExtension(appLocation, ".exe.update");
+            var tempNewAppPath = Path.ChangeExtension(appLocation, ".exe.upd");
 
             var exeEntry = FindExecutableEntry(zip);
             exeEntry.ExtractTo(tempNewAppPath);
@@ -31,15 +32,7 @@ namespace EZBlocker3.AutoUpdate {
             Logger.LogDebug("AutoUpdate: Replaced executable");
 
             Logger.LogDebug("AutoUpdate: Restarting");
-
-            // Process.Start(appLocation, "/updateRestart");
-            Process.Start(new ProcessStartInfo() {
-                WindowStyle = ProcessWindowStyle.Hidden,
-                FileName = "cmd.exe",
-                Arguments = $"/C TIMEOUT /T 3 /NOBREAK & START \"\" \"{appLocation}\" /updateRestart",
-                UseShellExecute = true,
-                CreateNoWindow = true
-            });
+            Process.Start(appLocation, "/updateRestart");
             Application.Current.Dispatcher.Invoke(() => {
                 Application.Current.Shutdown();
             });
