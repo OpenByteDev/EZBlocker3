@@ -31,7 +31,7 @@ namespace EZBlocker3.AutoUpdate {
             if (contentLength is long totalBytes) {
                 var progressHandler = new Progress<long>(bytesReceived => {
                     Progress?.Invoke(this, new DownloadProgressEventArgs(bytesReceived, totalBytes));
-                    Logger.LogDebug($"AutoUpdate: Received {totalBytes}/{contentLength} bytes");
+                    Logger.LogDebug($"AutoUpdate: Received {bytesReceived}/{totalBytes} bytes");
                 });
                 await contentStream.CopyToAsync(memoryStream, progressHandler, cancellationToken);
             } else {
