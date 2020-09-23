@@ -38,8 +38,8 @@ namespace EZBlocker3 {
                     return;
 
                 Dispatcher.Invoke(() => {
-                    var updateWindow = new UpdateWindow(update);
-                    updateWindow.Show();
+                    var updateWindow = new UpdateFoundWindow(update);
+                    updateWindow.ShowDialog();
                     Closed += (_, __) => updateWindow.Close();
                 });
             } catch (Exception e) {
@@ -98,6 +98,8 @@ namespace EZBlocker3 {
             base.OnStateChanged(e);
 
             ShowInTaskbar = WindowState != WindowState.Minimized;
+            foreach (Window window in OwnedWindows)
+                window.WindowState = WindowState;
         }
 
         protected override void OnClosed(EventArgs e) {

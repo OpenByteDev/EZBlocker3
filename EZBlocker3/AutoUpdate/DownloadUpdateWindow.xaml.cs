@@ -2,35 +2,43 @@
 using EZBlocker3.Interop;
 using EZBlocker3.Logging;
 using System;
-using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Shell;
 
 namespace EZBlocker3.AutoUpdate {
-    public partial class UpdateWindow : Window {
+    public partial class DownloadUpdateWindow : Window {
 
         private readonly UpdateInfo Update;
+        private readonly CancellationTokenSource _cancellationSource = new CancellationTokenSource();
 
-        public UpdateWindow(UpdateInfo update) {
+        public DownloadUpdateWindow(UpdateInfo update) {
             Update = update;
             InitializeComponent();
 
-            acceptDownloadButton.Click += (_, __) => {
-                acceptDownloadButton.IsEnabled = false;
-                Task.Run(DownloadUpdate);
+            abortDownloadButton.Click += (_, __) => {
+                _cancellationSource.Cancel();
+                Close();
             };
+
+            Task.Run(DownloadUpdate, _cancellationSource.Token);
+        }
+
+        protected override void OnClosed(EventArgs e) {
+            base.OnClosed(e);
+
+            _cancellationSource.Cancel();
         }
 
         private async Task DownloadUpdate() {
-            var download = new UpdateDownloader();
-            download.Progress += (s, e) => {
+            var downloader = new UpdateDownloader();
+            downloader.Progress += (s, e) => {
                 Dispatcher.Invoke(() => {
                     var normalizedPercentage = e.DownloadPercentage;
                     var percentage = normalizedPercentage * 100;
                     downloadProgress.Value = percentage;
-                    downloadState.Text = $"{Math.Round(percentage)}%";
+                    downloadState.Text = $"Downloading... {Math.Round(percentage)}%";
                     TaskbarItemInfo = new TaskbarItemInfo() {
                         ProgressValue = normalizedPercentage,
                         ProgressState = TaskbarItemProgressState.Normal
@@ -40,7 +48,7 @@ namespace EZBlocker3.AutoUpdate {
 
             DownloadedUpdate? downloadedUpdate = null;
             try {
-                downloadedUpdate = await download.Download(Update);
+                downloadedUpdate = await downloader.Download(Update, _cancellationSource.Token);
             } catch (Exception e) {
                 Logger.LogException("AutoUpdate: Update download failed", e);
                 Dispatcher.Invoke(() => {
@@ -50,20 +58,15 @@ namespace EZBlocker3.AutoUpdate {
             }
 
             Dispatcher.Invoke(() => {
-                downloadState.Text = $"Download finished";
-                restartButton.IsEnabled = true;
-                restartButton.Click += (_, __) => {
-                    TaskbarItemInfo = new TaskbarItemInfo() {
-                        ProgressState = TaskbarItemProgressState.Indeterminate
-                    };
-                    UpdateInstaller.InstallUpdateAndRestart(downloadedUpdate);
-                    restartButton.IsEnabled = false;
+                downloadState.Text = $"Installing...";
+                TaskbarItemInfo = new TaskbarItemInfo() {
+                    ProgressState = TaskbarItemProgressState.Indeterminate
                 };
+                UpdateInstaller.InstallUpdateAndRestart(downloadedUpdate);
                 TaskbarItemInfo = new TaskbarItemInfo() {
                     ProgressValue = 0,
                     ProgressState = TaskbarItemProgressState.None
                 };
-                TaskbarItemFlashHelper.FlashUntilFocused(this);
             });
         }
     }

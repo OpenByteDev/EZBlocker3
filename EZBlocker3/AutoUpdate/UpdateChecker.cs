@@ -67,7 +67,7 @@ namespace EZBlocker3.AutoUpdate {
                 Logger.LogError($"AutoUpdate: Update check failed (Failed to find download url)");
                 return null;
             }
-            return new UpdateInfo(downloadUrl);
+            return new UpdateInfo(downloadUrl, currentVersion, latestVersion);
         }
 
     }

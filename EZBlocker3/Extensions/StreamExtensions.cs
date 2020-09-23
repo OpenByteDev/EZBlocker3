@@ -12,7 +12,7 @@ namespace EZBlocker3.Extensions {
         public static Task CopyToAsync(this Stream source, Stream destination, CancellationToken cancellationToken) =>
             source.CopyToAsync(destination, DefaultCopyBufferSize, cancellationToken);
         public static Task CopyToAsync(this Stream source, Stream destination, IProgress<long>? progress = null, CancellationToken cancellationToken = default) =>
-            CopyToAsync(source, destination, DefaultCopyBufferSize, progress);
+            CopyToAsync(source, destination, DefaultCopyBufferSize, progress, cancellationToken);
         public static async Task CopyToAsync(this Stream source, Stream destination, int bufferSize, IProgress<long>? progress = null, CancellationToken cancellationToken = default) {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
