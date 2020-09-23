@@ -42,7 +42,7 @@ namespace EZBlocker3.AutoUpdate {
             try {
                 downloadedUpdate = await download.Download(Update);
             } catch (Exception e) {
-                Logger.LogError("AutoUpdate: Update download failed:\n" + e);
+                Logger.LogException("AutoUpdate: Update download failed", e);
                 Dispatcher.Invoke(() => {
                     downloadState.Text = $"Download failed";
                 });

@@ -79,7 +79,6 @@ namespace EZBlocker3 {
 
         public SpotifyHook() {
             _refreshTimer.Elapsed += RefreshTimer_Elapsed;
-            _refreshTimer.AutoReset = true;
         }
 
         public void Activate() {
@@ -109,6 +108,8 @@ namespace EZBlocker3 {
         }
 
         private void RefreshTimer_Elapsed(object sender, ElapsedEventArgs e) {
+            _refreshTimer.Enabled = false;
+
             if (!IsHooked) {
                 HookSpotify();
             } else {
@@ -159,32 +160,24 @@ namespace EZBlocker3 {
             Process = null;
             VolumeControl = null;
             IsMuted = null;
+            WindowTitle = null;
 
             // Logger.LogDebug($"SpotifyHook: Cleared");
         }
 
-        private Action<Process>? _invalidateProcessMainWindowName;
         private void RefreshHook() {
             if (Process is null)
                 return;
             // Logger.LogDebug($"Start refreshing Spotify Hook");
 
-            if (_invalidateProcessMainWindowName is null) {
-                // Expression Trees let us change a private field and are faster than reflection (if called multiple times)
-                var processParamter = Expression.Parameter(typeof(Process), "process");
-                var mainWindowField = Expression.Field(processParamter, "mainWindowTitle");
-                var assignment = Expression.Assign(mainWindowField, Expression.Constant(null, typeof(string)));
-                var lambda = Expression.Lambda<Action<Process>>(assignment, processParamter);
-                _invalidateProcessMainWindowName = lambda.Compile();
-            }
             try {
                 // invalidate MainWindowTitle by setting the backing field to null (does not happen by calling .Refresh())
-                _invalidateProcessMainWindowName(Process);
+                FastInvalidateMainWindowTitle(Process);
 
                 // invalidate other cached information
                 Process.Refresh();
             } catch (Exception e) {
-                Logger.LogError("SpotifyHook: Exception during fast invalidation of MainWindowTitle:\n" + e);
+                Logger.LogException("SpotifyHook: Exception during fast invalidation of MainWindowTitle", e);
 
                 // custom invalidation failed -> fall back to slower workaround.
                 var prevProcess = Process;
@@ -196,6 +189,19 @@ namespace EZBlocker3 {
             UpdateInfo();
 
             // Logger.LogDebug($"Refreshed Spotify Hook");
+        }
+
+        private Action<Process>? _invalidateProcessMainWindowTitle;
+        private void FastInvalidateMainWindowTitle(Process process) {
+            if (_invalidateProcessMainWindowTitle is null) {
+                // Expression Trees let us change a private field and are faster than reflection (if called multiple times)
+                var processParamter = Expression.Parameter(typeof(Process), "process");
+                var mainWindowField = Expression.Field(processParamter, "mainWindowTitle");
+                var assignment = Expression.Assign(mainWindowField, Expression.Constant(null, typeof(string)));
+                var lambda = Expression.Lambda<Action<Process>>(assignment, processParamter);
+                _invalidateProcessMainWindowTitle = lambda.Compile();
+            }
+            _invalidateProcessMainWindowTitle(process);
         }
 
         private void UpdateInfo() {

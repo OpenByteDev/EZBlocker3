@@ -38,6 +38,9 @@ namespace EZBlocker3.Logging {
             var errorMessage = new Win32Exception(Marshal.GetLastWin32Error()).Message;
             LogError(errorMessage);
         }
+        public static void LogException(string message, Exception exception) {
+            LogError(message + "\n" + exception.ToString());
+        }
 
     }
 }

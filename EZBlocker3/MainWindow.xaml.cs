@@ -43,7 +43,7 @@ namespace EZBlocker3 {
                     Closed += (_, __) => updateWindow.Close();
                 });
             } catch (Exception e) {
-                Logger.LogError($"Auto update failed: {e}");
+                Logger.LogException("Auto update failed", e);
             }
         }
 
