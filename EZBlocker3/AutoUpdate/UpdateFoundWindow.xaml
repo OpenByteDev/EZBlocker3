@@ -6,7 +6,7 @@
         xmlns:ui="http://schemas.modernwpf.com/2019"
         xmlns:local="clr-namespace:EZBlocker3"
         mc:Ignorable="d"
-        Title="Update Found!" Height="170" Width="350" ResizeMode="NoResize" ShowInTaskbar="False"
+        Title="Update Found!" Height="170" Width="350" ResizeMode="NoResize" ShowInTaskbar="False" WindowStyle="ToolWindow"
         ui:WindowHelper.UseModernWindowStyle="True">
     <Grid Margin="10 5 10 10" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
         <Grid.RowDefinitions>

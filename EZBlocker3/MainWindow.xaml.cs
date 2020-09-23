@@ -1,10 +1,15 @@
 ﻿using EZBlocker3.AutoUpdate;
+using EZBlocker3.Interop;
 using EZBlocker3.Logging;
 using System;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
+using System.Windows.Interop;
+using static EZBlocker3.AutoUpdate.UpdateFoundWindow;
 using static EZBlocker3.SpotifyHook;
 using Application = System.Windows.Application;
 using ContextMenu = System.Windows.Controls.ContextMenu;
@@ -13,7 +18,7 @@ using MenuItem = System.Windows.Controls.MenuItem;
 namespace EZBlocker3 {
     public partial class MainWindow : Window {
 
-        private readonly SpotifyHook spotifyHook = new SpotifyHook();
+        private readonly SpotifyHook _spotifyHook = new SpotifyHook();
         private readonly NotifyIcon _notifyIcon = new NotifyIcon();
 
         public MainWindow() {
@@ -29,8 +34,28 @@ namespace EZBlocker3 {
             // UpdateMuteStatus();
 
             Task.Run(() => RunUpdateCheck());
+
+            Loaded += MainWindow_Loaded;
         }
 
+        #region WindowProc
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e) {
+            var source = (HwndSource)PresentationSource.FromDependencyObject(this);
+            source.AddHook(WindowProc);
+        }
+        private IntPtr WindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled) {
+            switch (msg) {
+                case (int)Winuser.WindowProcMessage.WM_SYSCOMMAND:
+                    if ((int)wParam == (int)Winuser.WindowMessageSystemCommand.SC_CLOSE)
+                        // we manually close here, so that the "close window" command in the taskbar keeps working even if there is a dialog open.
+                        Close();
+                    break;
+            }
+            return IntPtr.Zero;
+        }
+        #endregion
+
+        #region AutoUpdate
         private async Task RunUpdateCheck() {
             try {
                 var result = await UpdateChecker.CheckForUpdate();
@@ -38,29 +63,41 @@ namespace EZBlocker3 {
                     return;
 
                 Dispatcher.Invoke(() => {
-                    var updateWindow = new UpdateFoundWindow(update);
-                    updateWindow.ShowDialog();
-                    Closed += (_, __) => updateWindow.Close();
+                    var decision = ShowUpdateFoundWindow(update);
+                    switch (decision) {
+                        case UpdateDecision.Accept:
+                            Logger.LogInfo($"AutoUpdate: Accepted update to {update.UpdateVersion}");
+                            ShowDownloadWindow(update);
+                            break;
+                        case UpdateDecision.NotNow:
+                            Logger.LogInfo($"AutoUpdate: Delayed update to {update.UpdateVersion}");
+                            break;
+                        case UpdateDecision.IgnoreUpdate:
+                            Logger.LogInfo($"AutoUpdate: Ignored update to {update.UpdateVersion}");
+                            // TODO: remmeber to not ask again for this version.
+                            break;
+                    }
                 });
             } catch (Exception e) {
                 Logger.LogException("Auto update failed", e);
             }
         }
 
-        private void SetupSpotifyHook() {
-            spotifyHook.SpotifyStateChanged += (_, __) => {
-                UpdateStatusLabel();
-                UpdateMuteStatus();
-            };
-            spotifyHook.ActiveSongChanged += (_, __) => {
-                UpdateStatusLabel();
-            };
-            spotifyHook.HookChanged += (_, __) => {
-                UpdateStatusLabel();
-            };
-            spotifyHook.Activate();
+        private UpdateDecision? ShowUpdateFoundWindow(UpdateInfo update) {
+            var updateWindow = new UpdateFoundWindow(update);
+            updateWindow.Owner = this;
+            updateWindow.ShowDialog();
+            return updateWindow.Decision;
         }
 
+        private bool? ShowDownloadWindow(UpdateInfo update) {
+            var downloadUpdateWindow = new DownloadUpdateWindow(update);
+            downloadUpdateWindow.Owner = this;
+            return downloadUpdateWindow.ShowDialog();
+        }
+        #endregion
+
+        #region NotifyIcon
         private void SetupNotifyIcon() {
             var sri = Application.GetResourceStream(new Uri("/Icon/Icon32.ico", UriKind.Relative));
             if (sri != null)
@@ -72,21 +109,43 @@ namespace EZBlocker3 {
                         Deminimize();
                         break;
                     case MouseButtons.Right:
-                        var contextMenu = new ContextMenu();
-                        var openItem = new MenuItem {
-                            Header = "Show Window"
-                        };
-                        openItem.Click += (_, __) => Deminimize();
-                        contextMenu.Items.Add(openItem);
-                        var exitItem = new MenuItem {
-                            Header = "Exit"
-                        };
-                        exitItem.Click += (_, __) => Application.Current.Shutdown();
-                        contextMenu.Items.Add(exitItem);
-                        contextMenu.IsOpen = true;
+                        ShowNotifyIconContextMenu();
                         break;
                 }
             };
+        }
+
+        private ContextMenu? _notifyIconContextMenu;
+        private void ShowNotifyIconContextMenu() {
+            if (_notifyIconContextMenu is null) {
+                _notifyIconContextMenu = new ContextMenu();
+                var openItem = new MenuItem {
+                    Header = "Show Window"
+                };
+                openItem.Click += (_, __) => Deminimize();
+                _notifyIconContextMenu.Items.Add(openItem);
+                var exitItem = new MenuItem {
+                    Header = "Exit"
+                };
+                exitItem.Click += (_, __) => Application.Current.Shutdown();
+                _notifyIconContextMenu.Items.Add(exitItem);
+            }
+            _notifyIconContextMenu.IsOpen = true;
+        }
+        #endregion
+
+        private void SetupSpotifyHook() {
+            _spotifyHook.SpotifyStateChanged += (_, __) => {
+                UpdateStatusLabel();
+                UpdateMuteStatus();
+            };
+            _spotifyHook.ActiveSongChanged += (_, __) => {
+                UpdateStatusLabel();
+            };
+            _spotifyHook.HookChanged += (_, __) => {
+                UpdateStatusLabel();
+            };
+            _spotifyHook.Activate();
         }
 
         public void Deminimize() {
@@ -94,36 +153,13 @@ namespace EZBlocker3 {
             Activate();
         }
 
-        protected override void OnStateChanged(EventArgs e) {
-            base.OnStateChanged(e);
-
-            ShowInTaskbar = WindowState != WindowState.Minimized;
-            foreach (Window window in OwnedWindows)
-                window.WindowState = WindowState;
-        }
-
-        protected override void OnClosed(EventArgs e) {
-            base.OnClosed(e);
-
-            if (_notifyIcon != null) {
-                _notifyIcon.Visible = false;
-                _notifyIcon.Icon?.Dispose();
-                _notifyIcon.Dispose();
-            }
-
-            if (spotifyHook != null) {
-                spotifyHook.Deactivate();
-                spotifyHook.Dispose();
-            }
-        }
-
         private void OpenVolumeControlButton_Click(object sender, RoutedEventArgs e) {
             Task.Run(() => VolumeMixer.Open());
         }
 
         private void UpdateMuteStatus() {
-            if (spotifyHook.State != SpotifyState.StartingUp && spotifyHook.State != SpotifyState.ShuttingDown)
-                spotifyHook.SetMute(mute: spotifyHook.IsAdPlaying);
+            if (_spotifyHook.State != SpotifyState.StartingUp && _spotifyHook.State != SpotifyState.ShuttingDown)
+                _spotifyHook.SetMute(mute: _spotifyHook.IsAdPlaying);
         }
 
         private void UpdateStatusLabel() {
@@ -133,14 +169,14 @@ namespace EZBlocker3 {
         }
 
         private string GetStateText() {
-            if (!spotifyHook.IsHooked) {
+            if (!_spotifyHook.IsHooked) {
                 return "Spotify is not running.";
             } else {
-                switch (spotifyHook.State) {
+                switch (_spotifyHook.State) {
                     case SpotifyState.Paused:
                         return "Spotify is paused.";
                     case SpotifyState.PlayingSong:
-                        if (!(spotifyHook.ActiveSong is SongInfo song)) {
+                        if (!(_spotifyHook.ActiveSong is SongInfo song)) {
                             Logger.LogError("SpotifyHook: Active song is undefined in PlayingSong state.");
                             throw new IllegalStateException();
                         }
@@ -157,5 +193,21 @@ namespace EZBlocker3 {
                 }
             }
         }
+
+        protected override void OnClosed(EventArgs e) {
+            base.OnClosed(e);
+
+            if (_notifyIcon != null) {
+                _notifyIcon.Visible = false;
+                _notifyIcon.Icon?.Dispose();
+                _notifyIcon.Dispose();
+            }
+
+            if (_spotifyHook != null) {
+                _spotifyHook.Deactivate();
+                _spotifyHook.Dispose();
+            }
+        }
+
     }
 }
