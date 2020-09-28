@@ -1,21 +1,23 @@
 ﻿using EZBlocker3.Extensions;
 using EZBlocker3.Interop;
 using EZBlocker3.Logging;
-using NAudio.CoreAudioApi;
 using System;
 using System.Diagnostics;
 using System.Linq;
 using WindowEvent = EZBlocker3.Interop.NativeMethods.WindowEvent;
 using AccessibleObjectID = EZBlocker3.Interop.NativeMethods.AccessibleObjectID;
 using static EZBlocker3.SpotifyHook;
+using EZBlocker3.Audio.ComWrapper;
+using EZBlocker3.Audio.Com;
 
 namespace EZBlocker3 {
     public class SpotifyHook : IDisposable {
 
         public Process? Process { get; private set; }
         public string? WindowTitle { get; private set; }
+        internal AudioSession? AudioSession { get; private set; }
 
-        public bool? IsMuted => _audioSession?.SimpleAudioVolume.Mute;
+        public bool? IsMuted => AudioSession?.IsMuted;
 
         public bool IsHooked { get; private set; }
         public bool IsPaused => State == SpotifyState.Paused;
@@ -45,7 +47,6 @@ namespace EZBlocker3 {
         private WindowEventHook _spotifyNameChangeEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_NAMECHANGE);
         private WindowEventHook _spotifyObjectDestroyEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_DESTROY);
         private WindowEventHook _globalEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_CREATE);
-        private AudioSessionControl? _audioSession;
 
         public SpotifyHook() {
             _globalEventHook.WinEventProc += _globalEventHook_WinEventProc;
@@ -147,17 +148,24 @@ namespace EZBlocker3 {
         }
 
         private void FetchAudioSession() {
-            using var enumerator = new MMDeviceEnumerator();
-            using var device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
-            var sessions = device.AudioSessionManager.Sessions;
-            for (int i = 0; i < sessions.Count; i++) {
-                if (sessions[i].GetProcessID == Process?.Id) {
-                    _audioSession = sessions[i];
-                    break;
+            using var device = AudioDevice.GetDefaultAudioDevice(EDataFlow.eRender, ERole.eMultimedia);
+            using var sessionManager = device.GetSessionManager();
+            using var sessions = sessionManager.GetSessionCollection();
+            for (var i=0; i<sessions.Count; i++) {
+                AudioSession? session = null;
+                try {
+                    session = sessions[0];
+                    if (session.ProcessID == MainWindowProcess?.Id) {
+                        AudioSession = session;
+                        break;
+                    }
+                } catch {
+                    session?.Dispose();
+                    throw;
                 }
             }
 
-            if (_audioSession is null)
+            if (AudioSession is null)
                 Logger.LogError("SpotifyHook: Failed to fetch audio session.");
         }
 
@@ -222,11 +230,12 @@ namespace EZBlocker3 {
 
         protected void ClearHookData() {
             Process?.Dispose();
+            AudioSession?.Dispose();
 
             Process = null;
             WindowTitle = null;
             ActiveSong = null;
-            _audioSession = null;
+            AudioSession = null;
             State = SpotifyState.Unknown;
 
             if (_globalEventHook.Hooked)
@@ -257,9 +266,9 @@ namespace EZBlocker3 {
                 return false;
 
             // ensure audio session
-            if (_audioSession is null) {
+            if (AudioSession is null) {
                 FetchAudioSession();
-                if (_audioSession is null) {
+                if (AudioSession is null) {
                     Logger.LogError($"SpotifyHook: Failed to {(mute ? "mute" : "unmute")} spotify due to missing audio session.");
                     return false;
                 }
@@ -267,7 +276,7 @@ namespace EZBlocker3 {
 
             // mute
             try {
-                _audioSession.SimpleAudioVolume.Mute = mute;
+                AudioSession.SetMute(mute);
                 Logger.LogInfo($"SpotifyHook: Spotify {(mute ? "muted" : "unmuted")}.");
                 return true;
             } catch(Exception e) {
