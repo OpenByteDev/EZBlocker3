@@ -5,7 +5,8 @@ using NAudio.CoreAudioApi;
 using System;
 using System.Diagnostics;
 using System.Linq;
-using static EZBlocker3.Interop.NativeMethods;
+using WindowEvent = EZBlocker3.Interop.NativeMethods.WindowEvent;
+using AccessibleObjectID = EZBlocker3.Interop.NativeMethods.AccessibleObjectID;
 using static EZBlocker3.SpotifyHook;
 
 namespace EZBlocker3 {
@@ -93,13 +94,12 @@ namespace EZBlocker3 {
             return true;
         }
 
-        private IntPtr _lastObjectCreateHandle;
-        private void _globalEventHook_WinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
+        private void _globalEventHook_WinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, AccessibleObjectID idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
             if (IsHooked)
                 return;
-            if (hwnd == _lastObjectCreateHandle)
+            // make sure that a window was created.
+            if (idObject != AccessibleObjectID.OBJID_WINDOW || idChild != NativeMethods.CHILDID_SELF)
                 return;
-            _lastObjectCreateHandle = hwnd;
 
             NativeMethods.GetWindowThreadProcessId(hwnd, out uint processId);
             var process = Process.GetProcessById((int)processId);
@@ -110,14 +110,17 @@ namespace EZBlocker3 {
             OnSpotifyHooked(process);
         }
 
-        private void _spotifyObjectDestroyEventHook_WinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
-            if (hwnd == Process?.MainWindowHandle)
-                OnSpotifyClose();
+        private void _spotifyObjectDestroyEventHook_WinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, AccessibleObjectID idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
+            // make sure that a window was destroyed.
+            if (idObject != AccessibleObjectID.OBJID_WINDOW || idChild != NativeMethods.CHILDID_SELF)
+                return;
+            UpdateState(SpotifyState.ShuttingDown);
+            OnSpotifyClose();
         }
 
-        private void _spotifyNameChangeEventHook_WinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
-            // TODO comment
-            if (idObject != 0)
+        private void _spotifyNameChangeEventHook_WinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, AccessibleObjectID idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
+            // make sure that a window name has changed.
+            if (idObject != AccessibleObjectID.OBJID_WINDOW || idChild != NativeMethods.CHILDID_SELF)
                 return;
             UpdateWindowTitle(NativeWindowUtils.GetWindowTitle(hwnd));
         }

@@ -51,74 +51,92 @@ namespace EZBlocker3.Interop {
             /// Closes the window.
             /// </summary>
             SC_CLOSE = 0xF060,
+
             /// <summary>
             /// Changes the cursor to a question mark with a pointer. If the user then clicks a control in the dialog box, the control receives a WM_HELP message.
             /// </summary>
             SC_CONTEXTHELP = 0xF180,
+
             /// <summary>
             /// Selects the default item; the user double-clicked the window menu.
             /// </summary>
             SC_DEFAULT = 0xF160,
+
             /// <summary>
             /// Activates the window associated with the application-specified hot key. The lParam parameter identifies the window to activate.
             /// </summary>
             SC_HOTKEY = 0xF150,
+
             /// <summary>
             /// Scrolls horizontally.
             /// </summary>
             SC_HSCROLL = 0xF080,
+
             /// <summary>
             /// Indicates whether the screen saver is secure.
             /// </summary>
             SCF_ISSECURE = 0x00000001,
+
             /// <summary>
             /// Retrieves the window menu as a result of a keystroke. For more information, see the Remarks section.
             /// </summary>
             SC_KEYMENU = 0xF100,
+
             /// <summary>
             /// Maximizes the window.
             /// </summary>
             SC_MAXIMIZE = 0xF030,
+
             /// <summary>
             /// Minimizes the window.
             /// </summary>
             SC_MINIMIZE = 0xF020,
+
             /// <summary>
             /// Sets the state of the display. This command supports devices that have power-saving features, such as a battery-powered personal computer.
             /// </summary>
             SC_MONITORPOWER = 0xF170,
+
             /// <summary>
             /// Retrieves the window menu as a result of a mouse click.
             /// </summary>
             SC_MOUSEMENU = 0xF090,
+
             /// <summary>
             /// Moves the window.
             /// </summary>
             SC_MOVE = 0xF010,
+
             /// <summary>
             /// Moves to the next window.
             /// </summary>
             SC_NEXTWINDOW = 0xF040,
+
             /// <summary>
             /// Moves to the previous window.
             /// </summary>
             SC_PREVWINDOW = 0xF050,
+
             /// <summary>
             /// Restores the window to its normal position and size.
             /// </summary>
             SC_RESTORE = 0xF120,
+
             /// <summary>
             /// Executes the screen saver application specified in the [boot] section of the System.ini file.
             /// </summary>
             SC_SCREENSAVE = 0xF140,
+
             /// <summary>
             /// Sizes the window.
             /// </summary>
             SC_SIZE = 0xF000,
+
             /// <summary>
             /// Activates the Start menu.
             /// </summary>
             SC_TASKLIST = 0xF130,
+
             /// <summary>
             /// Scrolls vertically.
             /// </summary>
@@ -255,10 +273,78 @@ namespace EZBlocker3.Interop {
             IntPtr hWinEventHook,
             WindowEvent eventType,
             IntPtr hwnd,
-            int idObject,
+            AccessibleObjectID idObject,
             int idChild,
             uint dwEventThread,
             uint dwmsEventTime);
+
+        public const int CHILDID_SELF = 0;
+
+        /// <summary>
+        /// This enumeration lists all kinds of accessible objects that can
+        /// be directly assigned to a window.
+        /// </summary>
+        public enum AccessibleObjectID : uint {
+            /// <summary>
+            /// The window itself rather than a child object.
+            /// </summary>
+            OBJID_WINDOW = 0x00000000,
+
+            /// <summary>
+            /// The window's system menu.
+            /// </summary>
+            OBJID_SYSMENU = 0xFFFFFFFF,
+
+            /// <summary>
+            /// The window's title bar.
+            /// </summary>
+            OBJID_TITLEBAR = 0xFFFFFFFE,
+
+            /// <summary>
+            /// The window's menu bar.
+            /// </summary>
+            OBJID_MENU = 0xFFFFFFFD,
+
+            /// <summary>
+            /// The window's client area. 
+            /// </summary>
+            OBJID_CLIENT = 0xFFFFFFFC,
+
+            /// <summary>
+            /// The window's vertical scroll bar.
+            /// </summary>
+            OBJID_VSCROLL = 0xFFFFFFFB,
+
+            /// <summary>
+            /// The window's horizontal scroll bar.
+            /// </summary>
+            OBJID_HSCROLL = 0xFFFFFFFA,
+
+            /// <summary>
+            /// The window's size grip: an optional frame component located at the lower-right corner of the window frame.
+            /// </summary>
+            OBJID_SIZEGRIP = 0xFFFFFFF9,
+
+            /// <summary>
+            /// The text insertion bar (caret) in the window.
+            /// </summary>
+            OBJID_CARET = 0xFFFFFFF8,
+
+            /// <summary>
+            /// The mouse pointer. There is only one mouse pointer in the system, and it is not a child of any window.
+            /// </summary>
+            OBJID_CURSOR = 0xFFFFFFF7,
+
+            /// <summary>
+            /// An alert that is associated with a window or an application. 
+            /// </summary>
+            OBJID_ALERT = 0xFFFFFFF6,
+
+            /// <summary>
+            /// A sound object. Sound objects do not have screen locations or children, but they do have name and state attributes. They are children of the application that is playing the sound.
+            /// </summary>
+            OBJID_SOUND = 0xFFFFFFF5
+        }
 
         [Flags]
         public enum WinEventHookFlags : uint {
@@ -268,15 +354,18 @@ namespace EZBlocker3.Interop {
             /// Although this method is asynchronous, events are guaranteed to be in sequential order.
             /// </summary>
             WINEVENT_OUTOFCONTEXT = 0x0000,
+
             /// <summary>
             /// Prevents this instance of the hook from receiving the events that are generated by the thread that is registering this hook. 
             /// </summary>
             WINEVENT_SKIPOWNTHREAD = 0x0001,
+
             /// <summary>
             /// Prevents this instance of the hook from receiving the events that are generated by threads in this process.
             /// This flag does not prevent threads from generating events.
             /// </summary>
             WINEVENT_SKIPOWNPROCESS = 0x0002,
+
             /// <summary>
             /// The DLL that contains the callback function is mapped into the address space of the process that generates the event.
             /// With this flag, the system sends event notifications to the callback function as they occur. 

@@ -71,7 +71,7 @@ namespace EZBlocker3.Interop {
                 _eventProcHandle.Free();
         }
 
-        protected virtual void OnWinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
+        protected virtual void OnWinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, AccessibleObjectID idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
             WinEventProc?.Invoke(hWinEventHook, eventType, hwnd, idObject, idChild, dwEventThread, dwEventThread);
         }
 
