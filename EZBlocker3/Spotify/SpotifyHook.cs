@@ -9,11 +9,13 @@ using AccessibleObjectID = EZBlocker3.Interop.NativeMethods.AccessibleObjectID;
 using static EZBlocker3.SpotifyHook;
 using EZBlocker3.Audio.ComWrapper;
 using EZBlocker3.Audio.Com;
+using EZBlocker3.Utils;
 
 namespace EZBlocker3 {
     public class SpotifyHook : IDisposable {
 
-        public Process? Process { get; private set; }
+        public Process? MainWindowProcess { get; private set; }
+        protected Process[]? AdditionalProcesses { get; private set; }
         public string? WindowTitle { get; private set; }
         internal AudioSession? AudioSession { get; private set; }
 
@@ -44,9 +46,9 @@ namespace EZBlocker3 {
         public event SpotifyStateChangedEventHandler? SpotifyStateChanged;
         public delegate void SpotifyStateChangedEventHandler(object sender, SpotifyStateChangedEventArgs eventArgs);
 
-        private WindowEventHook _spotifyNameChangeEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_NAMECHANGE);
-        private WindowEventHook _spotifyObjectDestroyEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_DESTROY);
-        private WindowEventHook _globalEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_CREATE);
+        private readonly WindowEventHook _spotifyNameChangeEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_NAMECHANGE);
+        private readonly WindowEventHook _spotifyObjectDestroyEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_DESTROY);
+        private readonly WindowEventHook _globalEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_CREATE);
 
         public SpotifyHook() {
             _globalEventHook.WinEventProc += _globalEventHook_WinEventProc;
@@ -90,7 +92,7 @@ namespace EZBlocker3 {
                 if (process != mainProcess)
                     process.Dispose();
 
-            OnSpotifyHooked(mainProcess);
+            OnSpotifyHooked(mainProcess, processes);
 
             return true;
         }
@@ -109,12 +111,14 @@ namespace EZBlocker3 {
                 return;
 
             OnSpotifyHooked(process);
+            UpdateState(SpotifyState.StartingUp);
         }
 
         private void _spotifyObjectDestroyEventHook_WinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, AccessibleObjectID idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
             // make sure that a window was destroyed.
             if (idObject != AccessibleObjectID.OBJID_WINDOW || idChild != NativeMethods.CHILDID_SELF)
                 return;
+
             UpdateState(SpotifyState.ShuttingDown);
             OnSpotifyClose();
         }
@@ -126,47 +130,79 @@ namespace EZBlocker3 {
             UpdateWindowTitle(NativeWindowUtils.GetWindowTitle(hwnd));
         }
 
-        private void OnSpotifyHooked(Process process) {
-            if (IsHooked || process == null || process.HasExited)
+        private void OnSpotifyHooked(Process mainProcess) {
+            OnSpotifyHooked(mainProcess, null);
+        }
+        private void OnSpotifyHooked(Process mainProcess, Process[]? additionalProcesses) {
+            if (IsHooked || mainProcess == null || mainProcess.HasExited)
                 return;
 
-            Process = process;
+            MainWindowProcess = mainProcess;
+            AdditionalProcesses = additionalProcesses;
             IsHooked = true;
 
             if (_globalEventHook.Hooked)
                 _globalEventHook.Unhook();
 
             // TODO multi event hook
-            _spotifyNameChangeEventHook.HookToProcess(process);
-            _spotifyObjectDestroyEventHook.HookToProcess(process);
+            _spotifyNameChangeEventHook.HookToProcess(mainProcess);
+            _spotifyObjectDestroyEventHook.HookToProcess(mainProcess);
 
             FetchAudioSession();
 
             OnHookChanged();
 
-            UpdateWindowTitle(Process.MainWindowTitle);
+            UpdateWindowTitle(mainProcess.MainWindowTitle);
         }
 
         private void FetchAudioSession() {
+            // fetch sessions
             using var device = AudioDevice.GetDefaultAudioDevice(EDataFlow.eRender, ERole.eMultimedia);
             using var sessionManager = device.GetSessionManager();
             using var sessions = sessionManager.GetSessionCollection();
+
+            // check main process and collect sessions
+            var sessionCount = sessions.Count;
+            using var sessionCache = new DisposableList<AudioSession>(sessionCount);
             for (var i=0; i<sessions.Count; i++) {
-                AudioSession? session = null;
-                try {
-                    session = sessions[0];
-                    if (session.ProcessID == MainWindowProcess?.Id) {
-                        AudioSession = session;
-                        break;
-                    }
-                } catch {
-                    session?.Dispose();
-                    throw;
+                var session = sessions[i];
+                if (session.ProcessID == MainWindowProcess?.Id) {
+                    Logger.LogInfo("SpotifyHook: Successfully fetched audio session.");
+                    AudioSession = session;
+                    return;
+                } else {
+                    sessionCache.Add(session);
                 }
             }
 
-            if (AudioSession is null)
-                Logger.LogError("SpotifyHook: Failed to fetch audio session.");
+            Logger.LogWarning("SpotifyHook: Failed to fetch audio session using main window process.");
+
+            // try fetch through other "spotify" processes
+            if (AdditionalProcesses is null)
+                AdditionalProcesses = Process.GetProcessesByName("spotify");
+
+            using var sessionMap = new ValueDisposableDictionary<uint, AudioSession>();
+            foreach (var session in sessionCache)
+                sessionMap.Add(session.ProcessID, session);
+            sessionCache.Clear();
+
+            foreach (var process in AdditionalProcesses) {
+                var processId = (uint)process.Id;
+
+                // skip main process as we already checked it
+                if (MainWindowProcess?.Id == processId)
+                    continue;
+
+                if (sessionMap.TryGetValue(processId, out AudioSession session)) {
+                    AudioSession = session;
+
+                    // remove from map to avoid disposal
+                    sessionMap.Remove(processId);
+                    return;
+                }
+            }
+
+            Logger.LogError("SpotifyHook: Failed to fetch audio session.");
         }
 
         private void UpdateWindowTitle(string newWindowTitle) {
@@ -219,6 +255,8 @@ namespace EZBlocker3 {
         }
 
         private void OnSpotifyClose() {
+            Logger.LogWarning($"SpotifyHook: Spotify closed.");
+
             ClearHookData();
 
             IsHooked = false;
@@ -229,13 +267,15 @@ namespace EZBlocker3 {
         }
 
         protected void ClearHookData() {
-            Process?.Dispose();
+            MainWindowProcess?.Dispose();
+            AdditionalProcesses?.DisposeAll();
             AudioSession?.Dispose();
 
-            Process = null;
+            MainWindowProcess = null;
+            AdditionalProcesses = null;
+            AudioSession = null;
             WindowTitle = null;
             ActiveSong = null;
-            AudioSession = null;
             State = SpotifyState.Unknown;
 
             if (_globalEventHook.Hooked)
@@ -287,7 +327,7 @@ namespace EZBlocker3 {
 
 
         private void OnActiveSongChanged(SongInfo? previous, SongInfo? current) =>
-        OnActiveSongChanged(new ActiveSongChangedEventArgs(previous, current));
+            OnActiveSongChanged(new ActiveSongChangedEventArgs(previous, current));
         protected virtual void OnActiveSongChanged(ActiveSongChangedEventArgs eventArgs) {
             Logger.LogInfo($"SpotifyHook: Active song: \"{eventArgs.NewActiveSong}\"");
             ActiveSongChanged?.Invoke(this, eventArgs);
@@ -309,7 +349,9 @@ namespace EZBlocker3 {
 
         #region IDisposable
         public void Dispose() {
-            Process?.Dispose();
+            MainWindowProcess?.Dispose();
+            AdditionalProcesses?.DisposeAll();
+            AudioSession?.Dispose();
             _globalEventHook?.Dispose();
             _spotifyNameChangeEventHook?.Dispose();
             _spotifyObjectDestroyEventHook?.Dispose();
