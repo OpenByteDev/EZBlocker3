@@ -1,62 +1,26 @@
 ﻿using EZBlocker3.Extensions;
+using EZBlocker3.Interop;
 using EZBlocker3.Logging;
+using NAudio.CoreAudioApi;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Timers;
-using static EZBlocker3.AudioUtils;
+using static EZBlocker3.Interop.NativeMethods;
 using static EZBlocker3.SpotifyHook;
-using Timer = System.Timers.Timer;
 
 namespace EZBlocker3 {
-    internal class SpotifyHook : IDisposable {
+    public class SpotifyHook : IDisposable {
 
-        private Process? _process;
-        private bool _wasHooked = false;
-        public Process? Process {
-            get => _process;
-            private set {
-                _process = value;
-                if (IsHooked != _wasHooked)
-                    OnHookChanged();
-
-                _wasHooked = IsHooked;
-            }
-        }
-
-        private VolumeControl? _volumeControl;
-        private HashSet<int>? _allSpotifyProcessIds;
-        public VolumeControl? VolumeControl {
-            get {
-                _volumeControl ??= AudioUtils.GetVolumeControl(_allSpotifyProcessIds);
-                return _volumeControl;
-            }
-            private set => _volumeControl = value;
-        }
-
+        public Process? Process { get; private set; }
         public string? WindowTitle { get; private set; }
-        /// <summary>
-        /// Should a state change be delayed until the audio fades out.
-        /// </summary>
-        public bool WaitForAudioFade { get; set; } = true;
 
-        public bool IsHooked {
-            get {
-                try {
-                    return Process != null && !Process.HasExited;
-                } catch (InvalidOperationException) { // throws on unassociated process.
-                    Process = null; // avoid the exception next time
-                    return false;
-                }
-            }
-        }
+        public bool? IsMuted => _audioSession?.SimpleAudioVolume.Mute;
+
+        public bool IsHooked { get; private set; }
         public bool IsPaused => State == SpotifyState.Paused;
         public bool IsPlaying => IsSongPlaying || IsAdPlaying;
         public bool IsSongPlaying => State == SpotifyState.PlayingSong;
         public bool IsAdPlaying => State == SpotifyState.PlayingAdvertisement;
-        public bool? IsMuted { get; private set; } = null;
         public SongInfo? ActiveSong { get; private set; }
         public bool IsActive { get; private set; }
         public SpotifyState State { get; private set; } = SpotifyState.Unknown;
@@ -77,194 +41,199 @@ namespace EZBlocker3 {
         public event SpotifyStateChangedEventHandler? SpotifyStateChanged;
         public delegate void SpotifyStateChangedEventHandler(object sender, SpotifyStateChangedEventArgs eventArgs);
 
-        public const double HookedRefreshInterval = 100;
-        public const double UnhookedRefreshInterval = 2000;
-        private readonly Timer _refreshTimer = new Timer(UnhookedRefreshInterval);
+        private WindowEventHook _spotifyNameChangeEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_NAMECHANGE);
+        private WindowEventHook _spotifyObjectDestroyEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_DESTROY);
+        private WindowEventHook _globalEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_CREATE);
+        private AudioSessionControl? _audioSession;
 
         public SpotifyHook() {
-            _refreshTimer.Elapsed += RefreshTimer_Elapsed;
+            _globalEventHook.WinEventProc += _globalEventHook_WinEventProc;
+            _spotifyNameChangeEventHook.WinEventProc += _spotifyNameChangeEventHook_WinEventProc;
+            _spotifyObjectDestroyEventHook.WinEventProc += _spotifyObjectDestroyEventHook_WinEventProc;
         }
 
         public void Activate() {
             if (IsActive)
-                return;
+                throw new InvalidOperationException("Hook is already active.");
 
             Logger.LogDebug("SpotifyHook: Activated");
 
             IsActive = true;
 
-            HookSpotify();
-
-            _refreshTimer.Start();
-
+            if (!TryHookSpotify())
+                _globalEventHook.HookGlobal();
         }
+
         public void Deactivate() {
             if (!IsActive)
-                return;
+                throw new InvalidOperationException("Hook has to be active.");
 
             IsActive = false;
 
-            _refreshTimer.Stop();
+            IsHooked = false;
+            ClearHookData();
 
-            ClearHook();
-
-            Logger.LogInfo($"SpotifyHook: Deactivated");
+            Logger.LogDebug("SpotifyHook: Deactivated");
         }
 
-        private void RefreshTimer_Elapsed(object sender, ElapsedEventArgs e) {
-            _refreshTimer.Enabled = false;
-
-            if (!IsHooked) {
-                HookSpotify();
-            } else {
-                RefreshHook();
-            }
-            _refreshTimer.Interval = IsHooked ? HookedRefreshInterval : UnhookedRefreshInterval;
-
-            _refreshTimer.Enabled = true;
-        }
-
-        private bool HookSpotify() {
-            ClearHook();
-
+        private bool TryHookSpotify() {
             var processes = Process.GetProcessesByName("spotify");
-            // TODO: dispose processes not stored
+            var mainProcess = processes.Where(process => !string.IsNullOrWhiteSpace(process.MainWindowTitle)).FirstOrDefault();
 
-            Process = processes.Where(e => !string.IsNullOrWhiteSpace(e.MainWindowTitle)).FirstOrDefault();
-            if (Process is null) {
-                if (VolumeControl is null)
-                    return false;
+            if (mainProcess == null)
+                return false;
 
-                try {
-                    Process = Process.GetProcessById(VolumeControl.ProcessId);
-                } catch (ArgumentException) {
-                    // TODO rework VolumeControl to store Process so that HasExited can be used.
-                    Logger.LogInfo($"SpotifyHook: Failed to recover hook using volume control.");
-                }
+            // dispose unused processes
+            foreach (var process in processes)
+                if (process != mainProcess)
+                    process.Dispose();
 
-                if (!IsHooked) {
-                    Process = null;
-                    VolumeControl = null;
-                    return false;
-                }
-            }
-
-            _allSpotifyProcessIds = processes.Select(e => e.Id).ToHashSet();
-            UpdateInfo();
+            OnSpotifyHooked(mainProcess);
 
             return true;
         }
 
-        private void ClearHook() {
-            Process?.Dispose();
-            VolumeControl?.Dispose();
-
-            Process = null;
-            VolumeControl = null;
-            IsMuted = null;
-            WindowTitle = null;
-
-            // Logger.LogDebug($"SpotifyHook: Cleared");
-        }
-
-        private void RefreshHook() {
-            if (Process is null)
+        private IntPtr _lastObjectCreateHandle;
+        private void _globalEventHook_WinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
+            if (IsHooked)
                 return;
-            // Logger.LogDebug($"Start refreshing Spotify Hook");
+            if (hwnd == _lastObjectCreateHandle)
+                return;
+            _lastObjectCreateHandle = hwnd;
 
-            try {
-                // invalidate MainWindowTitle by setting the backing field to null (does not happen by calling .Refresh())
-                FastInvalidateMainWindowTitle(Process);
+            NativeMethods.GetWindowThreadProcessId(hwnd, out uint processId);
+            var process = Process.GetProcessById((int)processId);
 
-                // invalidate other cached information
-                Process.Refresh();
-            } catch (Exception e) {
-                Logger.LogException("SpotifyHook: Exception during fast invalidation of MainWindowTitle", e);
+            if (!process.ProcessName.Equals("spotify", StringComparison.OrdinalIgnoreCase))
+                return;
 
-                // custom invalidation failed -> fall back to slower workaround.
-                var prevProcess = Process;
-                Process = Process.GetProcessById(prevProcess.Id);
-                prevProcess.Dispose();
-            }
-
-            // inspect updated process information
-            UpdateInfo();
-
-            // Logger.LogDebug($"Refreshed Spotify Hook");
+            OnSpotifyHooked(process);
         }
 
-        private Action<Process>? _invalidateProcessMainWindowTitle;
-        private void FastInvalidateMainWindowTitle(Process process) {
-            if (_invalidateProcessMainWindowTitle is null) {
-                // Expression Trees let us change a private field and are faster than reflection (if called multiple times)
-                var processParamter = Expression.Parameter(typeof(Process), "process");
-                var mainWindowField = Expression.Field(processParamter, "mainWindowTitle");
-                var assignment = Expression.Assign(mainWindowField, Expression.Constant(null, typeof(string)));
-                var lambda = Expression.Lambda<Action<Process>>(assignment, processParamter);
-                _invalidateProcessMainWindowTitle = lambda.Compile();
-            }
-            _invalidateProcessMainWindowTitle(process);
+        private void _spotifyObjectDestroyEventHook_WinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
+            if (hwnd == Process?.MainWindowHandle)
+                OnSpotifyClose();
         }
 
-        private void UpdateInfo() {
-            UpdateMuteStatus();
+        private void _spotifyNameChangeEventHook_WinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, int idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
+            // TODO comment
+            if (idObject != 0)
+                return;
+            UpdateWindowTitle(NativeWindowUtils.GetWindowTitle(hwnd));
+        }
+
+        private void OnSpotifyHooked(Process process) {
+            if (IsHooked || process == null || process.HasExited)
+                return;
+
+            Process = process;
+            IsHooked = true;
+
+            if (_globalEventHook.Hooked)
+                _globalEventHook.Unhook();
+
+            // TODO multi event hook
+            _spotifyNameChangeEventHook.HookToProcess(process);
+            _spotifyObjectDestroyEventHook.HookToProcess(process);
+
+            FetchAudioSession();
+
+            OnHookChanged();
+
+            UpdateWindowTitle(Process.MainWindowTitle);
+        }
+
+        private void FetchAudioSession() {
+            using var enumerator = new MMDeviceEnumerator();
+            using var device = enumerator.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia);
+            var sessions = device.AudioSessionManager.Sessions;
+            for (int i = 0; i < sessions.Count; i++) {
+                if (sessions[i].GetProcessID == Process?.Id) {
+                    _audioSession = sessions[i];
+                    break;
+                }
+            }
+
+            if (_audioSession is null)
+                Logger.LogError("SpotifyHook: Failed to fetch audio session.");
+        }
+
+        private void UpdateWindowTitle(string newWindowTitle) {
+            if (newWindowTitle == WindowTitle)
+                return;
 
             var oldWindowTitle = WindowTitle;
-            var newWindowTitle = WindowTitle = Process?.MainWindowTitle.Trim();
-            if (oldWindowTitle != newWindowTitle) {
-                var volumePeak = AudioUtils.GetPeakVolume(VolumeControl?.Control);
-                // if we switch from a playing state into another, we wait until we detect
-                if (WaitForAudioFade && IsPlaying && volumePeak > 0) {
-                    // reset window title to reevaluate later
-                    WindowTitle = oldWindowTitle;
-                    return;
-                }
+            WindowTitle = newWindowTitle;
+            OnWindowTitleChanged(oldWindowTitle, newWindowTitle);
+        }
 
-                Logger.LogDebug($"SpotifyHook: Current window name is \"{newWindowTitle}\"");
-                switch (newWindowTitle) {
-                    // Paused / Default for Free version
-                    case "Spotify Free":
-                    // Paused / Default for Premium version
-                    // Why do you need EZBlocker3 when you have premium?
-                    case "Spotify Premium":
-                        UpdateState(SpotifyState.Paused);
-                        break;
-                    // Advertisment Playing
-                    case "Advertisement":
+        private void OnWindowTitleChanged(string? oldWindowTitle, string newWindowTitle) {
+            Logger.LogDebug($"SpotifyHook: Current window name changed to \"{newWindowTitle}\"");
+            switch (newWindowTitle) {
+                // Paused / Default for Free version
+                case "Spotify Free":
+                // Paused / Default for Premium version
+                // Why do you need EZBlocker3 when you have premium?
+                case "Spotify Premium":
+                    UpdateState(SpotifyState.Paused);
+                    break;
+                // Advertisment Playing
+                case "Advertisement":
+                    UpdateState(SpotifyState.PlayingAdvertisement);
+                    break;
+                // Advertisment playing or Starting up
+                case "Spotify":
+                    if (oldWindowTitle is null || oldWindowTitle == "")
+                        UpdateState(SpotifyState.StartingUp);
+                    else
                         UpdateState(SpotifyState.PlayingAdvertisement);
-                        break;
-                    // Advertisment playing or Starting up
-                    case "Spotify":
-                        // first time detecting spotify?
-                        if (oldWindowTitle == null) {
-                            if (Process is null)
-                                throw new IllegalStateException();
-
-                            // did spotify just start?
-                            if ((DateTime.Now - Process.StartTime) < TimeSpan.FromMilliseconds(UnhookedRefreshInterval))
-                                UpdateState(SpotifyState.StartingUp);
-                            else
-                                UpdateState(SpotifyState.PlayingAdvertisement);
-                        } else
-                            UpdateState(SpotifyState.PlayingAdvertisement);
-                        break;
-                    // Shutting down
-                    case "":
-                        UpdateState(SpotifyState.ShuttingDown);
-                        break;
-                    // Song Playing: "[artist] - [title]"
-                    case var name when name?.Contains(" - ") == true:
-                        var (artist, title) = name.Split(" - ", maxCount: 2).Select(e => e.Trim()).ToArray();
-                        UpdateState(SpotifyState.PlayingSong, newSong: new SongInfo(title, artist));
-                        break;
-                    // What is happening?
-                    default:
-                        UpdateState(SpotifyState.Unknown);
-                        Logger.LogWarning($"SpotifyHook: Spotify entered an unknown state. (WindowTitle={newWindowTitle})");
-                        break;
-                }
+                    break;
+                // Shutting down
+                case "":
+                    if (oldWindowTitle is null)
+                        UpdateState(SpotifyState.StartingUp);
+                    else UpdateState(SpotifyState.ShuttingDown);
+                    break;
+                // Song Playing: "[artist] - [title]"
+                case var name when name?.Contains(" - ") == true:
+                    var (artist, title) = name.Split(" - ", maxCount: 2).Select(e => e.Trim()).ToArray();
+                    UpdateState(SpotifyState.PlayingSong, newSong: new SongInfo(title, artist));
+                    break;
+                // What is happening?
+                default:
+                    UpdateState(SpotifyState.Unknown);
+                    Logger.LogWarning($"SpotifyHook: Spotify entered an unknown state. (WindowTitle={newWindowTitle})");
+                    break;
             }
         }
+
+        private void OnSpotifyClose() {
+            ClearHookData();
+
+            IsHooked = false;
+
+            OnHookChanged();
+
+            _globalEventHook.HookGlobal();
+        }
+
+        protected void ClearHookData() {
+            Process?.Dispose();
+
+            Process = null;
+            WindowTitle = null;
+            ActiveSong = null;
+            _audioSession = null;
+            State = SpotifyState.Unknown;
+
+            if (_globalEventHook.Hooked)
+                _globalEventHook.Unhook();
+            if (_spotifyNameChangeEventHook.Hooked)
+                _spotifyNameChangeEventHook.Unhook();
+            if (_spotifyObjectDestroyEventHook.Hooked)
+                _spotifyObjectDestroyEventHook.Unhook();
+        }
+
 
         private void UpdateState(SpotifyState newState, SongInfo? newSong = null) {
             var prevSong = ActiveSong;
@@ -278,33 +247,35 @@ namespace EZBlocker3 {
                 OnActiveSongChanged(prevSong, newSong);
         }
 
-        private void UpdateMuteStatus() {
-            IsMuted ??= AudioUtils.IsMuted(VolumeControl?.Control);
-        }
-
         public bool Mute() => SetMute(mute: true);
         public bool Unmute() => SetMute(mute: false);
         public bool SetMute(bool mute) {
             if (!IsHooked)
                 return false;
 
-            if (IsMuted == mute)
-                return true;
+            // ensure audio session
+            if (_audioSession is null) {
+                FetchAudioSession();
+                if (_audioSession is null) {
+                    Logger.LogError($"SpotifyHook: Failed to {(mute ? "mute" : "unmute")} spotify due to missing audio session.");
+                    return false;
+                }
+            }
 
-            if (VolumeControl != null) {
-                AudioUtils.SetMute(VolumeControl.Control, mute);
-                IsMuted = mute;
+            // mute
+            try {
+                _audioSession.SimpleAudioVolume.Mute = mute;
                 Logger.LogInfo($"SpotifyHook: Spotify {(mute ? "muted" : "unmuted")}.");
                 return true;
-            } else {
-                IsMuted = null;
-                Logger.LogWarning($"SpotifyHook: Failed to {(mute ? "mute" : "unmute")} Spotify due to missing volume control.");
+            } catch(Exception e) {
+                Logger.LogException($"SpotifyHook: Failed to {(mute ? "mute" : "unmute")} spotify:", e);
                 return false;
             }
         }
 
+
         private void OnActiveSongChanged(SongInfo? previous, SongInfo? current) =>
-            OnActiveSongChanged(new ActiveSongChangedEventArgs(previous, current));
+        OnActiveSongChanged(new ActiveSongChangedEventArgs(previous, current));
         protected virtual void OnActiveSongChanged(ActiveSongChangedEventArgs eventArgs) {
             Logger.LogInfo($"SpotifyHook: Active song: \"{eventArgs.NewActiveSong}\"");
             ActiveSongChanged?.Invoke(this, eventArgs);
@@ -325,33 +296,17 @@ namespace EZBlocker3 {
         }
 
         #region IDisposable
-        private bool _disposed;
-
-        protected virtual void Dispose(bool disposing) {
-            if (!_disposed) {
-                if (disposing) {
-                    // dispose managed state
-                    _refreshTimer?.Dispose();
-                    VolumeControl?.Dispose();
-                    Process?.Dispose();
-                }
-
-                // free unmanaged resources
-
-                _disposed = true;
-            }
-        }
-
         public void Dispose() {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            Process?.Dispose();
+            _globalEventHook?.Dispose();
+            _spotifyNameChangeEventHook?.Dispose();
+            _spotifyObjectDestroyEventHook?.Dispose();
         }
         #endregion
     }
 
     #region EventArgs
-    internal class SpotifyStateChangedEventArgs : EventArgs {
+    public class SpotifyStateChangedEventArgs : EventArgs {
 
         public SpotifyState PreviousState { get; private set; }
         public SpotifyState NewState { get; private set; }
@@ -363,7 +318,7 @@ namespace EZBlocker3 {
 
     }
 
-    internal class ActiveSongChangedEventArgs : EventArgs {
+    public class ActiveSongChangedEventArgs : EventArgs {
 
         public SongInfo? PreviousActiveSong { get; private set; }
         public SongInfo? NewActiveSong { get; private set; }

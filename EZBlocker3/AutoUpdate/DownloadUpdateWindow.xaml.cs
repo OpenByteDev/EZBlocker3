@@ -1,6 +1,4 @@
-﻿using EZBlocker3.Extensions;
-using EZBlocker3.Interop;
-using EZBlocker3.Logging;
+﻿using EZBlocker3.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;

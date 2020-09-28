@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
-using static EZBlocker3.Interop.Winuser;
+using static EZBlocker3.Interop.NativeMethods;
 
 namespace EZBlocker3.Interop {
     // based on https://stackoverflow.com/a/8929473/6304917

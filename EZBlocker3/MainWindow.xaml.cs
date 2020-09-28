@@ -1,10 +1,10 @@
 ﻿using EZBlocker3.AutoUpdate;
 using EZBlocker3.Interop;
 using EZBlocker3.Logging;
+using EZBlocker3.Spotify;
 using System;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
@@ -18,17 +18,18 @@ using MenuItem = System.Windows.Controls.MenuItem;
 namespace EZBlocker3 {
     public partial class MainWindow : Window {
 
-        private readonly SpotifyHook _spotifyHook = new SpotifyHook();
-        private readonly NotifyIcon _notifyIcon = new NotifyIcon();
+        private SpotifyHook _spotifyHook;
+        private SpotifyMuter _spotifyMuter;
+        private NotifyIcon _notifyIcon;
 
         public MainWindow() {
             InitializeComponent();
 
-            OpenVolumeControlButton.Click += OpenVolumeControlButton_Click;
-            // MuteSpotifyButton.Click += MuteSpotifyButton_Click;
-
             SetupSpotifyHook();
             SetupNotifyIcon();
+
+            OpenVolumeControlButton.Click += OpenVolumeControlButton_Click;
+            // MuteSpotifyButton.Click += MuteSpotifyButton_Click;
 
             UpdateStatusLabel();
             // UpdateMuteStatus();
@@ -45,8 +46,8 @@ namespace EZBlocker3 {
         }
         private IntPtr WindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled) {
             switch (msg) {
-                case (int)Winuser.WindowProcMessage.WM_SYSCOMMAND:
-                    if ((int)wParam == (int)Winuser.WindowMessageSystemCommand.SC_CLOSE)
+                case (int)NativeMethods.WindowProcMessage.WM_SYSCOMMAND:
+                    if ((int)wParam == (int)NativeMethods.WindowMessageSystemCommand.SC_CLOSE)
                         // we manually close here, so that the "close window" command in the taskbar keeps working even if there is a dialog open.
                         Close();
                     break;
@@ -99,6 +100,8 @@ namespace EZBlocker3 {
 
         #region NotifyIcon
         private void SetupNotifyIcon() {
+            _notifyIcon = new NotifyIcon();
+
             var sri = Application.GetResourceStream(new Uri("/Icon/Icon32.ico", UriKind.Relative));
             if (sri != null)
                 _notifyIcon.Icon = new Icon(sri.Stream);
@@ -135,9 +138,11 @@ namespace EZBlocker3 {
         #endregion
 
         private void SetupSpotifyHook() {
+            _spotifyHook = new SpotifyHook();
+            _spotifyMuter = new SpotifyMuter(_spotifyHook);
+
             _spotifyHook.SpotifyStateChanged += (_, __) => {
                 UpdateStatusLabel();
-                UpdateMuteStatus();
             };
             _spotifyHook.ActiveSongChanged += (_, __) => {
                 UpdateStatusLabel();
@@ -155,11 +160,6 @@ namespace EZBlocker3 {
 
         private void OpenVolumeControlButton_Click(object sender, RoutedEventArgs e) {
             Task.Run(() => VolumeMixer.Open());
-        }
-
-        private void UpdateMuteStatus() {
-            if (_spotifyHook.State != SpotifyState.StartingUp && _spotifyHook.State != SpotifyState.ShuttingDown)
-                _spotifyHook.SetMute(mute: _spotifyHook.IsAdPlaying);
         }
 
         private void UpdateStatusLabel() {
