@@ -1,5 +1,4 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 
 namespace EZBlocker3.AutoUpdate {
     public partial class UpdateFoundWindow : Window {

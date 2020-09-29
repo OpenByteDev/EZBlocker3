@@ -4,10 +4,11 @@ using EZBlocker3.Logging;
 using EZBlocker3.Spotify;
 using System;
 using System.Drawing;
-using System.Runtime.InteropServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
+using System.Windows.Input;
 using System.Windows.Interop;
 using static EZBlocker3.AutoUpdate.UpdateFoundWindow;
 using static EZBlocker3.SpotifyHook;
@@ -21,6 +22,7 @@ namespace EZBlocker3 {
         private SpotifyHook _spotifyHook;
         private SpotifyMuter _spotifyMuter;
         private NotifyIcon _notifyIcon;
+        private readonly CancellationTokenSource _cancellationSource = new CancellationTokenSource();
 
         public MainWindow() {
             InitializeComponent();
@@ -29,12 +31,10 @@ namespace EZBlocker3 {
             SetupNotifyIcon();
 
             OpenVolumeControlButton.Click += OpenVolumeControlButton_Click;
-            // MuteSpotifyButton.Click += MuteSpotifyButton_Click;
 
             UpdateStatusLabel();
-            // UpdateMuteStatus();
 
-            Task.Run(() => RunUpdateCheck());
+            Task.Run(RunUpdateCheck, _cancellationSource.Token);
 
             Loaded += MainWindow_Loaded;
         }
@@ -59,7 +59,7 @@ namespace EZBlocker3 {
         #region AutoUpdate
         private async Task RunUpdateCheck() {
             try {
-                var result = await UpdateChecker.CheckForUpdate();
+                var result = await UpdateChecker.CheckForUpdate(_cancellationSource.Token);
                 if (!(result is UpdateInfo update)) // No update found
                     return;
 
@@ -135,6 +135,11 @@ namespace EZBlocker3 {
             }
             _notifyIconContextMenu.IsOpen = true;
         }
+        private void CloseNotifyIconContextMenu() {
+            if (_notifyIconContextMenu is null)
+                return;
+            _notifyIconContextMenu.IsOpen = false;
+        }
         #endregion
 
         private void SetupSpotifyHook() {
@@ -159,7 +164,8 @@ namespace EZBlocker3 {
         }
 
         private void OpenVolumeControlButton_Click(object sender, RoutedEventArgs e) {
-            Task.Run(() => VolumeMixer.Open());
+            Task.Run(VolumeMixer.Open, _cancellationSource.Token);
+        }
         }
 
         private void UpdateStatusLabel() {
@@ -197,6 +203,10 @@ namespace EZBlocker3 {
         protected override void OnClosed(EventArgs e) {
             base.OnClosed(e);
 
+            _cancellationSource.Cancel();
+
+            CloseNotifyIconContextMenu();
+
             if (_notifyIcon != null) {
                 _notifyIcon.Visible = false;
                 _notifyIcon.Icon?.Dispose();
@@ -207,6 +217,8 @@ namespace EZBlocker3 {
                 _spotifyHook.Deactivate();
                 _spotifyHook.Dispose();
             }
+
+            GlobalSingletons.Dispose();
         }
 
     }

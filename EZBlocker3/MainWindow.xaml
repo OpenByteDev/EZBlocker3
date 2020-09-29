@@ -9,7 +9,7 @@
         Title="EZBlocker 3"
         SizeToContent="Height" Width="250" ResizeMode="CanMinimize"
         ui:WindowHelper.UseModernWindowStyle="True">
-    <Grid Margin="10 0 10 10">
+    <Grid Margin="10 4 10 10">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="10" />

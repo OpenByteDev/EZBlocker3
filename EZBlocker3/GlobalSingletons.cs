@@ -6,5 +6,9 @@ namespace EZBlocker3 {
         private static HttpClient? _httpClient;
         public static HttpClient HttpClient => _httpClient ??= new HttpClient();
 
+        public static void Dispose() {
+            HttpClient?.Dispose();
+        }
+
     }
 }
