@@ -18,6 +18,8 @@ using static EZBlocker3.SpotifyHook;
 using Application = System.Windows.Application;
 using ContextMenu = System.Windows.Controls.ContextMenu;
 using MenuItem = System.Windows.Controls.MenuItem;
+using Point = System.Windows.Point;
+using Size = System.Windows.Size;
 
 namespace EZBlocker3 {
     public partial class MainWindow : Window {
@@ -40,6 +42,11 @@ namespace EZBlocker3 {
             UpdateStatusLabel();
 
             Loaded += MainWindow_Loaded;
+
+            // if the screen configuration did not change, we restore the window position
+            if (new Size(SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight) == Properties.Settings.Default.VirtualScreenSize)
+                (Left, Top) = Properties.Settings.Default.MainWindowPosition;
+
             if (Properties.Settings.Default.StartMinimized)
                 Minimize();
 
@@ -229,6 +236,16 @@ namespace EZBlocker3 {
         public void Deminimize() {
             WindowState = WindowState.Normal;
             Activate();
+        }
+
+        protected override void OnClosing(CancelEventArgs e) {
+            base.OnClosing(e);
+
+            if (WindowState == WindowState.Normal) {
+                Properties.Settings.Default.MainWindowPosition = new Point(Left, Top);
+                Properties.Settings.Default.VirtualScreenSize = new Size(SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight);
+                Properties.Settings.Default.Save();
+            }
         }
 
         protected override void OnClosed(EventArgs e) {

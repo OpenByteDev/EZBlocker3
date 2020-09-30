@@ -106,5 +106,29 @@ namespace EZBlocker3.Properties {
                 this["IgnoreUpdate"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0,0")]
+        public global::System.Windows.Point MainWindowPosition {
+            get {
+                return ((global::System.Windows.Point)(this["MainWindowPosition"]));
+            }
+            set {
+                this["MainWindowPosition"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0,0")]
+        public global::System.Windows.Size VirtualScreenSize {
+            get {
+                return ((global::System.Windows.Size)(this["VirtualScreenSize"]));
+            }
+            set {
+                this["VirtualScreenSize"] = value;
+            }
+        }
     }
 }

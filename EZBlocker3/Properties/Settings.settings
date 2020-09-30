@@ -23,6 +23,11 @@
     <Setting Name="IgnoreUpdate" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="MainWindowPosition" Type="System.Nullable`1[System.Windows.Point]" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="VirtualScreenSize" Type="System.Nullable`1[System.Windows.Size]" Scope="User">
+      <Value Profile="(Default)" />
     </Setting>
   </Settings>
 </SettingsFile>
