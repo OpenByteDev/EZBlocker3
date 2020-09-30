@@ -6,13 +6,16 @@ using EZBlocker3.Settings;
 using EZBlocker3.Spotify;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
+using System.Windows.Media;
 using static EZBlocker3.AutoUpdate.UpdateFoundWindow;
 using static EZBlocker3.SpotifyHook;
 using Application = System.Windows.Application;
@@ -60,7 +63,6 @@ namespace EZBlocker3 {
 
             if (Properties.Settings.Default.CheckForUpdates)
                 Task.Run(RunUpdateCheck, _cancellationSource.Token);
-
         }
 #pragma warning restore CS8618
 
@@ -157,21 +159,48 @@ namespace EZBlocker3 {
                         break;
                 }
             };
+            _notifyIcon.BalloonTipClicked += (_, __) => {
+                Deminimize();
+            };
+            StateChanged += (_, __) => {
+                if (WindowState == WindowState.Minimized)
+                    _notifyIcon.ShowBalloonTip(5000, "EZBlocker3", "EZBlocker3 is hidden. Click this icon to restore.", ToolTipIcon.None);
+            };
+            // ensure context menu gets closed.
+            Closed += (_, __) => {
+                CloseNotifyIconContextMenu();
+                if (_notifyIconContextMenu != null)
+                    _notifyIconContextMenu.Visibility = Visibility.Hidden;
+            };
         }
 
         private ContextMenu? _notifyIconContextMenu;
         private void ShowNotifyIconContextMenu() {
             if (_notifyIconContextMenu is null) {
                 _notifyIconContextMenu = new ContextMenu();
-                var openItem = new MenuItem {
-                    Header = "Show Window"
+
+                var showWindowItem = new MenuItem {
+                    Header = "Show Application Window"
                 };
-                openItem.Click += (_, __) => Deminimize();
-                _notifyIconContextMenu.Items.Add(openItem);
+                showWindowItem.Click += (_, __) => Deminimize();
+                _notifyIconContextMenu.Items.Add(showWindowItem);
+
+                var openProjectPageItem = new MenuItem {
+                    Header = "Open Project Page"
+                };
+                openProjectPageItem.Click += (_, __) => {
+                    Process.Start(new ProcessStartInfo() {
+                        FileName = Properties.Resources.ProjectPageUrl,
+                        UseShellExecute = true
+                    });
+                };
+                _notifyIconContextMenu.Items.Add(openProjectPageItem);
+
                 var exitItem = new MenuItem {
                     Header = "Exit"
                 };
                 exitItem.Click += (_, __) => Application.Current.Shutdown();
+
                 _notifyIconContextMenu.Items.Add(exitItem);
             }
             _notifyIconContextMenu.IsOpen = true;
@@ -249,6 +278,7 @@ namespace EZBlocker3 {
         private void UpdateWindowBackground() {
             Background = App.DebugModeEnabled ? new SolidColorBrush(Colors.OrangeRed) : null;
         }
+
         protected override void OnStateChanged(EventArgs e) {
             base.OnStateChanged(e);
 
@@ -270,8 +300,6 @@ namespace EZBlocker3 {
             base.OnClosed(e);
 
             _cancellationSource.Cancel();
-
-            CloseNotifyIconContextMenu();
 
             if (Properties.Settings.Default.UnmuteOnClose)
                 _spotifyHook?.Unmute();
