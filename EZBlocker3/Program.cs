@@ -11,15 +11,12 @@ using System.Windows;
 namespace EZBlocker3 {
     internal static class Program {
 
-        public static readonly string AppName = Assembly.GetEntryAssembly().GetName().Name;
-        public static readonly string SingletonMutexName = AppName + "_SingletonMutex";
-        public static readonly string PipeName = AppName + "_IPC";
+        private static readonly string AppName = Assembly.GetEntryAssembly().GetName().Name;
+        private static readonly string SingletonMutexName = AppName + "_SingletonMutex";
+        private static readonly string PipeName = AppName + "_IPC";
 
         [STAThread]
         public static int Main(string[] args) {
-            if (args.Contains("/debug"))
-                Logger.EnableLogFile = true;
-
             using var mutex = new Mutex(initiallyOwned: true, SingletonMutexName, out var notAlreadyRunning);
 
             if (args.Contains("/updateRestart")) {
@@ -65,20 +62,21 @@ namespace EZBlocker3 {
             server?.BeginWaitForConnection(ConnectionHandler, server);
 
             Application.Current.Dispatcher.Invoke(() => {
-                var mainWindow = Application.Current.MainWindow;
+                var mainWindow = (MainWindow) Application.Current.MainWindow;
                 mainWindow.Dispatcher.Invoke(() => {
-                    mainWindow.WindowState = WindowState.Normal;
-                    mainWindow.Activate();
+                    mainWindow.Deminimize();
                 });
             });
         }
 
         private static int RunApp() {
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12; // enable all protocols
+            // enable all protocols
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
 
             var app = new App();
             app.InitializeComponent();
             app.ShutdownMode = ShutdownMode.OnMainWindowClose;
+
             return app.Run();
         }
     }
