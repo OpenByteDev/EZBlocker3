@@ -14,7 +14,7 @@ Comparing to the original, EZBlocker 3...
 
 ## Setup
 
-**[Download for Windows](https://github.com/OpenByteDev/EZBlocker3/releases/download/0.4.0.0/EZBlocker3_v0.4.0.0.zip)**
+**[Download for Windows](https://github.com/OpenByteDev/EZBlocker3/releases/latest/)**
 
 No need to install as EZBlocker 3 is a portable application.
 
