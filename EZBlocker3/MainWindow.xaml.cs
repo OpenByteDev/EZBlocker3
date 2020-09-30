@@ -238,6 +238,13 @@ namespace EZBlocker3 {
             Activate();
         }
 
+        protected override void OnStateChanged(EventArgs e) {
+            base.OnStateChanged(e);
+
+            if (Properties.Settings.Default.MinimizeToTray)
+                ShowInTaskbar = WindowState != WindowState.Minimized;
+        }
+
         protected override void OnClosing(CancelEventArgs e) {
             base.OnClosing(e);
 
