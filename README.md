@@ -3,9 +3,9 @@
 
 EZBlocker 3 is a Spotify Ad Muter/Blocker for Windows written in C#.
 It mutes Spotify while an advertisement is playing.
-It is an rewrite of the original [EZBlocker](https://github.com/Xeroday/Spotify-Ad-Blocker).
+It is a based on the original [EZBlocker](https://github.com/Xeroday/Spotify-Ad-Blocker).
 
-Comparing to the original EZBlocker 3...
+Comparing to the original, EZBlocker 3...
 - ... fixes some muting bugs (e.g. [#215](https://github.com/Xeroday/Spotify-Ad-Blocker/pull/215))
 - ... does not include any sort of analytics ([#103](https://github.com/Xeroday/Spotify-Ad-Blocker/issues/103)).
 - ... is built using a [modern UI](https://github.com/Kinnara/ModernWpf)
