@@ -109,10 +109,9 @@ namespace EZBlocker3.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0,0")]
-        public global::System.Windows.Point MainWindowPosition {
+        public global::System.Nullable<System.Windows.Point> MainWindowPosition {
             get {
-                return ((global::System.Windows.Point)(this["MainWindowPosition"]));
+                return ((global::System.Nullable<System.Windows.Point>)(this["MainWindowPosition"]));
             }
             set {
                 this["MainWindowPosition"] = value;
@@ -121,13 +120,24 @@ namespace EZBlocker3.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("0,0")]
-        public global::System.Windows.Size VirtualScreenSize {
+        public global::System.Nullable<System.Windows.Size> VirtualScreenSize {
             get {
-                return ((global::System.Windows.Size)(this["VirtualScreenSize"]));
+                return ((global::System.Nullable<System.Windows.Size>)(this["VirtualScreenSize"]));
             }
             set {
                 this["VirtualScreenSize"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool UpgradeRequired {
+            get {
+                return ((bool)(this["UpgradeRequired"]));
+            }
+            set {
+                this["UpgradeRequired"] = value;
             }
         }
     }

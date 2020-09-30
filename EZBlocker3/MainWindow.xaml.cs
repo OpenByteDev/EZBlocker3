@@ -36,6 +36,10 @@ namespace EZBlocker3 {
         public MainWindow() {
             InitializeComponent();
 
+            // add version to window title
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            Title += $" v{version}";
+
             // recolor window in debug mode
             Properties.Settings.Default.PropertyChanged += (s, e) => {
                 if (e.PropertyName != nameof(Properties.Settings.DebugMode))
@@ -55,8 +59,9 @@ namespace EZBlocker3 {
             Loaded += MainWindow_Loaded;
 
             // if the screen configuration did not change, we restore the window position
-            if (new Size(SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight) == Properties.Settings.Default.VirtualScreenSize)
-                (Left, Top) = Properties.Settings.Default.MainWindowPosition;
+            if (new Size(SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight) == Properties.Settings.Default.VirtualScreenSize
+                && Properties.Settings.Default.MainWindowPosition is Point position)
+                (Left, Top) = position;
 
             if (Properties.Settings.Default.StartMinimized)
                 Minimize();

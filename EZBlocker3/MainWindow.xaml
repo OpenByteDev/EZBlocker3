@@ -6,8 +6,8 @@
         xmlns:ui="http://schemas.modernwpf.com/2019"
         xmlns:local="clr-namespace:EZBlocker3"
         mc:Ignorable="d"
-        Title="EZBlocker 3"
-        SizeToContent="Height" Width="250" ResizeMode="CanMinimize"
+        Title="EZBlocker3"
+        SizeToContent="Height" Width="260" ResizeMode="CanMinimize"
         ui:WindowHelper.UseModernWindowStyle="True">
     <Grid Margin="10 4 10 10">
         <Grid.RowDefinitions>
