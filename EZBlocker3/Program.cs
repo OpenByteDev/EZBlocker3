@@ -39,6 +39,9 @@ namespace EZBlocker3 {
                 using var server = new NamedPipeServerStream(PipeName, PipeDirection.Out, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
                 server.BeginWaitForConnection(ConnectionHandler, server);
 
+                if (args.Contains("/debug"))
+                    App.DebugModeEnabled = true;
+
                 var exitCode = RunApp();
 
                 if (server.IsConnected)

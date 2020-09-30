@@ -15,7 +15,14 @@
             <RowDefinition Height="10" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <Button x:Name="OpenVolumeControlButton" Grid.Row="0" HorizontalAlignment="Center" Content="Open Volume Control" />
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <Button x:Name="OpenVolumeControlButton" Grid.Column="0" HorizontalAlignment="Center" Content="Open Volume Control" />
+            <ui:SymbolIcon x:Name="SettingsIcon" Grid.Column="2" Symbol="Setting" />
+        </Grid>
         <!--Button x:Name="MuteSpotifyButton" Grid.Row="2" HorizontalAlignment="Center" Content="Mute Spotify" /-->
         <!--StackPanel Grid.Row="2">
             <TextBlock Text="Update Intervall" />

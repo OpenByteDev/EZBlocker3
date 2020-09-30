@@ -1,0 +1,25 @@
+﻿<Window x:Class="EZBlocker3.Settings.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.modernwpf.com/2019"
+        xmlns:local="clr-namespace:EZBlocker3.Settings"
+        xmlns:utils="clr-namespace:EZBlocker3.Utils"
+        mc:Ignorable="d"
+        Title="Settings"
+        SizeToContent="WidthAndHeight" ResizeMode="NoResize"
+        ShowInTaskbar="False" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner"
+        ui:WindowHelper.UseModernWindowStyle="True" utils:WindowHelper.ApplySizeToContentFix="True">
+    <StackPanel Orientation="Vertical" Margin="10">
+        <StackPanel Orientation="Horizontal">
+            <RadioButton x:Name="minimizeToTrayRadioButton" Content="Minimize to tray" Tag="tray" IsChecked="True" Margin="0 0 10 0" GroupName="Minimize"  />
+            <RadioButton x:Name="minimizeToTaskbarRadioButton" Content="Minimize to taskbar" Tag="taskbar" GroupName="Minimize" />
+        </StackPanel>
+        <CheckBox x:Name="unmuteOnCloseCheckBox" Content="Unmute on close" IsChecked="True" ToolTip="Should Spotify be unmuted when EZBlocker 3 closes." />
+        <CheckBox x:Name="checkForUpdatesCheckBox" Content="Check for Updates" IsChecked="True" ToolTip="Should EZBlocker 3 check for new versions on startup." />
+        <CheckBox x:Name="debugModeCheckBox" Content="Debug Mode" IsChecked="False" ToolTip="Enabling debug mode will create a log file in the directory of the executable." />
+        <CheckBox x:Name="startMinimizedCheckBox" Content="Start Minimized" IsChecked="False" />
+        <!-- CheckBox x:Name="startOnLogin" Content="Start on Login" IsChecked="False" /-->
+    </StackPanel>
+</Window>

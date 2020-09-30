@@ -1,8 +1,11 @@
 ﻿using EZBlocker3.AutoUpdate;
+using EZBlocker3.Extensions;
 using EZBlocker3.Interop;
 using EZBlocker3.Logging;
+using EZBlocker3.Settings;
 using EZBlocker3.Spotify;
 using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,6 +27,7 @@ namespace EZBlocker3 {
         private NotifyIcon _notifyIcon;
         private readonly CancellationTokenSource _cancellationSource = new CancellationTokenSource();
 
+#pragma warning disable CS8618
         public MainWindow() {
             InitializeComponent();
 
@@ -31,13 +35,19 @@ namespace EZBlocker3 {
             SetupNotifyIcon();
 
             OpenVolumeControlButton.Click += OpenVolumeControlButton_Click;
+            SettingsIcon.MouseDown += SettingsIcon_MouseDown;
 
             UpdateStatusLabel();
 
-            Task.Run(RunUpdateCheck, _cancellationSource.Token);
-
             Loaded += MainWindow_Loaded;
+            if (Properties.Settings.Default.StartMinimized)
+                Minimize();
+
+            if (Properties.Settings.Default.CheckForUpdates)
+                Task.Run(RunUpdateCheck, _cancellationSource.Token);
+
         }
+#pragma warning restore CS8618
 
         #region WindowProc
         private void MainWindow_Loaded(object sender, RoutedEventArgs e) {
@@ -63,6 +73,9 @@ namespace EZBlocker3 {
                 if (!(result is UpdateInfo update)) // No update found
                     return;
 
+                if (Properties.Settings.Default.IgnoreUpdate == update.UpdateVersion.ToString())
+                    return;
+
                 Dispatcher.Invoke(() => {
                     var decision = ShowUpdateFoundWindow(update);
                     switch (decision) {
@@ -75,7 +88,7 @@ namespace EZBlocker3 {
                             break;
                         case UpdateDecision.IgnoreUpdate:
                             Logger.LogInfo($"AutoUpdate: Ignored update to {update.UpdateVersion}");
-                            // TODO: remmeber to not ask again for this version.
+                            Properties.Settings.Default.IgnoreUpdate = update.UpdateVersion.ToString();
                             break;
                     }
                 });
@@ -96,6 +109,19 @@ namespace EZBlocker3 {
             downloadUpdateWindow.Owner = this;
             return downloadUpdateWindow.ShowDialog();
         }
+        #endregion
+
+        #region Settings
+        private void SettingsIcon_MouseDown(object sender, MouseButtonEventArgs e) {
+            ShowSettingsWindow();
+        }
+
+        private bool? ShowSettingsWindow() {
+            var settingsWindow = new SettingsWindow();
+            settingsWindow.Owner = this;
+            return settingsWindow.ShowDialog();
+        }
+
         #endregion
 
         #region NotifyIcon
@@ -142,6 +168,7 @@ namespace EZBlocker3 {
         }
         #endregion
 
+        #region SpotifyHook
         private void SetupSpotifyHook() {
             _spotifyHook = new SpotifyHook();
             _spotifyMuter = new SpotifyMuter(_spotifyHook);
@@ -158,15 +185,6 @@ namespace EZBlocker3 {
             _spotifyHook.Activate();
         }
 
-        public void Deminimize() {
-            WindowState = WindowState.Normal;
-            Activate();
-        }
-
-        private void OpenVolumeControlButton_Click(object sender, RoutedEventArgs e) {
-            Task.Run(VolumeMixer.Open, _cancellationSource.Token);
-        }
-        }
 
         private void UpdateStatusLabel() {
             Dispatcher.Invoke(() => {
@@ -199,6 +217,19 @@ namespace EZBlocker3 {
                 }
             }
         }
+        #endregion
+
+        private void OpenVolumeControlButton_Click(object sender, RoutedEventArgs e) {
+            Task.Run(VolumeMixer.Open, _cancellationSource.Token);
+        }
+
+        public void Minimize() {
+            WindowState = WindowState.Minimized;
+        }
+        public void Deminimize() {
+            WindowState = WindowState.Normal;
+            Activate();
+        }
 
         protected override void OnClosed(EventArgs e) {
             base.OnClosed(e);
@@ -206,6 +237,9 @@ namespace EZBlocker3 {
             _cancellationSource.Cancel();
 
             CloseNotifyIconContextMenu();
+
+            if (Properties.Settings.Default.UnmuteOnClose)
+                _spotifyHook?.Unmute();
 
             if (_notifyIcon != null) {
                 _notifyIcon.Visible = false;

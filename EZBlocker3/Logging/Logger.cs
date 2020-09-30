@@ -8,19 +8,13 @@ using System.Runtime.InteropServices;
 namespace EZBlocker3.Logging {
     public static class Logger {
 
-        public static bool EnableLogFile
-#if DEBUG
-            = true;
-#else
-            = false;
-#endif
         private static object _lock_logFile = new object();
 
         public static void Log(LogLevel level, string message) {
             var formatted = $"[{DateTime.Now}][{level}] {message}";
             Trace.WriteLine(formatted);
 
-            if (EnableLogFile) {
+            if (App.DebugModeEnabled) {
                 lock (_lock_logFile) {
                     var directory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
                     var logFilePath = Path.Combine(directory, "log.txt");
