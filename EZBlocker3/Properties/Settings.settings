@@ -29,5 +29,8 @@
     <Setting Name="VirtualScreenSize" Type="System.Nullable`1[System.Windows.Size]" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="UpgradeRequired" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

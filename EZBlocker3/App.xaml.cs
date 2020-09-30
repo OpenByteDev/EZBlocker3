@@ -16,6 +16,11 @@ namespace EZBlocker3 {
 
             if (EZBlocker3.Properties.Settings.Default.DebugMode)
                 DebugModeEnabled = true;
+            if (EZBlocker3.Properties.Settings.Default.UpgradeRequired) {
+                EZBlocker3.Properties.Settings.Default.Upgrade();
+                EZBlocker3.Properties.Settings.Default.UpgradeRequired = false;
+                EZBlocker3.Properties.Settings.Default.Save();
+            }
         }
 
     }
