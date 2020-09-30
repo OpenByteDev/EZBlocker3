@@ -37,7 +37,7 @@ namespace EZBlocker3 {
                 server.BeginWaitForConnection(ConnectionHandler, server);
 
                 if (args.Contains("/debug"))
-                    App.DebugModeEnabled = true;
+                    App.ForceDebugMode = true;
 
                 var exitCode = RunApp();
 

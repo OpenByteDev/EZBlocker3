@@ -33,6 +33,14 @@ namespace EZBlocker3 {
         public MainWindow() {
             InitializeComponent();
 
+            // recolor window in debug mode
+            Properties.Settings.Default.PropertyChanged += (s, e) => {
+                if (e.PropertyName != nameof(Properties.Settings.DebugMode))
+                    return;
+                UpdateWindowBackground();
+            };
+            UpdateWindowBackground();
+
             SetupSpotifyHook();
             SetupNotifyIcon();
 
@@ -238,6 +246,9 @@ namespace EZBlocker3 {
             Activate();
         }
 
+        private void UpdateWindowBackground() {
+            Background = App.DebugModeEnabled ? new SolidColorBrush(Colors.OrangeRed) : null;
+        }
         protected override void OnStateChanged(EventArgs e) {
             base.OnStateChanged(e);
 
