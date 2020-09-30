@@ -1,9 +1,6 @@
-﻿using EZBlocker3.Extensions;
-using EZBlocker3.Logging;
-using Ionic.Zip;
+﻿using EZBlocker3.Logging;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Windows;
 
@@ -13,15 +10,14 @@ namespace EZBlocker3.AutoUpdate {
         public static void InstallUpdateAndRestart(DownloadedUpdate update) {
             Logger.LogDebug("AutoUpdate: Begin install");
 
-            using var zip = ZipFile.Read(update.UpdateBytes);
-
             var appLocation = Assembly.GetExecutingAssembly().Location;
             var appDirectory = Path.GetDirectoryName(appLocation);
             var tempOldAppPath = Path.ChangeExtension(appLocation, ".exe.bak");
             var tempNewAppPath = Path.ChangeExtension(appLocation, ".exe.upd");
 
-            var exeEntry = FindExecutableEntry(zip);
-            exeEntry.ExtractTo(tempNewAppPath);
+            using var tempNewAppFile = File.OpenWrite(tempNewAppPath);
+            update.UpdateBytes.WriteTo(tempNewAppFile);
+            update.Dispose();
 
             Logger.LogDebug("AutoUpdate: Extracted update");
 
@@ -36,10 +32,6 @@ namespace EZBlocker3.AutoUpdate {
             Application.Current.Dispatcher.Invoke(() => {
                 Application.Current.Shutdown();
             });
-        }
-
-        private static ZipEntry FindExecutableEntry(ZipFile zipFile) {
-            return zipFile.Entries.FirstOrDefault(zip => !zip.IsDirectory && zip.FileName == "EZBlocker3.exe");
         }
 
     }

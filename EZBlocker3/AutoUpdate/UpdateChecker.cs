@@ -60,7 +60,7 @@ namespace EZBlocker3.AutoUpdate {
             }
             Logger.LogInfo($"AutoUpdate: Updated detected {currentVersion} -> {latestVersion}");
             var downloadUrl = latestReleaseInfo?["assets"]?
-                .Where(e => e.Value<string>("content_type") == "application/x-zip-compressed")
+                .Where(e => e.Value<string>("content_type") == "application/x-msdownload")
                 .Select(e => e.Value<string>("browser_download_url"))
                 .FirstOrDefault();
             if (downloadUrl is null) {
