@@ -52,7 +52,7 @@ namespace EZBlocker3 {
             SetupNotifyIcon();
 
             OpenVolumeControlButton.Click += OpenVolumeControlButton_Click;
-            SettingsIcon.MouseDown += SettingsIcon_MouseDown;
+            SettingsIcon.MouseUp += SettingsIcon_MouseUp;
 
             UpdateStatusLabel();
 
@@ -98,7 +98,7 @@ namespace EZBlocker3 {
                 if (Properties.Settings.Default.IgnoreUpdate == update.UpdateVersion.ToString())
                     return;
 
-                Dispatcher.Invoke(() => {
+                await Dispatcher.InvokeAsync(() => {
                     var decision = ShowUpdateFoundWindow(update);
                     switch (decision) {
                         case UpdateDecision.Accept:
@@ -113,7 +113,7 @@ namespace EZBlocker3 {
                             Properties.Settings.Default.IgnoreUpdate = update.UpdateVersion.ToString();
                             break;
                     }
-                });
+                }, _cancellationSource.Token);
             } catch (Exception e) {
                 Logger.LogException("Auto update failed", e);
             }
@@ -134,7 +134,7 @@ namespace EZBlocker3 {
         #endregion
 
         #region Settings
-        private void SettingsIcon_MouseDown(object sender, MouseButtonEventArgs e) {
+        private void SettingsIcon_MouseUp(object sender, MouseButtonEventArgs e) {
             ShowSettingsWindow();
         }
 

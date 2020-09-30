@@ -41,7 +41,7 @@ namespace EZBlocker3.Extensions {
             while ((bytesRead = await source.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) != 0) {
                 await destination.WriteAsync(buffer, 0, bytesRead, cancellationToken);
                 totalBytesRead += bytesRead;
-                progress?.Report(totalBytesRead);
+                progress.Report(totalBytesRead);
             }
         }
     }

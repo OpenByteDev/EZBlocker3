@@ -1,4 +1,5 @@
-﻿using EZBlocker3.Logging;
+﻿using EZBlocker3.Extensions;
+using EZBlocker3.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -49,23 +50,32 @@ namespace EZBlocker3.AutoUpdate {
                 downloadedUpdate = await downloader.Download(Update, _cancellationSource.Token);
             } catch (Exception e) {
                 Logger.LogException("AutoUpdate: Update download failed", e);
-                Dispatcher.Invoke(() => {
-                    downloadState.Text = $"Download failed";
-                });
+                await Dispatcher.InvokeAsync(() => {
+                    ErrorDialog.Show($"Update download failed!", this);
+                    Close();
+                }, _cancellationSource.Token);
                 return;
             }
 
-            Dispatcher.Invoke(() => {
+            await Dispatcher.InvokeAsync(() => {
                 downloadState.Text = $"Installing...";
                 TaskbarItemInfo = new TaskbarItemInfo() {
                     ProgressState = TaskbarItemProgressState.Indeterminate
                 };
-                UpdateInstaller.InstallUpdateAndRestart(downloadedUpdate);
+
+                try {
+                    UpdateInstaller.InstallUpdateAndRestart(downloadedUpdate);
+                } catch(Exception e) {
+                    Logger.LogException("AutoUpdate: Update install failed", e);
+                    ErrorDialog.Show($"Failed to install update!", this);
+                    return;
+                }
+
                 TaskbarItemInfo = new TaskbarItemInfo() {
                     ProgressValue = 0,
                     ProgressState = TaskbarItemProgressState.None
                 };
-            });
+            }, _cancellationSource.Token);
         }
     }
 }

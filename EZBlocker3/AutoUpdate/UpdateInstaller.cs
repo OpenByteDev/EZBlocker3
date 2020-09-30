@@ -15,8 +15,8 @@ namespace EZBlocker3.AutoUpdate {
             var tempOldAppPath = Path.ChangeExtension(appLocation, ".exe.bak");
             var tempNewAppPath = Path.ChangeExtension(appLocation, ".exe.upd");
 
-            using var tempNewAppFile = File.OpenWrite(tempNewAppPath);
-            update.UpdateBytes.WriteTo(tempNewAppFile);
+            using (var tempNewAppFile = File.OpenWrite(tempNewAppPath))
+                update.UpdateBytes.WriteTo(tempNewAppFile);
             update.Dispose();
 
             Logger.LogDebug("AutoUpdate: Extracted update");
