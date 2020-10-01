@@ -1,5 +1,7 @@
 ﻿using System.Windows;
 using System;
+using System.ComponentModel;
+using Microsoft.Win32;
 
 namespace EZBlocker3.Settings {
     public partial class SettingsWindow : Window {
@@ -30,9 +32,10 @@ namespace EZBlocker3.Settings {
             startMinimizedCheckBox.Checked += (_, __) => Properties.Settings.Default.StartMinimized = true;
             startMinimizedCheckBox.Unchecked += (_, __) => Properties.Settings.Default.StartMinimized = false;
 
-            // startOnLogin.IsChecked = Properties.Settings.Default.StartOnLogin;
-            // startOnLogin.Checked += (_, __) => Properties.Settings.Default.StartOnLogin = true;
-            // startOnLogin.Unchecked += (_, __) => Properties.Settings.Default.StartOnLogin = false;
+            Autostart.SetEnabled(Properties.Settings.Default.StartOnLogin);
+            startOnLogin.IsChecked = Properties.Settings.Default.StartOnLogin;
+            startOnLogin.Checked += (_, __) => { Properties.Settings.Default.StartOnLogin = true; Autostart.Enable(); };
+            startOnLogin.Unchecked += (_, __) => { Properties.Settings.Default.StartOnLogin = false; Autostart.Disable(); };
         }
 
         protected override void OnClosed(EventArgs e) {
