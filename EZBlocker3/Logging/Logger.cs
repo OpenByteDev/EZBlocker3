@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace EZBlocker3.Logging {
@@ -16,7 +15,7 @@ namespace EZBlocker3.Logging {
 
             if (App.DebugModeEnabled) {
                 lock (_lock_logFile) {
-                    var directory = Path.GetDirectoryName(Assembly.GetEntryAssembly().Location);
+                    var directory = Path.GetDirectoryName(App.Location);
                     var logFilePath = Path.Combine(directory, "log.txt");
                     using var writer = new StreamWriter(logFilePath, append: true);
                     writer.WriteLine(formatted);

@@ -37,7 +37,7 @@ namespace EZBlocker3 {
             InitializeComponent();
 
             // add version to window title
-            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            var version = App.Version;
             Title += $" v{version}";
 
             // recolor window in debug mode

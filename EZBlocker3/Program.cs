@@ -4,14 +4,13 @@ using System.Diagnostics;
 using System.IO.Pipes;
 using System.Linq;
 using System.Net;
-using System.Reflection;
 using System.Threading;
 using System.Windows;
 
 namespace EZBlocker3 {
     internal static class Program {
 
-        private static readonly string AppName = Assembly.GetEntryAssembly().GetName().Name;
+        private static readonly string AppName = App.Name;
         private static readonly string SingletonMutexName = AppName + "_SingletonMutex";
         private static readonly string PipeName = AppName + "_IPC";
 

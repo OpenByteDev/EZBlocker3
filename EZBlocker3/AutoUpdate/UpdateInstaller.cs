@@ -10,7 +10,7 @@ namespace EZBlocker3.AutoUpdate {
         public static void InstallUpdateAndRestart(DownloadedUpdate update) {
             Logger.LogDebug("AutoUpdate: Begin install");
 
-            var appLocation = Assembly.GetExecutingAssembly().Location;
+            var appLocation = App.Location;
             var appDirectory = Path.GetDirectoryName(appLocation);
             var tempOldAppPath = Path.ChangeExtension(appLocation, ".exe.bak");
             var tempNewAppPath = Path.ChangeExtension(appLocation, ".exe.upd");
