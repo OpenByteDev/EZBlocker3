@@ -18,6 +18,7 @@ using System.Windows.Media;
 using static EZBlocker3.AutoUpdate.UpdateFoundWindow;
 using static EZBlocker3.SpotifyHook;
 using Application = System.Windows.Application;
+using Brush = System.Windows.Media.Brush;
 using ContextMenu = System.Windows.Controls.ContextMenu;
 using MenuItem = System.Windows.Controls.MenuItem;
 using Point = System.Windows.Point;
@@ -43,9 +44,9 @@ namespace EZBlocker3 {
             Properties.Settings.Default.PropertyChanged += (s, e) => {
                 if (e.PropertyName != nameof(Properties.Settings.DebugMode))
                     return;
-                UpdateWindowBackground();
+                UpdateBorderBrush();
             };
-            UpdateWindowBackground();
+            UpdateBorderBrush();
 
             SetupSpotifyHook();
             SetupNotifyIcon();
@@ -279,8 +280,11 @@ namespace EZBlocker3 {
             Activate();
         }
 
-        private void UpdateWindowBackground() {
-            Background = App.DebugModeEnabled ? new SolidColorBrush(Colors.OrangeRed) : null;
+        private Brush _defaultBrush;
+        private void UpdateBorderBrush() {
+            if (_defaultBrush == null)
+                _defaultBrush = BorderBrush;
+            BorderBrush = App.DebugModeEnabled ? new SolidColorBrush(Colors.OrangeRed) : _defaultBrush;
         }
 
         protected override void OnStateChanged(EventArgs e) {
