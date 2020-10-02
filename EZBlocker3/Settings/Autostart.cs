@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using EZBlocker3.Logging;
+using Microsoft.Win32;
 
 namespace EZBlocker3.Settings {
     public static class Autostart {
@@ -26,14 +27,18 @@ namespace EZBlocker3.Settings {
 
             using var startupApprovedRunKey = Registry.CurrentUser.OpenSubKey(StartupApprovedRunKey, writable: true);
             startupApprovedRunKey?.SetValue(App.ProductName, new byte[] { 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, RegistryValueKind.Binary);
+
+            Logger.LogInfo("Settings: Enabled Autostart");
         }
 
         public static void Disable() {
             using var runKey = Registry.CurrentUser.OpenSubKey(RunKey, writable: true);
-            runKey?.DeleteValue(App.ProductName);
+            runKey?.DeleteValue(App.ProductName, throwOnMissingValue: false);
 
             using var startupApprovedRunKey = Registry.CurrentUser.OpenSubKey(StartupApprovedRunKey, writable: true);
-            startupApprovedRunKey?.DeleteValue(App.ProductName);
+            startupApprovedRunKey?.DeleteValue(App.ProductName, throwOnMissingValue: false);
+
+            Logger.LogInfo("Settings: Disabled Autostart");
         }
 
         public static void SetEnabled(bool enabled) {

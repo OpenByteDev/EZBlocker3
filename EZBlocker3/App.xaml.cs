@@ -5,7 +5,6 @@ using System.Windows;
 namespace EZBlocker3 {
     public partial class App : Application {
 
-        private static bool IsDebugBuild =
         public static readonly Assembly Assembly = Assembly.GetExecutingAssembly();
         public static readonly AssemblyName AssemblyName = Assembly.GetName();
         public static readonly string Name = AssemblyName.Name;
@@ -13,6 +12,7 @@ namespace EZBlocker3 {
         public static readonly string Location = Assembly.Location;
         public static readonly Version Version = AssemblyName.Version;
 
+        private const bool IsDebugBuild =
 #if DEBUG 
             true;
 #else
@@ -21,8 +21,8 @@ namespace EZBlocker3 {
         public static bool ForceDebugMode = false;
         public static bool DebugModeEnabled => IsDebugBuild || ForceDebugMode || EZBlocker3.Properties.Settings.Default.DebugMode;
 
-        protected override void OnActivated(EventArgs e) {
-            base.OnActivated(e);
+        protected override void OnStartup(StartupEventArgs e) {
+            base.OnStartup(e);
 
             if (EZBlocker3.Properties.Settings.Default.UpgradeRequired) {
                 EZBlocker3.Properties.Settings.Default.Upgrade();

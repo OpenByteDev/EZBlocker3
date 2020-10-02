@@ -8,7 +8,6 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;

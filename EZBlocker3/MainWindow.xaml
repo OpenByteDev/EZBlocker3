@@ -23,12 +23,6 @@
             <Button x:Name="OpenVolumeControlButton" Grid.Column="0" HorizontalAlignment="Center" Content="Open Volume Control" />
             <ui:SymbolIcon x:Name="SettingsIcon" Grid.Column="2" Symbol="Setting" />
         </Grid>
-        <!--Button x:Name="MuteSpotifyButton" Grid.Row="2" HorizontalAlignment="Center" Content="Mute Spotify" /-->
-        <!--StackPanel Grid.Row="2">
-            <TextBlock Text="Update Intervall" />
-            <ui:NumberBox x:Name="UpdateIntervalInput" Minimum="1" SmallChange="10" LargeChange="100" SpinButtonPlacementMode="Inline" ValidationMode="InvalidInputOverwritten" />
-
-        </StackPanel-->
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
