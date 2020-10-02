@@ -88,7 +88,7 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <Version>0.5.0.0</Version>
+    <Version>0.6.0.0</Version>
     <Authors>OpenByte</Authors>
     <PackageIcon>Icon\Icon256.png</PackageIcon>
     <NeutralLanguage>en</NeutralLanguage>
