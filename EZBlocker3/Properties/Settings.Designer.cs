@@ -140,5 +140,17 @@ namespace EZBlocker3.Properties {
                 this["UpgradeRequired"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool StartWithSpotify {
+            get {
+                return ((bool)(this["StartWithSpotify"]));
+            }
+            set {
+                this["StartWithSpotify"] = value;
+            }
+        }
     }
 }

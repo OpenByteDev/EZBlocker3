@@ -1,7 +1,5 @@
 ﻿using System.Windows;
 using System;
-using System.ComponentModel;
-using Microsoft.Win32;
 
 namespace EZBlocker3.Settings {
     public partial class SettingsWindow : Window {
@@ -33,9 +31,14 @@ namespace EZBlocker3.Settings {
             startMinimizedCheckBox.Unchecked += (_, __) => Properties.Settings.Default.StartMinimized = false;
 
             Autostart.SetEnabled(Properties.Settings.Default.StartOnLogin);
-            startOnLogin.IsChecked = Properties.Settings.Default.StartOnLogin;
-            startOnLogin.Checked += (_, __) => { Properties.Settings.Default.StartOnLogin = true; Autostart.Enable(); };
-            startOnLogin.Unchecked += (_, __) => { Properties.Settings.Default.StartOnLogin = false; Autostart.Disable(); };
+            startOnLoginCheckBox.IsChecked = Properties.Settings.Default.StartOnLogin;
+            startOnLoginCheckBox.Checked += (_, __) => { Properties.Settings.Default.StartOnLogin = true; Autostart.Enable(); };
+            startOnLoginCheckBox.Unchecked += (_, __) => { Properties.Settings.Default.StartOnLogin = false; Autostart.Disable(); };
+
+            StartWithSpotify.SetEnabled(Properties.Settings.Default.StartWithSpotify);
+            startWithSpotifyCheckBox.IsChecked = Properties.Settings.Default.StartWithSpotify;
+            startWithSpotifyCheckBox.Checked += (_, __) => { Properties.Settings.Default.StartWithSpotify = true; StartWithSpotify.Enable(); };
+            startWithSpotifyCheckBox.Unchecked += (_, __) => { Properties.Settings.Default.StartWithSpotify = false; StartWithSpotify.Disable(); };
         }
 
         protected override void OnClosed(EventArgs e) {

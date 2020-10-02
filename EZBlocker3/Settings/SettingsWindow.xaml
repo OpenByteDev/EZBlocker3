@@ -20,6 +20,7 @@
         <CheckBox x:Name="checkForUpdatesCheckBox" Content="Check for Updates" IsChecked="True" ToolTip="Should EZBlocker 3 check for new versions on startup." />
         <CheckBox x:Name="debugModeCheckBox" Content="Debug Mode" IsChecked="False" ToolTip="Enabling debug mode will create a log file in the directory of the executable." />
         <CheckBox x:Name="startMinimizedCheckBox" Content="Start Minimized" IsChecked="False" />
-        <CheckBox x:Name="startOnLogin" Content="Start on Login" IsChecked="False" />
+        <CheckBox x:Name="startOnLoginCheckBox" Content="Start on Login" IsChecked="False" ToolTip="Should EZBlocker 3 automatically start with Windows" />
+        <CheckBox x:Name="startWithSpotifyCheckBox" Content="Start with Spotify" IsChecked="False" ToolTip="Start EZBlocker 3 when Spotify is started." />
     </StackPanel>
 </Window>
