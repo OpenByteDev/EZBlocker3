@@ -1,7 +1,6 @@
 ﻿using EZBlocker3.Logging;
 using System.Diagnostics;
 using System.IO;
-using System.Reflection;
 using System.Windows;
 
 namespace EZBlocker3.AutoUpdate {
