@@ -1,5 +1,8 @@
-﻿using System;
+﻿using EZBlocker3.Logging;
+using EZBlocker3.Settings;
+using System;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Windows;
 
@@ -23,13 +26,18 @@ namespace EZBlocker3 {
         public static bool ForceDebugMode = false;
         public static bool DebugModeEnabled => IsDebugBuild || ForceDebugMode || EZBlocker3.Properties.Settings.Default.DebugMode;
 
-        protected override void OnStartup(StartupEventArgs e) {
-            base.OnStartup(e);
+        protected override void OnStartup(StartupEventArgs eventArgs) {
+            base.OnStartup(eventArgs);
 
-            if (EZBlocker3.Properties.Settings.Default.UpgradeRequired) {
-                EZBlocker3.Properties.Settings.Default.Upgrade();
-                EZBlocker3.Properties.Settings.Default.UpgradeRequired = false;
-                EZBlocker3.Properties.Settings.Default.Save();
+            // enable all protocols
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+
+            var settings = EZBlocker3.Properties.Settings.Default;
+            if (settings.UpgradeRequired) {
+                settings.Upgrade();
+                settings.UpgradeRequired = false;
+                settings.Save();
+            }
             if (App.Location != settings.AppPath) {
                 try {
                     Autostart.SetEnabled(settings.StartOnLogin);

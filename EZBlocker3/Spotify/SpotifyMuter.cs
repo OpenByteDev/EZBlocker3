@@ -30,7 +30,8 @@ namespace EZBlocker3.Spotify {
                     await Task.Delay(300);
                     SpotifyHook.SetMute(mute: SpotifyHook.IsAdPlaying);
                 });
-            else SpotifyHook.SetMute(mute: SpotifyHook.IsAdPlaying);
+            else
+                SpotifyHook.SetMute(mute: SpotifyHook.IsAdPlaying);
         }
 
     }

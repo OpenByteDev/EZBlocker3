@@ -1,10 +1,9 @@
 ﻿using EZBlocker3.AutoUpdate;
 using EZBlocker3.Logging;
+using EZBlocker3.Settings;
 using System;
 using System.Diagnostics;
 using System.IO.Pipes;
-using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Windows;
 
@@ -42,20 +41,15 @@ namespace EZBlocker3 {
                 using var server = new NamedPipeServerStream(PipeName, PipeDirection.Out, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
                 server.BeginWaitForConnection(ConnectionHandler, server);
 
-                if (CliArgs.ForceDebugMode)
-                    App.ForceDebugMode = true;
-
                 var exitCode = RunApp();
 
                 if (server.IsConnected)
                     server.Disconnect();
-                server.Close();
                 mutex.ReleaseMutex();
                 return exitCode;
             } else { // another instance is already running 
                 using var client = new NamedPipeClientStream(".", PipeName, PipeDirection.In, PipeOptions.Asynchronous);
                 client.Connect(10000);
-                client.Close();
                 return 0;
             }
         }
@@ -76,8 +70,9 @@ namespace EZBlocker3 {
         }
 
         private static int RunApp() {
-            // enable all protocols
-            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+            if (CliArgs.ForceDebugMode)
+                App.ForceDebugMode = true;
+
             if (CliArgs.IsRedirectedSpotifyStart)
                 StartWithSpotify.HandleProxiedStart();
 
