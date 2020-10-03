@@ -67,8 +67,7 @@ namespace EZBlocker3 {
             if (Properties.Settings.Default.StartMinimized)
                 Minimize();
 
-            if (Properties.Settings.Default.CheckForUpdates)
-                Task.Run(RunUpdateCheck, _cancellationSource.Token);
+            MaybePerformUpdateCheck();
         }
 #pragma warning restore CS8618
 
@@ -90,6 +89,20 @@ namespace EZBlocker3 {
         #endregion
 
         #region AutoUpdate
+        // is there a better name for this?
+        private void MaybePerformUpdateCheck() {
+            if (Properties.Settings.Default.CheckForUpdates) {
+                var now = DateTime.Now;
+                if (Properties.Settings.Default.LastUpdateCheck is DateTime lastUpdateCheckDate) {
+                    var timeSinceLastUpdateCheck = now - lastUpdateCheckDate;
+                    if (timeSinceLastUpdateCheck < TimeSpan.FromDays(1))
+                        return;
+                }
+                Properties.Settings.Default.LastUpdateCheck = now;
+
+                Task.Run(RunUpdateCheck, _cancellationSource.Token);
+            }
+        }
         private async Task RunUpdateCheck() {
             try {
                 var result = await UpdateChecker.CheckForUpdate(_cancellationSource.Token);
