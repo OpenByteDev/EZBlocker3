@@ -10,6 +10,7 @@ using static EZBlocker3.SpotifyHook;
 using EZBlocker3.Audio.ComWrapper;
 using EZBlocker3.Audio.Com;
 using EZBlocker3.Utils;
+using System.Threading;
 
 namespace EZBlocker3 {
     /// <summary>
@@ -153,8 +154,8 @@ namespace EZBlocker3 {
 
             IsActive = true;
 
-            if (!TryHookSpotify())
-                _globalEventHook.HookGlobal();
+            _globalEventHook.HookGlobal();
+            TryHookSpotify();
         }
 
         /// <summary>
@@ -194,6 +195,7 @@ namespace EZBlocker3 {
             return true;
         }
 
+        private readonly object _lock_globalEventHook = new object();
         private void _globalEventHook_WinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, AccessibleObjectID idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
             if (IsHooked)
                 return;
@@ -201,43 +203,71 @@ namespace EZBlocker3 {
             if (idObject != AccessibleObjectID.OBJID_WINDOW || idChild != NativeMethods.CHILDID_SELF)
                 return;
 
-            NativeMethods.GetWindowThreadProcessId(hwnd, out uint processId);
-            var process = Process.GetProcessById((int)processId);
+            lock (_lock_globalEventHook) {
+                // recheck state in case it has changed in another thread.
+                if (IsHooked)
+                    return;
 
-            if (!process.ProcessName.Equals("spotify", StringComparison.OrdinalIgnoreCase))
-                return;
+                NativeMethods.GetWindowThreadProcessId(hwnd, out uint processId);
+                var process = Process.GetProcessById((int)processId);
 
-            OnSpotifyHooked(process);
-            UpdateState(SpotifyState.StartingUp);
+                if (!process.ProcessName.Equals("spotify", StringComparison.OrdinalIgnoreCase))
+                    return;
+
+                OnSpotifyHooked(process);
+                UpdateState(SpotifyState.StartingUp);
+            }
         }
 
+        private readonly object _lock_spotifyObjectDestroyEventHook = new object();
         private void _spotifyObjectDestroyEventHook_WinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, AccessibleObjectID idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
             // make sure that the destroyed control was a window.
             if (idObject != AccessibleObjectID.OBJID_WINDOW || idChild != NativeMethods.CHILDID_SELF)
                 return;
 
-            UpdateState(SpotifyState.ShuttingDown);
-            OnSpotifyClosed();
+            lock (_lock_spotifyObjectDestroyEventHook) {
+                // recheck state in case it has changed since the event was raised.
+                if (!IsHooked)
+                    return;
+
+                UpdateState(SpotifyState.ShuttingDown);
+                OnSpotifyClosed();
+            }
         }
 
+        private readonly object _lock_spotifyNameChangeEventHook = new object();
         private void _spotifyNameChangeEventHook_WinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, AccessibleObjectID idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
             // make sure that it was a window name that changed.
             if (idObject != AccessibleObjectID.OBJID_WINDOW || idChild != NativeMethods.CHILDID_SELF)
                 return;
 
-            UpdateWindowTitle(NativeWindowUtils.GetWindowTitle(hwnd));
+            lock (_lock_spotifyNameChangeEventHook) {
+                // recheck state in case it has changed since the event was raised.
+                if (!IsHooked)
+                    return;
+
+                UpdateWindowTitle(NativeWindowUtils.GetWindowTitle(hwnd));
+            }
         }
 
         /// <summary>
         /// OnSpotifyHooked is called whenever spotify is hooked.
         /// </summary>
         /// <param name="mainProcess">The main window spotify process.</param>
+        private readonly object _lock_OnSpotifyHooked = new object();
         protected virtual void OnSpotifyHooked(Process mainProcess) {
-            if (IsHooked || mainProcess == null || mainProcess.HasExited)
+            if (mainProcess == null || mainProcess.HasExited)
                 return;
 
+            // avoid "double-hooking"
+            // this lock could be replaced with Interlocked.Exchange but it does not support bools.
+            lock (_lock_OnSpotifyHooked) {
+                if (IsHooked)
+                    return;
+                IsHooked = true;
+            }
+
             MainWindowProcess = mainProcess;
-            IsHooked = true;
 
             if (_globalEventHook.Hooked)
                 _globalEventHook.Unhook();
@@ -359,13 +389,17 @@ namespace EZBlocker3 {
                     break;
                 // Advertisment playing or Starting up
                 case "Spotify":
-                    UpdateState(SpotifyState.PlayingAdvertisement);
+                    if (oldWindowTitle is null)
+                        UpdateState(SpotifyState.StartingUp);
+                    else
+                        UpdateState(SpotifyState.PlayingAdvertisement);
                     break;
                 // Shutting down
                 case "":
                     if (oldWindowTitle is null)
                         UpdateState(SpotifyState.StartingUp);
-                    else UpdateState(SpotifyState.ShuttingDown);
+                    else
+                        UpdateState(SpotifyState.ShuttingDown);
                     break;
                 // Song Playing: "[artist] - [title]"
                 case var name when name?.Contains(" - ") == true:
