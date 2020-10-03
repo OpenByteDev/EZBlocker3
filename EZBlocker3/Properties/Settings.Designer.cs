@@ -155,6 +155,18 @@ namespace EZBlocker3.Properties {
         
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string AppPath {
+            get {
+                return ((string)(this["AppPath"]));
+            }
+            set {
+                this["AppPath"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         public global::System.Nullable<System.DateTime> LastUpdateCheck {
             get {
                 return ((global::System.Nullable<System.DateTime>)(this["LastUpdateCheck"]));

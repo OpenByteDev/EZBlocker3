@@ -30,6 +30,15 @@ namespace EZBlocker3 {
                 EZBlocker3.Properties.Settings.Default.Upgrade();
                 EZBlocker3.Properties.Settings.Default.UpgradeRequired = false;
                 EZBlocker3.Properties.Settings.Default.Save();
+            if (App.Location != settings.AppPath) {
+                try {
+                    Autostart.SetEnabled(settings.StartOnLogin);
+                    StartWithSpotify.SetEnabled(settings.StartWithSpotify);
+                } catch (Exception e) {
+                    Logger.LogException("Failed to adjust to changed app path:", e);
+                }
+
+                settings.AppPath = App.Location;
             }
         }
 

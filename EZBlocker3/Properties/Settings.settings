@@ -35,6 +35,9 @@
     <Setting Name="StartWithSpotify" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="AppPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
     <Setting Name="LastUpdateCheck" Type="System.Nullable`1[System.DateTime]" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
