@@ -152,5 +152,16 @@ namespace EZBlocker3.Properties {
                 this["StartWithSpotify"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Nullable<System.DateTime> LastUpdateCheck {
+            get {
+                return ((global::System.Nullable<System.DateTime>)(this["LastUpdateCheck"]));
+            }
+            set {
+                this["LastUpdateCheck"] = value;
+            }
+        }
     }
 }
