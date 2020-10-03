@@ -1,4 +1,5 @@
 ﻿using EZBlocker3.Logging;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.CodeDom.Compiler;
 using System.ComponentModel;
@@ -11,6 +12,8 @@ using System.Text;
 namespace EZBlocker3.Settings {
     public static class StartWithSpotify {
 
+        private static readonly string SpotifyPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Spotify\Spotify.exe";
+
         public static void SetEnabled(bool enabled) {
             if (IsRedirectionExecutableInstalled()) {
                 if (!enabled)
@@ -21,25 +24,15 @@ namespace EZBlocker3.Settings {
             }
         }
         public static void Enable() {
-            InstallRedirectionExecutable();
+            InstallRedirectionExecutable(SpotifyPath);
         }
         public static void Disable() {
-            UninstallRedirectionExecutable();
+            UninstallRedirectionExecutable(SpotifyPath);
         }
 
-        private static string GetSpotifyPath() {
-            return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Spotify\Spotify.exe";
-        }
-
-        public static void InstallRedirectionExecutable() {
-            InstallRedirectionExecutable(GetSpotifyPath());
-        }
-        public static void UninstallRedirectionExecutable() {
-            UninstallRedirectionExecutable(GetSpotifyPath());
-        }
 
         public static bool IsRedirectionExecutableInstalled() {
-            var spotifyPath = GetSpotifyPath();
+            var spotifyPath = SpotifyPath;
             var realSpotifyPath = Path.ChangeExtension(spotifyPath, "real.exe");
             return File.Exists(realSpotifyPath);
         }
@@ -119,8 +112,8 @@ namespace EZBlocker3.Settings {
         }
         public static void UninstallRedirectionExecutable(string spotifyPath) {
             var realSpotifyPath = Path.ChangeExtension(spotifyPath, "real.exe");
-            var redirectorPath = Path.ChangeExtension(spotifyPath, "redirector.exe");
-            File.Delete(redirectorPath);
+            // var redirectorPath = Path.ChangeExtension(spotifyPath, "redirector.exe");
+            // File.Delete(redirectorPath);
             if (!File.Exists(realSpotifyPath))
                 return;
             File.Delete(spotifyPath);
@@ -138,7 +131,10 @@ namespace EZBlocker3.Settings {
             parameters.CompilerOptions = $"/target:winexe \"/win32icon:{shortName}\"";
 
             var provider = CodeDomProvider.CreateProvider("CSharp");
-            var code = _code.Replace("#---EZBLOCKER3PATH---#", App.Location).Replace("#---SPOTIFYPATH---#", spotifyPath);
+            var code = _code
+                .Replace("#---EZBLOCKER3PATH---#", App.Location)
+                .Replace("#---SPOTIFYPATH---#", spotifyPath)
+                .Replace("#---EZBLOCKER3ARGS---#", CliArgs.RedirectedSpotifyStartOption);
             var result = provider.CompileAssemblyFromSource(parameters, code);
 
             Logger.LogInfo("Settings: Generated redirection executable");
@@ -165,7 +161,7 @@ public static class RedirectExecutable {
         File.Move(spotifyPath, redirectorTmpPath);
         File.Move(realSpotifyPath, spotifyPath);
 
-        Process.Start(appPath, ""/redirectStart"");
+        Process.Start(appPath, ""#---EZBLOCKER3ARGS---#"");
 
         var process = new Process();
         process.StartInfo = new ProcessStartInfo() {
