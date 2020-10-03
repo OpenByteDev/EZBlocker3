@@ -28,6 +28,7 @@ namespace EZBlocker3 {
                 try {
                     // wait for old version to exit and release the mutex.
                     mutex.WaitOne(TimeSpan.FromSeconds(5), exitContext: false);
+                    UpdateInstaller.CleanupUpdate();
                 } catch (Exception e) {
                     Debugger.Launch();
                     Logger.LogException("Restart failed after update", e);
