@@ -20,6 +20,9 @@ namespace EZBlocker3.Spotify {
             if (newState == SpotifyState.StartingUp || newState == SpotifyState.ShuttingDown)
                 return;
 
+            if (oldState == SpotifyState.StartingUp && newState == SpotifyState.Paused)
+                return; // we skip here as no audio session is present and muting would fail.
+
             if (oldState == SpotifyState.PlayingAdvertisement) {
                 SpotifyHook.Unmute();
                 return;
