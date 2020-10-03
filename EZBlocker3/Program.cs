@@ -78,12 +78,19 @@ namespace EZBlocker3 {
         private static int RunApp() {
             // enable all protocols
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
+            if (CliArgs.IsRedirectedSpotifyStart)
+                StartWithSpotify.HandleProxiedStart();
 
             var app = new App();
             app.InitializeComponent();
             app.ShutdownMode = ShutdownMode.OnMainWindowClose;
 
-            return app.Run();
+            var exitCode = app.Run();
+
+            if (CliArgs.IsRedirectedSpotifyStart)
+                StartWithSpotify.HandleProxiedExit();
+
+            return exitCode;
         }
     }
 

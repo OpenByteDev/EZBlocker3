@@ -5,13 +5,13 @@ namespace EZBlocker3 {
 
         public const string ForceDebugOption = "/debug";
         public const string UpdateRestartOption = "/updateRestart";
-        public const string RedirectedSpotifyStartOption = "/redirectStart";
+        public const string ProxyStartOption = "/proxyStart";
         public const string AutomaticStartOption = "/autostart";
 
         public static CliArgs Parse(string[] args) {
             var forceDebugMode = false;
             var isUpdateRestart = false;
-            var isRedirectedSpotifyStart = false;
+            var isProxyStart = false;
             var isAutomaticStart = false;
 
             foreach (var arg in args) {
@@ -22,8 +22,8 @@ namespace EZBlocker3 {
                     case UpdateRestartOption:
                         isUpdateRestart = true;
                         break;
-                    case RedirectedSpotifyStartOption:
-                        isRedirectedSpotifyStart = true;
+                    case ProxyStartOption:
+                        isProxyStart = true;
                         break;
                     case AutomaticStartOption:
                         isAutomaticStart = true;
@@ -37,7 +37,7 @@ namespace EZBlocker3 {
             return new CliArgs() {
                 ForceDebugMode = forceDebugMode,
                 IsUpdateRestart = isUpdateRestart,
-                IsRedirectedSpotifyStart = isRedirectedSpotifyStart,
+                IsRedirectedSpotifyStart = isProxyStart,
                 IsAutomaticStart = isAutomaticStart
             };
         }
