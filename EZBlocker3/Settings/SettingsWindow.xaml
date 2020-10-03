@@ -21,5 +21,9 @@
         <CheckBox x:Name="debugModeCheckBox" Content="Debug Mode" IsChecked="False" ToolTip="Enabling debug mode will create a log file in the directory of the executable." />
         <CheckBox x:Name="startMinimizedCheckBox" Content="Start Minimized" IsChecked="False" />
         <CheckBox x:Name="startOnLogin" Content="Start on Login" IsChecked="False" />
+        <ui:SimpleStackPanel Orientation="Horizontal" Margin="0 10 0 0" HorizontalAlignment="Center" Spacing="10">
+            <Button x:Name="saveButton" Content="Save" Padding="20 5" />
+            <Button x:Name="cancelButton" Content="Cancel" Padding="20 5" />
+        </ui:SimpleStackPanel>
     </StackPanel>
 </Window>
