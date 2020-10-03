@@ -1,4 +1,5 @@
-﻿using EZBlocker3.Logging;
+﻿using EZBlocker3.AutoUpdate;
+using EZBlocker3.Logging;
 using System;
 using System.Diagnostics;
 using System.IO.Pipes;
@@ -10,18 +11,24 @@ using System.Windows;
 namespace EZBlocker3 {
     internal static class Program {
 
-        private static readonly string AppName = App.Name;
-        private static readonly string SingletonMutexName = AppName + "_SingletonMutex";
-        private static readonly string PipeName = AppName + "_IPC";
+        private static readonly string SingletonMutexName = App.Name + "_SingletonMutex";
+        private static readonly string PipeName = App.Name + "_IPC";
+
+#pragma warning disable CS8618
+        public static CliArgs CliArgs;
+#pragma warning restore CS8618
 
         [STAThread]
         public static int Main(string[] args) {
+            CliArgs = CliArgs.Parse(args);
+
             using var mutex = new Mutex(initiallyOwned: true, SingletonMutexName, out var notAlreadyRunning);
 
-            if (args.Contains("/updateRestart")) {
+            if (CliArgs.IsUpdateRestart) {
                 try {
                     // wait for old version to exit and release the mutex.
                     mutex.WaitOne(TimeSpan.FromSeconds(5), exitContext: false);
+                    UpdateInstaller.CleanupUpdate();
                 } catch (Exception e) {
                     Debugger.Launch();
                     Logger.LogException("Restart failed after update", e);
@@ -35,7 +42,7 @@ namespace EZBlocker3 {
                 using var server = new NamedPipeServerStream(PipeName, PipeDirection.Out, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
                 server.BeginWaitForConnection(ConnectionHandler, server);
 
-                if (args.Contains("/debug"))
+                if (CliArgs.ForceDebugMode)
                     App.ForceDebugMode = true;
 
                 var exitCode = RunApp();

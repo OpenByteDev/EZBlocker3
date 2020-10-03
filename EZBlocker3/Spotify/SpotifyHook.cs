@@ -73,6 +73,10 @@ namespace EZBlocker3 {
         /// </summary>
         public enum SpotifyState {
             /// <summary>
+            /// Spotify is in an unknown state.
+            /// </summary>
+            Unknown,
+            /// <summary>
             /// Spotify is playing a song.
             /// </summary>
             PlayingSong,
@@ -91,11 +95,7 @@ namespace EZBlocker3 {
             /// <summary>
             /// Spotify is in the process of shutting down.
             /// </summary>
-            ShuttingDown,
-            /// <summary>
-            /// Spotify is in an unknown state.
-            /// </summary>
-            Unknown
+            ShuttingDown
         }
 
         /// <summary>

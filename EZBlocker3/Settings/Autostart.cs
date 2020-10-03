@@ -23,7 +23,7 @@ namespace EZBlocker3.Settings {
 
         public static void Enable() {
             using var runKey = Registry.CurrentUser.OpenSubKey(RunKey, writable: true);
-            runKey?.SetValue(App.ProductName, App.Location, RegistryValueKind.String);
+            runKey?.SetValue(App.ProductName, $"{App.Location} {CliArgs.AutomaticStartOption}", RegistryValueKind.String);
 
             using var startupApprovedRunKey = Registry.CurrentUser.OpenSubKey(StartupApprovedRunKey, writable: true);
             startupApprovedRunKey?.SetValue(App.ProductName, new byte[] { 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, RegistryValueKind.Binary);

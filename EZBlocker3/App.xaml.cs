@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Windows;
 
@@ -10,6 +11,7 @@ namespace EZBlocker3 {
         public static readonly string Name = AssemblyName.Name;
         public static readonly string ProductName = Assembly.GetCustomAttribute<AssemblyProductAttribute>().Product;
         public static readonly string Location = Assembly.Location;
+        public static readonly string Directory = Path.GetDirectoryName(Location);
         public static readonly Version Version = AssemblyName.Version;
 
         private const bool IsDebugBuild =
