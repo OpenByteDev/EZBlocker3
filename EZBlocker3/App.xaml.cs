@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace EZBlocker3 {
@@ -32,22 +33,30 @@ namespace EZBlocker3 {
             // enable all protocols
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
 
+            // upgrade settings on first start (after update)
             var settings = EZBlocker3.Properties.Settings.Default;
             if (settings.UpgradeRequired) {
                 settings.Upgrade();
                 settings.UpgradeRequired = false;
                 settings.Save();
             }
+
+            // check if executable has moved
             if (App.Location != settings.AppPath) {
                 try {
-                    Autostart.SetEnabled(settings.StartOnLogin);
-                    StartWithSpotify.SetEnabled(settings.StartWithSpotify);
+                    if (settings.StartOnLogin)
+                        Autostart.SetEnabled(settings.StartOnLogin);
+                    // StartWithSpotify.SetEnabled(settings.StartWithSpotify);
                 } catch (Exception e) {
                     Logger.LogException("Failed to adjust to changed app path:", e);
                 }
 
                 settings.AppPath = App.Location;
             }
+
+            // Ensure that the proxy is still installed correctly if enabled.
+            if (settings.StartWithSpotify)
+                Task.Run(() => StartWithSpotify.SetEnabled(settings.StartWithSpotify));
         }
 
     }
