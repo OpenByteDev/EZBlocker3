@@ -8,12 +8,11 @@ namespace EZBlocker3.Logging {
     public static class Logger {
 
         private static object _lock_logFile = new object();
-
         public static void Log(LogLevel level, string message) {
-            var formatted = $"[{DateTime.Now}][{level}] {message}";
-            Trace.WriteLine(formatted);
-
             if (App.DebugModeEnabled) {
+                var formatted = $"[{DateTime.Now}][{level}] {message}";
+                Trace.WriteLine(formatted);
+
                 lock (_lock_logFile) {
                     var directory = Path.GetDirectoryName(App.Location);
                     var logFilePath = Path.Combine(directory, "log.txt");
