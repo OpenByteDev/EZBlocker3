@@ -1,7 +1,8 @@
 ﻿using EZBlocker3.Logging;
+using System.Text;
 
 namespace EZBlocker3 {
-    public record CliArgs(bool ForceDebugMode = false, bool IsUpdateRestart = false, bool IsRedirectedSpotifyStart = false, bool IsAutomaticStart = false) {
+    public record CliArgs(bool ForceDebugMode = false, bool IsUpdateRestart = false, bool IsProxyStart = false, bool IsAutomaticStart = false) {
 
         public const string ForceDebugOption = "/debug";
         public const string UpdateRestartOption = "/updateRestart";
@@ -37,11 +38,10 @@ namespace EZBlocker3 {
             return new CliArgs() {
                 ForceDebugMode = forceDebugMode,
                 IsUpdateRestart = isUpdateRestart,
-                IsRedirectedSpotifyStart = isProxyStart,
+                IsProxyStart = isProxyStart,
                 IsAutomaticStart = isAutomaticStart
             };
         }
-
 
     }
 }

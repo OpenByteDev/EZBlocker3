@@ -19,7 +19,6 @@ using static EZBlocker3.AutoUpdate.UpdateFoundWindow;
 using static EZBlocker3.SpotifyHook;
 using Application = System.Windows.Application;
 using Brush = System.Windows.Media.Brush;
-using Color = System.Windows.Media.Color;
 using ContextMenu = System.Windows.Controls.ContextMenu;
 using MenuItem = System.Windows.Controls.MenuItem;
 using Point = System.Windows.Point;

@@ -73,7 +73,7 @@ namespace EZBlocker3 {
             if (CliArgs.ForceDebugMode)
                 App.ForceDebugMode = true;
 
-            if (CliArgs.IsRedirectedSpotifyStart)
+            if (CliArgs.IsProxyStart)
                 StartWithSpotify.HandleProxiedStart();
 
             var app = new App();
@@ -82,7 +82,7 @@ namespace EZBlocker3 {
 
             var exitCode = app.Run();
 
-            if (CliArgs.IsRedirectedSpotifyStart)
+            if (CliArgs.IsProxyStart)
                 StartWithSpotify.HandleProxiedExit();
 
             return exitCode;
