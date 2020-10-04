@@ -67,7 +67,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <Platforms>x64</Platforms>
-    <TargetFramework>net452</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <LangVersion>9.0</LangVersion>
     <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
     <PublishTrimmed>False</PublishTrimmed>

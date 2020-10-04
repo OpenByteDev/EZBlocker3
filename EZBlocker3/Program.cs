@@ -1,10 +1,13 @@
 ﻿using EZBlocker3.AutoUpdate;
 using EZBlocker3.Logging;
+using EZBlocker3.Extensions;
 using EZBlocker3.Settings;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Pipes;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace EZBlocker3 {
@@ -38,35 +41,54 @@ namespace EZBlocker3 {
             }
 
             if (notAlreadyRunning) { // we are the only one around :(
-                using var server = new NamedPipeServerStream(PipeName, PipeDirection.Out, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Message, PipeOptions.Asynchronous);
-                server.BeginWaitForConnection(ConnectionHandler, server);
-
+                var cancellationTokenSource = new CancellationTokenSource();
+                Task.Run(() => RunPipeServer(cancellationTokenSource.Token), cancellationTokenSource.Token);
+                
                 var exitCode = RunApp();
 
-                if (server.IsConnected)
-                    server.Disconnect();
+                cancellationTokenSource.Cancel();
                 mutex.ReleaseMutex();
                 return exitCode;
             } else { // another instance is already running 
-                using var client = new NamedPipeClientStream(".", PipeName, PipeDirection.In, PipeOptions.Asynchronous);
-                client.Connect(10000);
+                using var client = new NamedPipeClientStream(".", PipeName, PipeDirection.Out, PipeOptions.Asynchronous);
+                client.Connect(TimeSpan.FromSeconds(10).Milliseconds);
+
+                if (CliArgs.IsProxyStart) {
+                    using var writer = new StreamWriter(client);
+                    writer.WriteLine(CliArgs.ProxyStartOption);
+                    writer.Flush();
+                }
+
                 return 0;
             }
         }
-        private static void ConnectionHandler(IAsyncResult result) {
-            if (!(result.AsyncState is NamedPipeServerStream server))
-                throw new IllegalStateException();
 
-            server?.EndWaitForConnection(result);
-            server?.Disconnect();
-            server?.BeginWaitForConnection(ConnectionHandler, server);
 
-            Application.Current.Dispatcher.Invoke(() => {
-                var mainWindow = (MainWindow) Application.Current.MainWindow;
-                mainWindow.Dispatcher.Invoke(() => {
+        private static async Task RunPipeServer(CancellationToken cancellationToken) {
+            using var server = new NamedPipeServerStream(PipeName, PipeDirection.In, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+            await server.WaitForConnectionAsync(cancellationToken);
+
+            // we received a connection, which means another instance was started -> we bring the window to the front
+            _ = Application.Current.Dispatcher.BeginInvoke(() => {
+                var mainWindow = (MainWindow)Application.Current.MainWindow;
+                _ = mainWindow.Dispatcher.BeginInvoke(() => {
                     mainWindow.Deminimize();
                 });
             });
+
+            using var reader = new StreamReader(server);
+            if (await reader.ReadLineAsync() is string line) {
+                if (line == CliArgs.ProxyStartOption) {
+                    StartWithSpotify.HandleProxiedStart();
+                    if (!CliArgs.IsProxyStart)
+                        CliArgs = CliArgs with { IsProxyStart = true };
+                }
+            }
+
+            server.Disconnect();
+
+            // restart server
+            await RunPipeServer(cancellationToken);
         }
 
         private static int RunApp() {
@@ -88,5 +110,4 @@ namespace EZBlocker3 {
             return exitCode;
         }
     }
-
 }
