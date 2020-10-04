@@ -66,6 +66,12 @@ namespace EZBlocker3 {
 
         private static async Task RunPipeServer(CancellationToken cancellationToken) {
             using var server = new NamedPipeServerStream(PipeName, PipeDirection.In, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+
+            cancellationToken.Register(() => {
+                if (server.IsConnected)
+                    server.Disconnect();
+                server.Dispose();
+            });
             await server.WaitForConnectionAsync(cancellationToken);
 
             // we received a connection, which means another instance was started -> we bring the window to the front
