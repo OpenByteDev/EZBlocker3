@@ -389,7 +389,7 @@ namespace EZBlocker3 {
                     break;
                 // Advertisment playing or Starting up
                 case "Spotify":
-                    if (oldWindowTitle is null)
+                    if (oldWindowTitle is null || oldWindowTitle == "")
                         UpdateState(SpotifyState.StartingUp);
                     else
                         UpdateState(SpotifyState.PlayingAdvertisement);
