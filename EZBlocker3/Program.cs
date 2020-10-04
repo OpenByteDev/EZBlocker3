@@ -22,6 +22,12 @@ namespace EZBlocker3 {
 
         [STAThread]
         public static int Main(string[] args) {
+            AppDomain.CurrentDomain.UnhandledException += (s, e) => {
+                try {
+                    Logger.LogError("Unhandled exception:\n" + e.ExceptionObject);
+                } catch { }
+            };
+
             CliArgs = CliArgs.Parse(args);
 
             using var mutex = new Mutex(initiallyOwned: true, SingletonMutexName, out var notAlreadyRunning);
