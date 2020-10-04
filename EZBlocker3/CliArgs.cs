@@ -1,5 +1,4 @@
 ﻿using EZBlocker3.Logging;
-using System.Text;
 
 namespace EZBlocker3 {
     public record CliArgs(bool ForceDebugMode = false, bool IsUpdateRestart = false, bool IsProxyStart = false, bool IsAutomaticStart = false) {

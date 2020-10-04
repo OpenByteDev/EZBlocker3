@@ -214,6 +214,10 @@ namespace EZBlocker3 {
                 if (!process.ProcessName.Equals("spotify", StringComparison.OrdinalIgnoreCase))
                     return;
 
+                // confirm that the process created has a window
+                if (process.MainWindowHandle == IntPtr.Zero)
+                    return;
+
                 OnSpotifyHooked(process);
                 UpdateState(SpotifyState.StartingUp);
             }

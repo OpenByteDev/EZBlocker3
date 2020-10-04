@@ -13,5 +13,9 @@ namespace EZBlocker3.Extensions {
             return dispatcher.InvokeAsync(callback, DispatcherPriority.Normal, cancellationToken);
         }
 
+        public static DispatcherOperation BeginInvoke(this Dispatcher dispatcher, Action callback) {
+            return dispatcher.BeginInvoke(DispatcherPriority.Normal, callback);
+        }
+
     }
 }
