@@ -78,6 +78,7 @@
     <SelfContained>True</SelfContained>
     <NoStandardLibraries>True</NoStandardLibraries>
     <TieredCompilationQuickJit>True</TieredCompilationQuickJit>
+    <AutoGenerateBindingRedirects>True</AutoGenerateBindingRedirects>
   </PropertyGroup>
   
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -100,7 +101,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>ad blocker;ad muter;spotify</PackageTags>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Description>EZBlocker 3 is a Spotify Ad Muter/Blocker for Windows written in C#. It mutes Spotify while an advertisement is playing. It is an rewrite of the original EZBlocker.</Description>
+    <Description>EZBlocker 3 is a Spotify Ad Muter/Blocker for Windows written in C#. It mutes Spotify while an advertisement is playing.</Description>
     <StartupObject>EZBlocker3.Program</StartupObject>
   </PropertyGroup>
 
