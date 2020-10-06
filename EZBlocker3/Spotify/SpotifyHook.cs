@@ -393,10 +393,18 @@ namespace EZBlocker3 {
                     break;
                 // Advertisment playing or Starting up
                 case "Spotify":
-                    if (oldWindowTitle is null || oldWindowTitle == "")
+                    if (oldWindowTitle == "")
                         UpdateState(SpotifyState.StartingUp);
-                    else
-                        UpdateState(SpotifyState.PlayingAdvertisement);
+                    else if (oldWindowTitle == null) {
+                        if (MainWindowProcess is null)
+                            throw new IllegalStateException();
+
+                        if ((DateTime.Now - MainWindowProcess.StartTime) < TimeSpan.FromMilliseconds(3000)) {
+                            UpdateState(SpotifyState.StartingUp);
+                        } else {
+                            UpdateState(SpotifyState.PlayingAdvertisement);
+                        }
+                    }
                     break;
                 // Shutting down
                 case "":
