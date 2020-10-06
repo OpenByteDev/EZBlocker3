@@ -83,7 +83,7 @@ namespace EZBlocker3 {
             // we received a connection, which means another instance was started -> we bring the window to the front
             _ = Application.Current.Dispatcher.BeginInvoke(() => {
                 var mainWindow = (MainWindow)Application.Current.MainWindow;
-                _ = mainWindow.Dispatcher.BeginInvoke(() => {
+                mainWindow.Dispatcher.BeginInvoke(() => {
                     mainWindow.Deminimize();
                 });
             });
