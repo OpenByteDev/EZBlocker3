@@ -33,7 +33,7 @@ namespace EZBlocker3.AutoUpdate {
         private async Task DownloadUpdate() {
             var downloader = new UpdateDownloader();
             downloader.Progress += (s, e) => {
-                Dispatcher.Invoke(() => {
+                Dispatcher.BeginInvoke(() => {
                     var normalizedPercentage = e.DownloadPercentage;
                     var percentage = normalizedPercentage * 100;
                     downloadProgress.Value = percentage;

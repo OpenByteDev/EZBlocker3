@@ -249,7 +249,7 @@ namespace EZBlocker3 {
 
 
         private void UpdateStatusLabel() {
-            Dispatcher.Invoke(() => {
+            Dispatcher.BeginInvoke(() => {
                 StateLabel.Text = GetStateText();
             });
         }
