@@ -393,9 +393,9 @@ namespace EZBlocker3.Spotify {
                     break;
                 // Advertisment playing or Starting up
                 case "Spotify":
-                    if (oldWindowTitle == "")
+                    if (oldWindowTitle == "") {
                         UpdateState(SpotifyState.StartingUp);
-                    else if (oldWindowTitle == null) {
+                    } else if (oldWindowTitle == null) {
                         if (MainWindowProcess is null)
                             throw new IllegalStateException();
 
@@ -404,6 +404,8 @@ namespace EZBlocker3.Spotify {
                         } else {
                             UpdateState(SpotifyState.PlayingAdvertisement);
                         }
+                    } else {
+                        UpdateState(SpotifyState.PlayingAdvertisement);
                     }
                     break;
                 // Shutting down
