@@ -38,7 +38,7 @@ namespace EZBlocker3.AutoUpdate {
                     var percentage = normalizedPercentage * 100;
                     downloadProgress.Value = percentage;
                     downloadState.Text = $"Downloading... {Math.Round(percentage)}%";
-                    TaskbarItemInfo = new TaskbarItemInfo() {
+                    Owner.TaskbarItemInfo = new TaskbarItemInfo() {
                         ProgressValue = normalizedPercentage,
                         ProgressState = TaskbarItemProgressState.Normal
                     };
@@ -59,7 +59,7 @@ namespace EZBlocker3.AutoUpdate {
 
             await Dispatcher.InvokeAsync(() => {
                 downloadState.Text = $"Installing...";
-                TaskbarItemInfo = new TaskbarItemInfo() {
+                Owner.TaskbarItemInfo = new TaskbarItemInfo() {
                     ProgressState = TaskbarItemProgressState.Indeterminate
                 };
 
@@ -71,7 +71,7 @@ namespace EZBlocker3.AutoUpdate {
                     return;
                 }
 
-                TaskbarItemInfo = new TaskbarItemInfo() {
+                Owner.TaskbarItemInfo = new TaskbarItemInfo() {
                     ProgressValue = 0,
                     ProgressState = TaskbarItemProgressState.None
                 };
