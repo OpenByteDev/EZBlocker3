@@ -334,8 +334,6 @@ namespace EZBlocker3 {
                 _spotifyHook.Deactivate();
                 _spotifyHook.Dispose();
             }
-
-            GlobalSingletons.Dispose();
         }
 
     }

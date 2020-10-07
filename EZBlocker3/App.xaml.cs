@@ -59,5 +59,11 @@ namespace EZBlocker3 {
                 Task.Run(() => StartWithSpotify.SetEnabled(settings.StartWithSpotify));
         }
 
+        protected override void OnExit(ExitEventArgs e) {
+            base.OnExit(e);
+
+            GlobalSingletons.Dispose();
+        }
+
     }
 }
