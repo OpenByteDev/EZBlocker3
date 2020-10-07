@@ -68,6 +68,7 @@ namespace EZBlocker3.AutoUpdate {
                 } catch(Exception e) {
                     Logger.LogException("AutoUpdate: Update install failed", e);
                     ErrorDialog.Show($"Failed to install update!", this);
+                    Close();
                     return;
                 }
 

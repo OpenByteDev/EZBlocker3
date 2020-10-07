@@ -12,7 +12,7 @@ namespace EZBlocker3.AutoUpdate {
         private static string TempOldAppPath => Path.ChangeExtension(App.Location, ".exe.bak");
 
         [Lazy]
-        private static string TempNewAppPath => Path.ChangeExtension(App.Location, ".exe.bak");
+        private static string TempNewAppPath => Path.ChangeExtension(App.Location, ".exe.upd");
 
         public static void InstallUpdateAndRestart(DownloadedUpdate update) {
             try {
