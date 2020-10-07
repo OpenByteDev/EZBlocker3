@@ -90,17 +90,23 @@ namespace EZBlocker3 {
         #region AutoUpdate
         // is there a better name for this?
         private void MaybePerformUpdateCheck() {
-            if (Properties.Settings.Default.CheckForUpdates) {
-                var now = DateTime.Now;
-                if (Properties.Settings.Default.LastUpdateCheck is DateTime lastUpdateCheckDate) {
-                    var timeSinceLastUpdateCheck = now - lastUpdateCheckDate;
-                    if (timeSinceLastUpdateCheck < TimeSpan.FromDays(1))
-                        return;
-                }
-                Properties.Settings.Default.LastUpdateCheck = now;
-
+            if (App.ForceUpdateCheck) {
                 Task.Run(RunUpdateCheck, _cancellationSource.Token);
+                return;
             }
+
+            if (!Properties.Settings.Default.CheckForUpdates)
+                return;
+
+            var now = DateTime.Now;
+            if (Properties.Settings.Default.LastUpdateCheck is DateTime lastUpdateCheckDate) {
+                var timeSinceLastUpdateCheck = now - lastUpdateCheckDate;
+                if (timeSinceLastUpdateCheck < TimeSpan.FromDays(1))
+                    return;
+            }
+            Properties.Settings.Default.LastUpdateCheck = now;
+
+            Task.Run(RunUpdateCheck, _cancellationSource.Token);
         }
         private async Task RunUpdateCheck() {
             try {
