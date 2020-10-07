@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Lazy;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -7,16 +8,24 @@ using System.Runtime.InteropServices;
 namespace EZBlocker3.Logging {
     public static class Logger {
 
-        private static object _lock_logFile = new object();
+        [Lazy]
+        private static FileInfo _logFileInfo {
+            get {
+                var directory = Path.GetDirectoryName(App.Location);
+                var logFilePath = Path.Combine(directory, "log.txt");
+                return new FileInfo(logFilePath);
+            }
+        }
+
+        private static readonly object _lock_logFile = new object();
         public static void Log(LogLevel level, string message) {
             if (App.DebugModeEnabled) {
                 var formatted = $"[{DateTime.Now}][{level}] {message}";
                 Trace.WriteLine(formatted);
 
                 lock (_lock_logFile) {
-                    var directory = Path.GetDirectoryName(App.Location);
-                    var logFilePath = Path.Combine(directory, "log.txt");
-                    using var writer = new StreamWriter(logFilePath, append: true);
+                    using var file = _logFileInfo.OpenWrite();
+                    using var writer = new StreamWriter(file);
                     writer.WriteLine(formatted);
                 }
             }

@@ -1,5 +1,6 @@
 ﻿using EZBlocker3.Logging;
 using EZBlocker3.Utils;
+using Lazy;
 using System;
 using System.CodeDom.Compiler;
 using System.Diagnostics;
@@ -9,14 +10,12 @@ using System.IO;
 namespace EZBlocker3.Settings {
     public static class StartWithSpotify {
 
-        private static string? _spotifyPath;
-        private static string SpotifyPath => _spotifyPath ??= Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Spotify\Spotify.exe";
-
-        private static string? _realSpotifyPath;
-        private static string RealSpotifyPath => _realSpotifyPath ??= Path.ChangeExtension(SpotifyPath, "real.exe");
-
-        private static string? _proxyTempPath;
-        private static string ProxyTempPath => _proxyTempPath ??= Path.ChangeExtension(SpotifyPath, "proxy.exe");
+        [Lazy]
+        private static string SpotifyPath => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Spotify\Spotify.exe";
+        [Lazy]
+        private static string RealSpotifyPath => Path.ChangeExtension(SpotifyPath, "real.exe");
+        [Lazy]
+        private static string ProxyTempPath => Path.ChangeExtension(SpotifyPath, "proxy.exe");
 
         public static void SetEnabled(bool enabled) {
             if (IsProxyInstalled()) {

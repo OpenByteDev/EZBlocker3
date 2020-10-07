@@ -1,4 +1,5 @@
 ﻿using EZBlocker3.Logging;
+using Lazy;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -7,11 +8,11 @@ using System.Windows;
 namespace EZBlocker3.AutoUpdate {
     public static class UpdateInstaller {
 
-        private static string? _tempOldAppPath;
-        private static string TempOldAppPath => _tempOldAppPath ??= Path.ChangeExtension(App.Location, ".exe.bak");
+        [Lazy]
+        private static string TempOldAppPath => Path.ChangeExtension(App.Location, ".exe.bak");
 
-        private static string? _tempNewAppPath;
-        private static string TempNewAppPath => _tempNewAppPath ??= Path.ChangeExtension(App.Location, ".exe.bak");
+        [Lazy]
+        private static string TempNewAppPath => Path.ChangeExtension(App.Location, ".exe.bak");
 
         public static void InstallUpdateAndRestart(DownloadedUpdate update) {
             try {
