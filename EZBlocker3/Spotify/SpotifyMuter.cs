@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using static EZBlocker3.SpotifyHook;
+using static EZBlocker3.Spotify.SpotifyHook;
 
 namespace EZBlocker3.Spotify {
     public class SpotifyMuter {

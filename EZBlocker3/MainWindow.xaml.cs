@@ -16,7 +16,7 @@ using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
 using static EZBlocker3.AutoUpdate.UpdateFoundWindow;
-using static EZBlocker3.SpotifyHook;
+using static EZBlocker3.Spotify.SpotifyHook;
 using Application = System.Windows.Application;
 using Brush = System.Windows.Media.Brush;
 using ContextMenu = System.Windows.Controls.ContextMenu;

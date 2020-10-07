@@ -6,13 +6,13 @@ using System.Diagnostics;
 using System.Linq;
 using WindowEvent = EZBlocker3.Interop.NativeMethods.WindowEvent;
 using AccessibleObjectID = EZBlocker3.Interop.NativeMethods.AccessibleObjectID;
-using static EZBlocker3.SpotifyHook;
 using EZBlocker3.Audio.ComWrapper;
 using EZBlocker3.Audio.Com;
 using EZBlocker3.Utils;
 using System.Threading;
+using static EZBlocker3.Spotify.SpotifyHook;
 
-namespace EZBlocker3 {
+namespace EZBlocker3.Spotify {
     /// <summary>
     /// Represents a hook to the spotify process.
     /// </summary>
