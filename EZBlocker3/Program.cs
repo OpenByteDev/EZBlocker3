@@ -22,11 +22,7 @@ namespace EZBlocker3 {
 
         [STAThread]
         public static int Main(string[] args) {
-            AppDomain.CurrentDomain.UnhandledException += (s, e) => {
-                try {
-                    Logger.LogError("Unhandled exception:\n" + e.ExceptionObject);
-                } catch { }
-            };
+            AppDomain.CurrentDomain.UnhandledException += (s, e) => OnUnhandledException(e.ExceptionObject as Exception);
 
             CliArgs = CliArgs.Parse(args);
 
@@ -69,6 +65,11 @@ namespace EZBlocker3 {
             }
         }
 
+        private static void OnUnhandledException(Exception? exception) {
+            try {
+                Logger.LogError("Unhandled exception:\n" + exception);
+            } catch { }
+        }
 
         private static async Task RunPipeServer(CancellationToken cancellationToken) {
             using var server = new NamedPipeServerStream(PipeName, PipeDirection.In, NamedPipeServerStream.MaxAllowedServerInstances, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
@@ -113,6 +114,7 @@ namespace EZBlocker3 {
             var app = new App();
             app.InitializeComponent();
             app.ShutdownMode = ShutdownMode.OnMainWindowClose;
+            app.DispatcherUnhandledException += (s, e) => OnUnhandledException(e.Exception);
 
             var exitCode = app.Run();
 
