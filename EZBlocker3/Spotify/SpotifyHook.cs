@@ -12,6 +12,9 @@ using EZBlocker3.Utils;
 using System.Threading;
 using System.Collections.Generic;
 using static EZBlocker3.Spotify.SpotifyHook;
+using System.Linq.Expressions;
+using Lazy;
+using System.Reflection;
 
 namespace EZBlocker3.Spotify {
     /// <summary>
@@ -219,10 +222,27 @@ namespace EZBlocker3.Spotify {
             // needed because this method gets called multiple times by the same thread at the same time (reentrant)
             _windowCreationEventProcessor.EnqueueAndProcess(hwnd);
         }
+
+        [Lazy]
+        private Func<uint, Process> _getProcessByIdFastFunc {
+            get {
+                // Expression Trees let us change a private field and are faster than reflection (if called multiple times)
+                var processIdParameter = Expression.Parameter(typeof(uint), "processId");
+                var processInfoType = typeof(Process).Assembly.GetType(typeof(Process).FullName + "Info");
+                var constructor = typeof(Process).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, new Type[] { typeof(string), typeof(bool), typeof(int), processInfoType });
+                var processIdConverted = Expression.Convert(processIdParameter, typeof(int));
+                var newExpression = Expression.New(constructor, Expression.Constant("."), Expression.Constant(false), processIdConverted, Expression.Constant(null, processInfoType));
+                var lambda = Expression.Lambda<Func<uint, Process>>(newExpression, processIdParameter);
+                return lambda.Compile();
+            }
+        }
+
         private void HandleWindowCreation(IntPtr windowHandle) {
             // get created process
             NativeMethods.GetWindowThreadProcessId(windowHandle, out uint processId);
-            var process = Process.GetProcessById((int)processId);
+
+            // avoid "costly" validation checks
+            var process = _getProcessByIdFastFunc(processId);
 
             // confirm that its a spotify process.
             if (!process.ProcessName.Equals("spotify", StringComparison.OrdinalIgnoreCase))
