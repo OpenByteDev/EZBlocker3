@@ -129,9 +129,9 @@ namespace EZBlocker3.Spotify {
         private readonly WindowEventHook _windowDestructionEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_DESTROY);
         private readonly WindowEventHook _windowCreationEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_CREATE);
 
-        private readonly ReentrantEventProcessor<IntPtr> _windowCreationEventProcessor;
+        private readonly SafeReentrantEventProcessor<IntPtr> _windowCreationEventProcessor;
         // private readonly ReentrantEventProcessor<IntPtr> _titleChangeEventHookProcessor;
-        // private readonly ReentrantEventProcessor<IntPtr> _windowDestructionEventProcessor;
+        private readonly SafeReentrantEventProcessor<IntPtr> _windowDestructionEventProcessor;
 
         /// <summary>
         /// A cache for all running spotify processes.
@@ -146,7 +146,8 @@ namespace EZBlocker3.Spotify {
             _titleChangeEventHook.WinEventProc += _titleChangeEventHook_WinEventProc;
             _windowDestructionEventHook.WinEventProc += _windowDestructionEventHook_WinEventProc;
 
-            _windowCreationEventProcessor = new ReentrantEventProcessor<IntPtr>(HandleWindowCreation);
+            _windowCreationEventProcessor = new SafeReentrantEventProcessor<IntPtr>(HandleWindowCreation);
+            _windowDestructionEventProcessor = new SafeReentrantEventProcessor<IntPtr>(HandleWindowDestruction);
         }
 
         /// <summary>
@@ -227,15 +228,15 @@ namespace EZBlocker3.Spotify {
             if (!process.ProcessName.Equals("spotify", StringComparison.OrdinalIgnoreCase))
                 return;
 
-            // confirm that the process created has a window
-            if (process.MainWindowHandle == IntPtr.Zero)
+            // confirm that that the process has a window.
+            if (process.MainWindowTitle == null)
                 return;
 
-            if (IsHooked)
+            // confirm the process still runs
+            if (process.HasExited)
                 return;
 
             OnSpotifyHooked(process);
-            UpdateState(SpotifyState.StartingUp);
 
             _windowCreationEventProcessor.FlushQueue();
         }
@@ -249,8 +250,30 @@ namespace EZBlocker3.Spotify {
             if (idObject != AccessibleObjectID.OBJID_WINDOW || idChild != NativeMethods.CHILDID_SELF)
                 return;
 
+            // queue events and handle one after another
+            // needed because this method gets called multiple times by the same thread at the same time (reentrant)
+            // _windowDestructionEventProcessor.EnqueueAndProcess(hwnd);
+
+            HandleWindowDestruction(hwnd);
+        }
+
+        private void HandleWindowDestruction(IntPtr windowHandle) {
+            if (MainWindowProcess == null)
+                return;
+
+            if (!MainWindowProcess.HasExited)
+                return;
+
+            // if (MainWindowProcess.MainWindowHandle != windowHandle)
+            //     return;
+
+            // if (!IsHooked)
+            //    return;
+
             UpdateState(SpotifyState.ShuttingDown);
             OnSpotifyClosed();
+
+            _windowDestructionEventProcessor.FlushQueue();
         }
 
         private void _titleChangeEventHook_WinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, AccessibleObjectID idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
@@ -573,13 +596,13 @@ namespace EZBlocker3.Spotify {
             _windowDestructionEventHook?.Dispose();
         }
 
-        private class ReentrantEventProcessor<T> {
+        private class SafeReentrantEventProcessor<T> {
 
             private int _guard = 0;
             private readonly Queue<T> _eventQueue = new Queue<T>();
             private readonly Action<T> _eventProcessor;
 
-            public ReentrantEventProcessor(Action<T> eventProcessor) {
+            public SafeReentrantEventProcessor(Action<T> eventProcessor) {
                 _eventProcessor = eventProcessor;
             }
 
@@ -604,8 +627,7 @@ namespace EZBlocker3.Spotify {
                     }
                 } finally {
                     // stop executing
-                    if (Interlocked.Exchange(ref _guard, 0) == 0)
-                        throw new IllegalStateException();
+                    _guard = 0;
                 }
             }
 
