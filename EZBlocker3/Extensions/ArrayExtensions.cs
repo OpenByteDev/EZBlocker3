@@ -1,6 +1,6 @@
 ﻿# nullable disable
 
-namespace EZBlocker3 {
+namespace EZBlocker3.Extensions {
     internal static class ArrayExtensions {
 
         public static void Deconstruct<T>(this T[] items, out T t0) {

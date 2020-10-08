@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace EZBlocker3 {
+namespace EZBlocker3.Audio {
     public static class VolumeMixer {
 
         public static readonly string Path = Environment.GetEnvironmentVariable("WINDIR") + @"\System32\SndVol.exe";

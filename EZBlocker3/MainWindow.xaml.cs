@@ -1,4 +1,5 @@
-﻿using EZBlocker3.AutoUpdate;
+﻿using EZBlocker3.Audio;
+using EZBlocker3.AutoUpdate;
 using EZBlocker3.Extensions;
 using EZBlocker3.Interop;
 using EZBlocker3.Logging;
