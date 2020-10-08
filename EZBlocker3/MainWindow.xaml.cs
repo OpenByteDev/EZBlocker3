@@ -242,18 +242,12 @@ namespace EZBlocker3 {
             _spotifyHook = new SpotifyHook();
             _spotifyMuter = new SpotifyMuter(_spotifyHook);
 
-            _spotifyHook.SpotifyStateChanged += (_, __) => {
-                UpdateStatusLabel();
-            };
-            _spotifyHook.ActiveSongChanged += (_, __) => {
-                UpdateStatusLabel();
-            };
-            _spotifyHook.HookChanged += (_, __) => {
-                UpdateStatusLabel();
-            };
+            _spotifyHook.SpotifyStateChanged += (_, __) => UpdateStatusLabel();
+            _spotifyHook.ActiveSongChanged += (_, __) => UpdateStatusLabel();
+            _spotifyHook.HookChanged += (_, __) => UpdateStatusLabel();
+
             _spotifyHook.Activate();
         }
-
 
         private void UpdateStatusLabel() {
             Dispatcher.BeginInvoke(() => {
