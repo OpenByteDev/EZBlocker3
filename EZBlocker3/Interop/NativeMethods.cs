@@ -286,6 +286,11 @@ namespace EZBlocker3.Interop {
             /// </summary>
             EVENT_OBJECT_DESTROY = 0x8001,
             /// <summary>
+            /// A hidden object is shown.
+            /// The system sends this event for the following user interface elements: caret, cursor, and window object.
+            /// </summary>
+            EVENT_OBJECT_SHOW = 0x8002,
+            /// <summary>
             /// An object's Name property has changed.
             /// The system sends this event for the following user interface elements: check box, cursor, list-view control, push button, radio button, status bar control, tree view control, and window object.
             /// Server applications send this event for their accessible objects.
