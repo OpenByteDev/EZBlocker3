@@ -130,7 +130,7 @@ namespace EZBlocker3.Spotify {
 
         private readonly WindowEventHook _titleChangeEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_NAMECHANGE);
         private readonly WindowEventHook _windowDestructionEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_DESTROY);
-        private readonly WindowEventHook _windowCreationEventHook = new WindowEventHook(/*WindowEvent.EVENT_OBJECT_CREATE*/ (WindowEvent)0x8002);
+        private readonly WindowEventHook _windowCreationEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_SHOW);
 
         private readonly SafeReentrantEventProcessor<IntPtr> _windowCreationEventProcessor;
         private readonly SafeReentrantEventProcessor<IntPtr> _titleChangeEventHookProcessor;
