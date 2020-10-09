@@ -3,6 +3,7 @@ using Lazy;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace EZBlocker3.AutoUpdate {
@@ -18,6 +19,7 @@ namespace EZBlocker3.AutoUpdate {
             try {
                 Logger.LogDebug("AutoUpdate: Begin install");
 
+                File.Delete(TempNewAppPath);
                 using (var tempNewAppFile = File.OpenWrite(TempNewAppPath))
                     update.UpdateBytes.WriteTo(tempNewAppFile);
                 update.Dispose();
@@ -31,7 +33,7 @@ namespace EZBlocker3.AutoUpdate {
                 Logger.LogDebug("AutoUpdate: Replaced executable");
 
                 Logger.LogDebug("AutoUpdate: Restarting");
-                Process.Start(App.Location, "/updateRestart");
+                Process.Start(App.Location, "/updateRestart").Dispose();
                 Application.Current.Dispatcher.Invoke(() => {
                     Application.Current.Shutdown();
                 });
@@ -59,7 +61,10 @@ namespace EZBlocker3.AutoUpdate {
         }
 
         public static void CleanupUpdate() {
-            File.Delete(TempOldAppPath);
+            Task.Run(async () => {
+                await Task.Delay(10000);
+                File.Delete(TempOldAppPath);
+            });
         }
     }
 }
