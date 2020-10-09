@@ -9,11 +9,10 @@ namespace EZBlocker3.Logging {
     public static class Logger {
 
         [Lazy]
-        private static FileInfo _logFileInfo {
+        private static string _logFilePath {
             get {
                 var directory = Path.GetDirectoryName(App.Location);
-                var logFilePath = Path.Combine(directory, "log.txt");
-                return new FileInfo(logFilePath);
+                return Path.Combine(directory, "log.txt");
             }
         }
 
@@ -24,8 +23,7 @@ namespace EZBlocker3.Logging {
                 Trace.WriteLine(formatted);
 
                 lock (_lock_logFile) {
-                    using var file = _logFileInfo.OpenWrite();
-                    using var writer = new StreamWriter(file);
+                    using var writer = new StreamWriter(_logFilePath, append: true);
                     writer.WriteLine(formatted);
                 }
             }

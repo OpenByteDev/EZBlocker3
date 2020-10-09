@@ -114,6 +114,9 @@ namespace EZBlocker3 {
             app.InitializeComponent();
             app.ShutdownMode = ShutdownMode.OnMainWindowClose;
             app.DispatcherUnhandledException += (s, e) => OnUnhandledException(e.Exception);
+            TaskScheduler.UnobservedTaskException += (s, e) => {
+                Logger.LogException("Unobserved task exception: ", e.Exception);
+            };
 
             var exitCode = app.Run();
 
