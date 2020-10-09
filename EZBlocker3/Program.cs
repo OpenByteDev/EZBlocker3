@@ -34,7 +34,6 @@ namespace EZBlocker3 {
                     mutex.WaitOne(TimeSpan.FromSeconds(5), exitContext: false);
                     UpdateInstaller.CleanupUpdate();
                 } catch (Exception e) {
-                    Debugger.Launch();
                     Logger.LogException("Restart failed after update", e);
                 }
 
