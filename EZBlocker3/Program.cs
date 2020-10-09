@@ -3,7 +3,6 @@ using EZBlocker3.Logging;
 using EZBlocker3.Extensions;
 using EZBlocker3.Settings;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading;

@@ -26,7 +26,7 @@ namespace EZBlocker3 {
 # endif
         public static bool ForceDebugMode = false;
         public static bool DebugModeEnabled => IsDebugBuild || ForceDebugMode || EZBlocker3.Properties.Settings.Default.DebugMode;
-        public static bool ForceUpdate = true;
+        public static bool ForceUpdate = false;
         public static bool ForceUpdateCheck = IsDebugBuild || ForceUpdate;
 
         protected override void OnStartup(StartupEventArgs eventArgs) {
