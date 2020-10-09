@@ -90,7 +90,7 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <Version>0.7.5.0</Version>
+    <Version>0.7.6.0</Version>
     <Authors>OpenByte</Authors>
     <PackageIcon>Icon\Icon256.png</PackageIcon>
     <NeutralLanguage>en</NeutralLanguage>
