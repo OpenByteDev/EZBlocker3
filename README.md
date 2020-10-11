@@ -21,6 +21,10 @@ Comparing to the original, EZBlocker 3...
 
 No need to install as EZBlocker 3 is a portable application.
 
+## Remove application
+
+To remove EZBlocker 3 the "Uninstall" button in the settings menu should be used.
+
 ## Technical overview
 
 ### UI
@@ -28,7 +32,7 @@ The EZBlocker 3 UI ist built using the [Windows Presentation Foundation](https:/
 
 ### Ad detection
 Ads are detected by checking the spotify window title. On startup EZBlocker scans for running processes named "spotify" that have a window and extracts the title. It then listens for title changes by handling the `EVENT_OBJECT_NAMECHANGE` event using [`SetWinEventHook`](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwineventhook).
-Spotify startup and shutdown are detected by handling the `EVENT_OBJECT_DESTROY`and `EVENT_OBJECT_CREATE` events.
+Spotify startup and shutdown are detected by handling the `EVENT_OBJECT_DESTROY`and `EVENT_OBJECT_SHOW` events.
 
 ### Auto update
 EZBlocker 3 checks for new releases on startup using the [Github REST API](https://docs.github.com/en/free-pro-team@latest/rest). If a newer version is found, it is downloaded next to the app. The `EZBlocker3.exe` file is then switched out while it is still running and then restarted.
