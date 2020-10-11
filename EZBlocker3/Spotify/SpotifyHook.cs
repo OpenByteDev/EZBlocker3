@@ -132,9 +132,9 @@ namespace EZBlocker3.Spotify {
         private readonly WindowEventHook _windowDestructionEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_DESTROY);
         private readonly WindowEventHook _windowCreationEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_SHOW);
 
-        private readonly SafeReentrantEventProcessor<IntPtr> _windowCreationEventProcessor;
-        private readonly SafeReentrantEventProcessor<IntPtr> _titleChangeEventHookProcessor;
-        private readonly SafeReentrantEventProcessor<IntPtr> _windowDestructionEventProcessor;
+        private readonly ReentrancySafeEventProcessor<IntPtr> _windowCreationEventProcessor;
+        private readonly ReentrancySafeEventProcessor<IntPtr> _titleChangeEventProcessor;
+        private readonly ReentrancySafeEventProcessor<IntPtr> _windowDestructionEventProcessor;
 
         /// <summary>
         /// A cache for all running spotify processes.
@@ -149,9 +149,9 @@ namespace EZBlocker3.Spotify {
             _titleChangeEventHook.WinEventProc += _titleChangeEventHook_WinEventProc;
             _windowDestructionEventHook.WinEventProc += _windowDestructionEventHook_WinEventProc;
 
-            _windowCreationEventProcessor = new SafeReentrantEventProcessor<IntPtr>(HandleWindowCreation);
-            _titleChangeEventHookProcessor = new SafeReentrantEventProcessor<IntPtr>(HandleWindowTitleChange);
-            _windowDestructionEventProcessor = new SafeReentrantEventProcessor<IntPtr>(HandleWindowDestruction);
+            _windowCreationEventProcessor = new ReentrancySafeEventProcessor<IntPtr>(HandleWindowCreation);
+            _titleChangeEventProcessor = new ReentrancySafeEventProcessor<IntPtr>(HandleWindowTitleChange);
+            _windowDestructionEventProcessor = new ReentrancySafeEventProcessor<IntPtr>(HandleWindowDestruction);
         }
 
         /// <summary>
@@ -313,7 +313,7 @@ namespace EZBlocker3.Spotify {
 
             // queue events and handle one after another
             // needed because this method gets called multiple times by the same thread at the same time (reentrant)
-            _titleChangeEventHookProcessor.EnqueueAndProcess(hwnd);
+            _titleChangeEventProcessor.EnqueueAndProcess(hwnd);
         }
 
         private void HandleWindowTitleChange(IntPtr windowHandle) {
@@ -629,38 +629,38 @@ namespace EZBlocker3.Spotify {
             _windowDestructionEventHook?.Dispose();
         }
 
-        private class SafeReentrantEventProcessor<T> {
+        private class ReentrancySafeEventProcessor<T> {
 
-            private int _guard = 0;
+            private bool _processing = false;
             private readonly Queue<T> _eventQueue = new Queue<T>();
             private readonly Action<T> _eventProcessor;
 
-            public SafeReentrantEventProcessor(Action<T> eventProcessor) {
+            public ReentrancySafeEventProcessor(Action<T> eventProcessor) {
                 _eventProcessor = eventProcessor;
             }
 
             public void EnqueueAndProcess(T eventData) {
                 // check if already executing
-                if (Interlocked.Exchange(ref _guard, 1) == 1) {
-                    // enqueue event
+                if (_processing) {
+                    // some call already reached processing.
                     _eventQueue.Enqueue(eventData);
                     return;
                 }
 
                 // first call, so we start executing
+                _processing = true;
 
                 try {
                     // process own event data
                     _eventProcessor(eventData);
 
                     // process queued events
-                    while (_eventQueue.Count > 0) {
-                        T data = _eventQueue.Dequeue();
+                    while (_eventQueue.TryDequeue(out var data)) {
                         _eventProcessor(data);
                     }
                 } finally {
                     // stop executing
-                    _guard = 0;
+                    _processing = false;
                 }
             }
 
