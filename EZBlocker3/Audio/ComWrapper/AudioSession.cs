@@ -5,10 +5,10 @@ using System.Runtime.InteropServices;
 namespace EZBlocker3.Audio.ComWrapper {
     public class AudioSession : IDisposable {
 
-        private readonly ISimpleAudioVolume? _simpleAudioVolume;
-        private readonly IAudioMeterInformation? _audioMeterInformation;
         private readonly IAudioSessionControl _audioSessionControl;
         private readonly IAudioSessionControl2? _audioSessionControl2;
+        private readonly ISimpleAudioVolume? _simpleAudioVolume;
+        private readonly IAudioMeterInformation? _audioMeterInformation;
 
         public AudioSession(IAudioSessionControl session) {
             _audioSessionControl = session;
@@ -72,14 +72,14 @@ namespace EZBlocker3.Audio.ComWrapper {
                 }
 
                 // free unmanaged resources
-                if (_simpleAudioVolume != null)
-                    Marshal.ReleaseComObject(_simpleAudioVolume);
-                if (_audioMeterInformation != null)
-                    Marshal.ReleaseComObject(_audioMeterInformation);
                 if (_audioSessionControl != null)
                     Marshal.ReleaseComObject(_audioSessionControl);
-                if (_audioSessionControl2 != null)
-                    Marshal.ReleaseComObject(_audioSessionControl2);
+                // if (_audioSessionControl2 != null)
+                //     Marshal.ReleaseComObject(_audioSessionControl2);
+                // if (_simpleAudioVolume != null)
+                //     Marshal.ReleaseComObject(_simpleAudioVolume);
+                // if (_audioMeterInformation != null)
+                //     Marshal.ReleaseComObject(_audioMeterInformation);
 
                 _disposed = true;
             }

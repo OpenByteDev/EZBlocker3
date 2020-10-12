@@ -19,7 +19,7 @@ namespace EZBlocker3.Audio {
                 }
 
                 // free unmanaged resources
-                if (ComObject != null && Marshal.IsComObject(ComObject))
+                if (ComObject != null)
                     Marshal.ReleaseComObject(ComObject);
 
                 _disposed = true;
