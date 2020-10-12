@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 
 namespace EZBlocker3.Audio {
-    internal abstract class ComWrapper<T> : IDisposable {
+    public abstract class ComWrapper<T> : IDisposable {
 
         protected readonly T ComObject;
 

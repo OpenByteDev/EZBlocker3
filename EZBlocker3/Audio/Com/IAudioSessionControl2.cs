@@ -9,7 +9,7 @@ namespace EZBlocker3.Audio.Com {
     /// MSDN Reference: http://msdn.microsoft.com/en-us/library/dd368248.aspx
     /// </remarks>
     [Guid("bfb7ff88-7239-4fc9-8fa2-07c950be9c6d"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal partial interface IAudioSessionControl2 {
+    public partial interface IAudioSessionControl2 {
         // Note: We can't derive from IAudioSessionControl, as that will produce the wrong vtable.
 
         #region IAudioSessionControl Methods

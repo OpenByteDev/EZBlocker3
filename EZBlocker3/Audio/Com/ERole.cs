@@ -5,7 +5,7 @@
 	/// <remarks>
 	/// MSDN Reference: http://msdn.microsoft.com/en-us/library/dd370842.aspx
 	/// </remarks>
-	internal enum ERole {
+	public enum ERole {
 		/// <summary>
 		/// Games, system notification sounds, and voice commands.
 		/// </summary>

@@ -9,7 +9,7 @@ namespace EZBlocker3.Audio.Com {
     /// MSDN Reference: http://msdn.microsoft.com/en-us/library/dd371399.aspx
     /// </remarks>
     [Guid("A95664D2-9614-4F35-A746-DE8DB63617E6"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal partial interface IMMDeviceEnumerator {
+    public partial interface IMMDeviceEnumerator {
 
         /*
         /// <summary>

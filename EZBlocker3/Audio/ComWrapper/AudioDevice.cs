@@ -3,7 +3,7 @@ using System;
 using System.Runtime.InteropServices;
 
 namespace EZBlocker3.Audio.ComWrapper {
-    internal class AudioDevice : ComWrapper<IMMDevice> {
+    public class AudioDevice : ComWrapper<IMMDevice> {
 
         private AudioDevice(IMMDevice device) : base(device) { }
 

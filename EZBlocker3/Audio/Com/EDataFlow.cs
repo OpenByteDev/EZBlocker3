@@ -5,7 +5,7 @@
 	/// <remarks>
 	/// MSDN Reference: http://msdn.microsoft.com/en-us/library/dd370828.aspx
 	/// </remarks>
-	internal enum EDataFlow {
+	public enum EDataFlow {
 		/// <summary>
 		/// Audio data flows from the application to the audio endpoint device, which renders the stream.
 		/// </summary>

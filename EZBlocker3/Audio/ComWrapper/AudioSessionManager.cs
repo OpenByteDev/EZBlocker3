@@ -2,7 +2,7 @@
 using System.Runtime.InteropServices;
 
 namespace EZBlocker3.Audio.ComWrapper {
-    internal class AudioSessionManager : ComWrapper<IAudioSessionManager2> {
+    public class AudioSessionManager : ComWrapper<IAudioSessionManager2> {
 
         public AudioSessionManager(IAudioSessionManager2 sessionManager) : base(sessionManager) { }
 

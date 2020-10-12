@@ -8,7 +8,7 @@ namespace EZBlocker3.Audio.Com {
     /// MSDN Reference: http://msdn.microsoft.com/en-us/library/dd368227.aspx
     /// </remarks>
     [Guid("C02216F6-8C67-4B5B-9D00-D008E73E0064"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-    internal partial interface IAudioMeterInformation {
+    public partial interface IAudioMeterInformation {
         /// <summary>
         /// Gets the peak sample value for the channels in the audio stream.
         /// </summary>

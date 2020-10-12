@@ -9,7 +9,7 @@ namespace EZBlocker3.Audio.Com {
 	/// MSDN Reference: http://msdn.microsoft.com/en-us/library/dd316531.aspx
 	/// </remarks>
 	[Guid("87CE5498-68D6-44E5-9215-6DA47EF883D8"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	internal partial interface ISimpleAudioVolume {
+	public partial interface ISimpleAudioVolume {
 		/// <summary>
 		/// Sets the master volume level for the audio session.
 		/// </summary>

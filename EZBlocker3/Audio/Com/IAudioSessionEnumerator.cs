@@ -9,7 +9,7 @@ namespace EZBlocker3.Audio.Com {
 	/// MSDN Reference: http://msdn.microsoft.com/en-us/library/dd368281.aspx
 	/// </remarks>
 	[Guid("E2F5BB11-0570-40CA-ACDD-3AA01277DEE8"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	internal partial interface IAudioSessionEnumerator {
+	public partial interface IAudioSessionEnumerator {
 		/// <summary>
 		/// Gets the total number of audio sessions that are open on the audio device.
 		/// </summary>
