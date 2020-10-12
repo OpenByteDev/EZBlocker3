@@ -51,7 +51,7 @@ namespace EZBlocker3.AutoUpdate {
             } catch (Exception e) {
                 Logger.LogException("AutoUpdate: Update download failed", e);
                 await Dispatcher.InvokeAsync(() => {
-                    ErrorDialog.Show($"Update download failed!", this);
+                    MessageBox.Show("Update download failed!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     Close();
                 }, _cancellationSource.Token);
                 return;
@@ -67,7 +67,7 @@ namespace EZBlocker3.AutoUpdate {
                     UpdateInstaller.InstallUpdateAndRestart(downloadedUpdate);
                 } catch(Exception e) {
                     Logger.LogException("AutoUpdate: Update install failed", e);
-                    ErrorDialog.Show($"Failed to install update!", this);
+                    MessageBox.Show("Failed to install update!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     Close();
                     return;
                 }
