@@ -1,7 +1,9 @@
 ﻿using System.Windows;
+using MessageBox = ModernWpf.MessageBox;
 
 namespace EZBlocker3.Settings {
     public partial class SettingsWindow : Window {
+
         public SettingsWindow() {
             InitializeComponent();
 
@@ -16,9 +18,17 @@ namespace EZBlocker3.Settings {
 
             saveButton.Click += (_, __) => { SaveSettings(); Close(); };
             cancelButton.Click += (_, __) => { Close(); };
+            uninstallButton.Click += (_, __) => {
+                if (MessageBox.Show("Do you really want to uninstall EZBlocker 3?", "Confirm Uninstall", MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
+                    Uninstall.Run();
+                }
+            };
         }
 
         private void SaveSettings() {
+            if (!App.SaveSettingsOnClose)
+                return;
+
             Properties.Settings.Default.UnmuteOnClose = unmuteOnCloseCheckBox.IsChecked ?? Properties.Settings.Default.UnmuteOnClose;
             Properties.Settings.Default.MinimizeToTray = minimizeToTrayRadioButton.IsChecked ?? Properties.Settings.Default.MinimizeToTray;
             Properties.Settings.Default.CheckForUpdates = checkForUpdatesCheckBox.IsChecked ?? Properties.Settings.Default.CheckForUpdates;

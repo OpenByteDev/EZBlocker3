@@ -21,6 +21,10 @@ Comparing to the original, EZBlocker 3...
 
 No need to install as EZBlocker 3 is a portable application.
 
+## Remove application
+
+To remove EZBlocker 3 the "Uninstall" button in the settings menu should be used.
+
 ## Technical overview
 
 ### UI

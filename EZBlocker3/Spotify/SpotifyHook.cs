@@ -9,7 +9,6 @@ using AccessibleObjectID = EZBlocker3.Interop.NativeMethods.AccessibleObjectID;
 using EZBlocker3.Audio.ComWrapper;
 using EZBlocker3.Audio.Com;
 using EZBlocker3.Utils;
-using System.Threading;
 using System.Collections.Generic;
 using static EZBlocker3.Spotify.SpotifyHook;
 using System.Linq.Expressions;
@@ -623,7 +622,9 @@ namespace EZBlocker3.Spotify {
         public void Dispose() {
             MainWindowProcess?.Dispose();
             _processesCache?.DisposeAll();
+
             AudioSession?.Dispose();
+
             _windowCreationEventHook?.Dispose();
             _titleChangeEventHook?.Dispose();
             _windowDestructionEventHook?.Dispose();

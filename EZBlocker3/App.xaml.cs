@@ -14,6 +14,7 @@ namespace EZBlocker3 {
         public static readonly AssemblyName AssemblyName = Assembly.GetName();
         public static readonly string Name = AssemblyName.Name;
         public static readonly string ProductName = Assembly.GetCustomAttribute<AssemblyProductAttribute>().Product;
+        public static readonly string CompanyName = Assembly.GetCustomAttribute<AssemblyCompanyAttribute>().Company;
         public static readonly string Location = Assembly.Location;
         public static readonly string Directory = Path.GetDirectoryName(Location);
         public static readonly Version Version = AssemblyName.Version;
@@ -28,6 +29,7 @@ namespace EZBlocker3 {
         public static bool DebugModeEnabled => IsDebugBuild || ForceDebugMode || EZBlocker3.Properties.Settings.Default.DebugMode;
         public static bool ForceUpdate = false;
         public static bool ForceUpdateCheck = IsDebugBuild || ForceUpdate;
+        public static bool SaveSettingsOnClose = true;
 
         protected override void OnStartup(StartupEventArgs eventArgs) {
             base.OnStartup(eventArgs);

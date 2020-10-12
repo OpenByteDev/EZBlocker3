@@ -188,7 +188,7 @@ namespace EZBlocker3 {
                 Deminimize();
             };
             StateChanged += (_, __) => {
-                if (WindowState == WindowState.Minimized)
+                if (WindowState == WindowState.Minimized && !ShowInTaskbar)
                     _notifyIcon.ShowBalloonTip(5000, "EZBlocker3", "EZBlocker3 is hidden. Click this icon to restore.", ToolTipIcon.None);
             };
             // ensure context menu gets closed.
@@ -301,16 +301,19 @@ namespace EZBlocker3 {
         }
 
         protected override void OnStateChanged(EventArgs e) {
-            base.OnStateChanged(e);
-
             if (Properties.Settings.Default.MinimizeToTray)
                 ShowInTaskbar = WindowState != WindowState.Minimized;
+
+            base.OnStateChanged(e);
         }
 
         protected override void OnClosing(CancelEventArgs e) {
             base.OnClosing(e);
 
             if (WindowState == WindowState.Normal) {
+                if (!App.SaveSettingsOnClose)
+                    return;
+
                 Properties.Settings.Default.MainWindowPosition = new Point(Left, Top);
                 Properties.Settings.Default.VirtualScreenSize = new Size(SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight);
                 Properties.Settings.Default.Save();
