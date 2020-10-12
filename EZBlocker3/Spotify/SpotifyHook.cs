@@ -588,7 +588,7 @@ namespace EZBlocker3.Spotify {
 
             // mute
             try {
-                AudioSession.SetMute(mute);
+                AudioSession.IsMuted = mute;
                 Logger.LogInfo($"SpotifyHook: Spotify {(mute ? "muted" : "unmuted")}.");
                 return true;
             } catch (Exception e) {

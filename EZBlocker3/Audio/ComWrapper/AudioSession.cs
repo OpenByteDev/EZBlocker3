@@ -6,12 +6,14 @@ namespace EZBlocker3.Audio.ComWrapper {
     public class AudioSession : IDisposable {
 
         private readonly ISimpleAudioVolume? _simpleAudioVolume;
+        private readonly IAudioMeterInformation? _audioMeterInformation;
         private readonly IAudioSessionControl _audioSessionControl;
         private readonly IAudioSessionControl2? _audioSessionControl2;
 
         public AudioSession(IAudioSessionControl session) {
-            _simpleAudioVolume = session as ISimpleAudioVolume;
             _audioSessionControl = session;
+            _simpleAudioVolume = session as ISimpleAudioVolume;
+            _audioMeterInformation = session as IAudioMeterInformation;
             _audioSessionControl2 = session as IAudioSessionControl2;
         }
 
@@ -23,6 +25,7 @@ namespace EZBlocker3.Audio.ComWrapper {
                 return processId;
             }
         }
+
         public bool IsMuted {
             get {
                 if (_simpleAudioVolume is null)
@@ -30,12 +33,34 @@ namespace EZBlocker3.Audio.ComWrapper {
                 Marshal.ThrowExceptionForHR(_simpleAudioVolume.GetMute(out var isMuted));
                 return isMuted;
             }
+            set {
+                if (_simpleAudioVolume is null)
+                    throw new NotSupportedException();
+                Marshal.ThrowExceptionForHR(_simpleAudioVolume.SetMute(value, Guid.Empty));
+            }
         }
 
-        public void SetMute(bool mute) {
-            if (_simpleAudioVolume is null)
-                throw new NotSupportedException();
-            Marshal.ThrowExceptionForHR(_simpleAudioVolume.SetMute(mute, Guid.Empty));
+        public float MasterVolume {
+            get {
+                if (_simpleAudioVolume is null)
+                    throw new NotSupportedException();
+                Marshal.ThrowExceptionForHR(_simpleAudioVolume.GetMasterVolume(out var level));
+                return level;
+            }
+            set {
+                if (_simpleAudioVolume is null)
+                    throw new NotSupportedException();
+                Marshal.ThrowExceptionForHR(_simpleAudioVolume.SetMasterVolume(value, Guid.Empty));
+            }
+        }
+
+        public float PeakVolume {
+            get {
+                if (_audioMeterInformation is null)
+                    throw new NotSupportedException();
+                Marshal.ThrowExceptionForHR(_audioMeterInformation.GetPeakValue(out var peak));
+                return peak;
+            }
         }
 
         #region IDisposable
@@ -49,10 +74,12 @@ namespace EZBlocker3.Audio.ComWrapper {
                 // free unmanaged resources
                 if (_simpleAudioVolume != null)
                     Marshal.ReleaseComObject(_simpleAudioVolume);
-                if (_audioSessionControl2 != null)
-                    Marshal.ReleaseComObject(_audioSessionControl2);
+                if (_audioMeterInformation != null)
+                    Marshal.ReleaseComObject(_audioMeterInformation);
                 if (_audioSessionControl != null)
                     Marshal.ReleaseComObject(_audioSessionControl);
+                if (_audioSessionControl2 != null)
+                    Marshal.ReleaseComObject(_audioSessionControl2);
 
                 _disposed = true;
             }
