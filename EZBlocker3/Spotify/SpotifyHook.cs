@@ -1,19 +1,19 @@
-﻿using EZBlocker3.Extensions;
+﻿using EZBlocker3.Audio.Com;
+using EZBlocker3.Audio.ComWrapper;
+using EZBlocker3.Extensions;
 using EZBlocker3.Interop;
 using EZBlocker3.Logging;
+using EZBlocker3.Utils;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using Lazy;
 using WindowEvent = EZBlocker3.Interop.NativeMethods.WindowEvent;
 using AccessibleObjectID = EZBlocker3.Interop.NativeMethods.AccessibleObjectID;
-using EZBlocker3.Audio.ComWrapper;
-using EZBlocker3.Audio.Com;
-using EZBlocker3.Utils;
-using System.Collections.Generic;
 using static EZBlocker3.Spotify.SpotifyHook;
-using System.Linq.Expressions;
-using Lazy;
-using System.Reflection;
 
 namespace EZBlocker3.Spotify {
     /// <summary>
@@ -29,10 +29,6 @@ namespace EZBlocker3.Spotify {
         /// The current window title of the main window.
         /// </summary>
         public string? WindowTitle { get; private set; }
-        /// <summary>
-        /// The current audio session if spotify is running and a session has been initialized.
-        /// </summary>
-        internal AudioSession? AudioSession { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether spotify is currently muting or null if spotify is not running.
@@ -126,6 +122,22 @@ namespace EZBlocker3.Spotify {
         /// Represents an event handler for the SpotifyStateChanged event.
         /// </summary>
         public delegate void SpotifyStateChangedEventHandler(object sender, SpotifyStateChangedEventArgs eventArgs);
+
+        /// <summary>
+        /// The current audio session if spotify is running and a session has been initialized.
+        /// </summary>
+        private AudioSession? _audioSession = null;
+        public AudioSession? AudioSession {
+            get {
+                if (_audioSession is null) {
+                    FetchAudioSession();
+                    if (_audioSession is null) {
+                        Logger.LogError($"SpotifyHook: Failed to fetch audio session.");
+                    }
+                }
+                return _audioSession;
+            }
+        }
 
         private readonly WindowEventHook _titleChangeEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_NAMECHANGE);
         private readonly WindowEventHook _windowDestructionEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_DESTROY);
@@ -353,7 +365,7 @@ namespace EZBlocker3.Spotify {
         /// <summary>
         /// Fetch the spotify audio session.
         /// </summary>
-        protected void FetchAudioSession() {
+        protected AudioSession? FetchAudioSession() {
             // Fetch sessions
             using var device = AudioDevice.GetDefaultAudioDevice(EDataFlow.eRender, ERole.eMultimedia);
             using var sessionManager = device.GetSessionManager();
@@ -366,8 +378,8 @@ namespace EZBlocker3.Spotify {
                 var session = sessions[i];
                 if (session.ProcessID == MainWindowProcess?.Id) {
                     Logger.LogInfo("SpotifyHook: Successfully fetched audio session using main window process.");
-                    AudioSession = session;
-                    return;
+                    _audioSession = session;
+                    return _audioSession;
                 } else {
                     // Store non-spotify sessions in disposable list to make sure that they the underlying COM objects are disposed.
                     sessionCache.Add(session);
@@ -394,16 +406,18 @@ namespace EZBlocker3.Spotify {
                     continue;
 
                 if (sessionMap.TryGetValue(processId, out AudioSession session)) {
-                    AudioSession = session;
+                    _audioSession = session;
                     Logger.LogInfo("SpotifyHook: Successfully fetched audio session using secondary spotify processes.");
 
                     // remove from map to avoid disposal
                     sessionMap.Remove(processId);
-                    return;
+                    return _audioSession;
                 }
             }
 
             Logger.LogError("SpotifyHook: Failed to fetch audio session.");
+
+            return null;
         }
 
         /// <summary>
@@ -513,11 +527,11 @@ namespace EZBlocker3.Spotify {
         protected void ClearHookData() {
             MainWindowProcess?.Dispose();
             _processesCache?.DisposeAll();
-            AudioSession?.Dispose();
+            _audioSession?.Dispose();
 
             MainWindowProcess = null;
             _processesCache = null;
-            AudioSession = null;
+            _audioSession = null;
             WindowTitle = null;
             ActiveSong = null;
             State = SpotifyState.Unknown;
@@ -568,11 +582,8 @@ namespace EZBlocker3.Spotify {
 
             // ensure audio session
             if (AudioSession is null) {
-                FetchAudioSession();
-                if (AudioSession is null) {
-                    Logger.LogError($"SpotifyHook: Failed to {(mute ? "mute" : "unmute")} spotify due to missing audio session.");
-                    return false;
-                }
+                Logger.LogError($"SpotifyHook: Failed to {(mute ? "mute" : "unmute")} spotify due to missing audio session.");
+                return false;
             }
 
             // mute
