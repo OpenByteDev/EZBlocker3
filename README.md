@@ -10,7 +10,7 @@ Comparing to the original, EZBlocker 3...
 - ... does not include any sort of analytics ([#103](https://github.com/Xeroday/Spotify-Ad-Blocker/issues/103)).
 - ... is built using a [modern UI](https://github.com/Kinnara/ModernWpf)
 - ... offers automatic updating
-- ... uses an event based approach instead of polling for a smaller performance footprint (using [WinEventHooks](https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwineventhook))
+- ... uses an event based approach instead of polling for a smaller performance footprint
 
 ![Dark Theme](https://raw.githubusercontent.com/OpenByteDev/EZBlocker3/master/screenshots/Screenshot-01.png)
 ![Light Theme](https://raw.githubusercontent.com/OpenByteDev/EZBlocker3/master/screenshots/Screenshot-02.png)
