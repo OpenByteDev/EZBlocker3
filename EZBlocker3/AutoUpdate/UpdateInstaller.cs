@@ -1,4 +1,5 @@
 ﻿using EZBlocker3.Logging;
+using EZBlocker3.Settings;
 using Lazy;
 using System;
 using System.Diagnostics;
@@ -31,6 +32,10 @@ namespace EZBlocker3.AutoUpdate {
                 File.Move(TempNewAppPath, App.Location);
 
                 Logger.LogDebug("AutoUpdate: Replaced executable");
+
+                // disable settings with external state before upgrade, as the new version maybe uses a different system.
+                StartWithSpotify.Disable();
+                Autostart.Disable();
 
                 Logger.LogDebug("AutoUpdate: Restarting");
                 Process.Start(App.Location, "/updateRestart").Dispose();

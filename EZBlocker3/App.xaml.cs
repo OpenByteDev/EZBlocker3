@@ -1,6 +1,7 @@
 ﻿using EZBlocker3.Logging;
 using EZBlocker3.Settings;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Reflection;
@@ -37,8 +38,14 @@ namespace EZBlocker3 {
             // enable all protocols
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
 
-            // upgrade settings on first start (after update)
             var settings = EZBlocker3.Properties.Settings.Default;
+            // reenable settings after update (disabled in UpdateInstaller.InstallUpdateAndRestart)
+            if (settings.UpgradeRequired || Program.CliArgs.IsUpdateRestart) {
+                StartWithSpotify.SetEnabled(settings.StartWithSpotify);
+                Autostart.SetEnabled(settings.StartOnLogin);
+            }
+
+            // upgrade settings on first start (after update)
             if (settings.UpgradeRequired) {
                 settings.Upgrade();
                 settings.UpgradeRequired = false;
