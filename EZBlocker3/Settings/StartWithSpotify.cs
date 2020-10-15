@@ -70,7 +70,7 @@ namespace EZBlocker3.Settings {
             parameters.CompilerOptions = $"/target:winexe \"/win32icon:{iconPath}\"";
 
             var provider = CodeDomProvider.CreateProvider("CSharp");
-            var code = GetProxyCode(App.Location, CliArgs.ProxyStartOption);
+            var code = GetProxyCode(App.Location, appArgs: CliArgs.ProxyStartOption, RealSpotifyPath, spotifyArgs: string.Empty);
             var result = provider.CompileAssemblyFromSource(parameters, code);
 
             foreach (CompilerError error in result.Errors)
@@ -85,13 +85,15 @@ namespace EZBlocker3.Settings {
             if (!File.Exists(RealSpotifyPath)) {
                 Logger.LogWarning("Started through proxy executable when no proxy is present");
                 return;
-            } 
+            }
 
-            File.Delete(ProxyTempPath);
-            File.Move(SpotifyPath, ProxyTempPath);
-            File.Move(RealSpotifyPath, SpotifyPath);
-
-            Process.Start(SpotifyPath).Dispose();
+            try {
+                File.Delete(ProxyTempPath);
+                File.Move(SpotifyPath, ProxyTempPath);
+                File.Move(RealSpotifyPath, SpotifyPath);
+            } catch (Exception e) {
+                Logger.LogException("Failed to handle proxied start:", e);
+            }
         }
         public static void HandleProxiedExit() {
             Logger.LogInfo("Reset proxy executable");
@@ -101,19 +103,27 @@ namespace EZBlocker3.Settings {
                 return;
             }
 
-            File.Move(SpotifyPath, RealSpotifyPath);
-            File.Move(ProxyTempPath, SpotifyPath);
+            try {
+                File.Move(SpotifyPath, RealSpotifyPath);
+                File.Move(ProxyTempPath, SpotifyPath);
+            } catch (Exception e) {
+                Logger.LogException("Failed to handle proxied exit:", e);
+            }
+        }
         }
 
-        private static string GetProxyCode(string appPath, string appArgs) => @"
+        private static string GetProxyCode(string appPath, string appArgs, string spotifyPath, string spotifyArgs) => @"
 using System.Diagnostics;
 
 public static class Proxy {
     public static void Main() {
         var appPath = @""" + appPath + @""";
         var appArgs = @""" + appArgs + @""";
+        var spotifyPath = @""" + spotifyPath + @""";
+        var spotifyArgs = @""" + spotifyArgs + @""";
 
-        Process.Start(appPath, appArgs);
+        Process.Start(spotifyPath, spotifyArgs).Dispose();
+        Process.Start(appPath, appArgs).Dispose();
     }
 }";
     }
