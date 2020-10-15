@@ -127,17 +127,7 @@ namespace EZBlocker3.Spotify {
         /// The current audio session if spotify is running and a session has been initialized.
         /// </summary>
         private AudioSession? _audioSession = null;
-        public AudioSession? AudioSession {
-            get {
-                if (_audioSession is null) {
-                    FetchAudioSession();
-                    if (_audioSession is null) {
-                        Logger.LogError($"SpotifyHook: Failed to fetch audio session.");
-                    }
-                }
-                return _audioSession;
-            }
-        }
+        public AudioSession? AudioSession => _audioSession ?? FetchAudioSession();
 
         private readonly WindowEventHook _titleChangeEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_NAMECHANGE);
         private readonly WindowEventHook _windowDestructionEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_DESTROY);
@@ -202,7 +192,7 @@ namespace EZBlocker3.Spotify {
         /// </summary>
         /// <returns>A value indicating whether spotify could be hooked.</returns>
         protected bool TryHookSpotify() {
-            var processes = Process.GetProcessesByName("spotify");
+            var processes = Process.GetProcesses().Where(IsSpotifyProcess).ToArray();
 
             // find the main window process
             var mainProcess = processes.Where(process => !string.IsNullOrWhiteSpace(process.MainWindowTitle)).FirstOrDefault();
@@ -219,6 +209,10 @@ namespace EZBlocker3.Spotify {
             OnSpotifyHooked(mainProcess);
 
             return true;
+        }
+
+        private static bool IsSpotifyProcess(Process process) {
+            return process.ProcessName.StartsWith("spotify", StringComparison.OrdinalIgnoreCase);
         }
 
         private void _windowCreationEventHook_WinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, AccessibleObjectID idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
@@ -257,7 +251,7 @@ namespace EZBlocker3.Spotify {
             var process = _getProcessByIdFastFunc(processId);
 
             // confirm that its a spotify process.
-            if (!process.ProcessName.Equals("spotify", StringComparison.OrdinalIgnoreCase)) {
+            if (!IsSpotifyProcess(process)) {
                 process.Dispose();
                 return;
             }
