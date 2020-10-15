@@ -29,8 +29,14 @@ namespace EZBlocker3.Settings {
         public static void Enable() => InstallProxy();
         public static void Disable() => UninstallProxy();
 
-        public static bool IsProxyInstalled() => File.Exists(RealSpotifyPath);
+        public static bool IsProxyInstalled() {
+            if (!File.Exists(RealSpotifyPath))
+                return false;
+            return !IsInvalidStateAfterSpotifyUpdate();
+        }
         public static void InstallProxy() {
+            HandleInvalidStateAfterUpdate();
+
             var tempIconFilePath = Path.ChangeExtension(SpotifyPath, ".ico.temp");
             try {
                 using var spotifyIcon = Icon.ExtractAssociatedIcon(SpotifyPath);
@@ -53,13 +59,35 @@ namespace EZBlocker3.Settings {
             }
         }
         public static void UninstallProxy() {
+            HandleInvalidStateAfterUpdate();
+
             if (File.Exists(RealSpotifyPath)) {
+                // spotify is not running
                 File.Delete(SpotifyPath);
                 File.Move(RealSpotifyPath, SpotifyPath);
             } else {
+                // spotify is running
                 File.Delete(ProxyTempPath);
             }
         }
+
+        private static bool IsInvalidStateAfterSpotifyUpdate() {
+            // check if executable is smaller than 5MB
+            // the real spotify executable is > 20MB and the proxy should be less than 1MB
+            // if the size is > 5MB that means that spotify was updated and replaced the proxy
+            return new FileInfo(SpotifyPath).Length > 1024 * 1024 * 5;
+        }
+        private static void HandleInvalidStateAfterUpdate() {
+            if (!IsInvalidStateAfterSpotifyUpdate())
+                return;
+
+            try {
+                File.Delete(RealSpotifyPath);
+            } catch {
+                File.Move(RealSpotifyPath, Path.GetTempFileName());
+            }
+        }
+
         public static bool GenerateProxy(string executablePath, string iconPath) {
             var parameters = new CompilerParameters {
                 GenerateExecutable = true,
