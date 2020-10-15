@@ -30,7 +30,7 @@ namespace EZBlocker3 {
             if (CliArgs.IsUpdateRestart) {
                 try {
                     // wait for old version to exit and release the mutex.
-                    mutex.WaitOne(TimeSpan.FromSeconds(5), exitContext: false);
+                    mutex.WaitOne(TimeSpan.FromSeconds(10), exitContext: false);
                     UpdateInstaller.CleanupUpdate();
                 } catch (Exception e) {
                     Logger.LogException("Restart failed after update", e);
@@ -90,9 +90,7 @@ namespace EZBlocker3 {
             using var reader = new StreamReader(server);
             if (await reader.ReadLineAsync() is string line) {
                 if (line == CliArgs.ProxyStartOption) {
-                    StartWithSpotify.HandleProxiedStart();
-                    if (!CliArgs.IsProxyStart)
-                        CliArgs = CliArgs with { IsProxyStart = true };
+                    StartWithSpotify.TransformToProxied();
                 }
             }
 

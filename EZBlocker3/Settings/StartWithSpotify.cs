@@ -107,6 +107,11 @@ namespace EZBlocker3.Settings {
             return result.Errors.Count == 0;
         }
 
+        public static void TransformToProxied() {
+            HandleProxiedStart();
+            if (!Program.CliArgs.IsProxyStart)
+                Program.CliArgs = Program.CliArgs with { IsProxyStart = true };
+        }
         public static void HandleProxiedStart() {
             Logger.LogInfo("Started through proxy executable");
 
@@ -138,6 +143,9 @@ namespace EZBlocker3.Settings {
                 Logger.LogException("Failed to handle proxied exit:", e);
             }
         }
+        public static void StartSpotify() {
+            TransformToProxied();
+            Process.Start(SpotifyPath).Dispose();
         }
 
         private static string GetProxyCode(string appPath, string appArgs, string spotifyPath, string spotifyArgs) => @"

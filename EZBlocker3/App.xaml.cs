@@ -35,11 +35,12 @@ namespace EZBlocker3 {
         protected override void OnStartup(StartupEventArgs eventArgs) {
             base.OnStartup(eventArgs);
 
-            // enable all protocols
+            // enable all security protocols
+            // without this statement https requests fail.
             ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
 
-            var settings = EZBlocker3.Properties.Settings.Default;
             // reenable settings after update (disabled in UpdateInstaller.InstallUpdateAndRestart)
+            var settings = EZBlocker3.Properties.Settings.Default;
             if (settings.UpgradeRequired || Program.CliArgs.IsUpdateRestart) {
                 StartWithSpotify.SetEnabled(settings.StartWithSpotify);
                 Autostart.SetEnabled(settings.StartOnLogin);
@@ -65,9 +66,16 @@ namespace EZBlocker3 {
                 settings.AppPath = App.Location;
             }
 
-            // Ensure that the proxy is still installed correctly if enabled.
             if (settings.StartWithSpotify)
-                Task.Run(() => StartWithSpotify.SetEnabled(settings.StartWithSpotify));
+                Task.Run(() => {
+                    // Ensure that the proxy is still installed correctly if enabled.
+                    StartWithSpotify.SetEnabled(settings.StartWithSpotify);
+
+                    // start spotify if start with spotify is enabled but we did not start through the proxy
+                    if (!Program.CliArgs.IsProxyStart)
+                        StartWithSpotify.StartSpotify();
+                });
+
         }
 
         protected override void OnExit(ExitEventArgs e) {
