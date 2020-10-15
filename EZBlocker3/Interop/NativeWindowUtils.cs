@@ -7,6 +7,8 @@ namespace EZBlocker3.Interop {
 
         public static string GetWindowTitle(IntPtr handle) {
             var titleLength = NativeMethods.GetWindowTextLength(handle);
+            if (titleLength == 0)
+                return string.Empty;
             var builder = new StringBuilder(titleLength + 1);
             if (NativeMethods.GetWindowText(handle, builder, builder.Capacity) == 0)
                 throw new Win32Exception();
