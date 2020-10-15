@@ -342,8 +342,7 @@ namespace EZBlocker3.Spotify {
 
             MainWindowProcess = mainProcess;
 
-            if (_windowCreationEventHook.Hooked)
-                _windowCreationEventHook.Unhook();
+            _windowCreationEventHook.Unhook(throwIfNotHooked: false);
 
             // TODO multi event hook
             _titleChangeEventHook.HookToProcess(mainProcess);
@@ -530,12 +529,9 @@ namespace EZBlocker3.Spotify {
             ActiveSong = null;
             State = SpotifyState.Unknown;
 
-            if (_windowCreationEventHook.Hooked)
-                _windowCreationEventHook.Unhook();
-            if (_titleChangeEventHook.Hooked)
-                _titleChangeEventHook.Unhook();
-            if (_windowDestructionEventHook.Hooked)
-                _windowDestructionEventHook.Unhook();
+            _windowCreationEventHook.Unhook(throwIfNotHooked: false);
+            _titleChangeEventHook.Unhook(throwIfNotHooked: false);
+            _windowDestructionEventHook.Unhook(throwIfNotHooked: false);
         }
 
         /// <summary>

@@ -10,6 +10,9 @@ using static EZBlocker3.Interop.NativeMethods;
 namespace EZBlocker3.Interop {
     internal class WindowEventHook : IDisposable {
 
+        private const uint AllThreads = 0;
+        private const uint AllProcesses = 0;
+
         public WindowEvent EventMin { get; private set; }
         public WindowEvent EventMax { get; private set; }
         public bool Hooked { get; private set; } = false;
@@ -26,15 +29,23 @@ namespace EZBlocker3.Interop {
             EventMax = eventMax;
         }
 
-        public bool HookGlobal() => HookInternal(0, 0);
-        public bool HookToProcess(Process process) => HookToProcess((uint) process.Id);
-        public bool HookToProcess(uint processId) => HookInternal(processId, 0);
-        public bool HookToThread(Thread thread) => HookToThread((uint) thread.ManagedThreadId);
-        public bool HookToThread(uint threadId) => HookInternal(0, threadId);
+        public bool HookGlobal(bool throwIfAlreadyHooked = true, bool throwOnFailure = true) =>
+            HookInternal(processId: AllProcesses, threadId: AllThreads, throwIfAlreadyHooked, throwOnFailure);
+        public bool HookToProcess(Process process, bool throwIfAlreadyHooked = true, bool throwOnFailure = true) =>
+            HookToProcess((uint) process.Id, throwIfAlreadyHooked, throwOnFailure);
+        public bool HookToProcess(uint processId, bool throwIfAlreadyHooked = true, bool throwOnFailure = true) =>
+            HookInternal(processId, threadId: AllThreads, throwIfAlreadyHooked, throwOnFailure);
+        public bool HookToThread(Thread thread, bool throwIfAlreadyHooked = true, bool throwOnFailure = true) =>
+            HookToThread((uint) thread.ManagedThreadId, throwIfAlreadyHooked, throwOnFailure);
+        public bool HookToThread(uint threadId, bool throwIfAlreadyHooked = true, bool throwOnFailure = true) =>
+            HookInternal(processId: AllProcesses, threadId, throwIfAlreadyHooked, throwOnFailure);
 
-        private bool HookInternal(uint processId, uint threadId) {
-            if (Hooked)
-                throw new InvalidOperationException("Hook is already hooked.");
+        private bool HookInternal(uint processId, uint threadId, bool throwIfAlreadyHooked, bool throwOnFailure) {
+            if (Hooked) {
+                if (throwIfAlreadyHooked)
+                    throw new InvalidOperationException("Hook is already hooked.");
+                return true;
+            }
 
             var eventProc = new WinEventProc(OnWinEventProc);
             _eventProcHandle = GCHandle.Alloc(eventProc);
@@ -48,27 +59,35 @@ namespace EZBlocker3.Interop {
                 dwFlags: WinEventHookFlags.WINEVENT_OUTOFCONTEXT | WinEventHookFlags.WINEVENT_SKIPOWNPROCESS
             );
 
-            Hooked = _hookHandle != IntPtr.Zero;
-
-            if (!Hooked)
-                throw new Win32Exception();
-            return Hooked;
+            if (_hookHandle != IntPtr.Zero) {
+                Hooked = true;
+                return true;
+            } else {
+                _eventProcHandle.Free();
+                if (throwOnFailure)
+                    throw new Win32Exception();
+                return false;
+            }
         }
 
-        public void Unhook() {
-            if (!Hooked)
-                throw new InvalidOperationException("Hook is not hooked.");
+        public bool Unhook(bool throwIfNotHooked = true, bool throwOnFailure = true) {
+            if (!Hooked) {
+                if (throwIfNotHooked)
+                    throw new InvalidOperationException("Hook is not hooked.");
+                return true;
+            }
 
-            UnhookInternal();
-        }
-
-        private void UnhookInternal() {
-            Hooked = false;
-
-            if (_hookHandle != IntPtr.Zero)
-                UnhookWinEvent(_hookHandle);
             if (_eventProcHandle.IsAllocated)
                 _eventProcHandle.Free();
+
+            if (UnhookWinEvent(_hookHandle)) {
+                Hooked = false;
+                return true;
+            } else {
+                if (throwOnFailure)
+                    throw new Win32Exception();
+                return false;
+            }
         }
 
         protected virtual void OnWinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, AccessibleObjectID idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
@@ -85,7 +104,7 @@ namespace EZBlocker3.Interop {
                 }
 
                 // free unmanaged resources
-                UnhookInternal();
+                Unhook(throwIfNotHooked: false, throwOnFailure: false);
 
                 _disposed = true;
             }
