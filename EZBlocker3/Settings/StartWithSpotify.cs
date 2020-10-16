@@ -18,18 +18,23 @@ namespace EZBlocker3.Settings {
         private static string ProxyTempPath => Path.ChangeExtension(SpotifyPath, "proxy.exe");
 
         public static void SetEnabled(bool enabled) {
-            if (IsProxyInstalled()) {
-                if (!enabled)
-                    Disable();
-            } else {
-                if (enabled)
-                    Enable();
-            }
+            if (enabled)
+                Enable();
+            else
+                Disable();
         }
-        public static void Enable() => InstallProxy();
-        public static void Disable() => UninstallProxy();
+        public static void Enable() {
+            if (IsProxyInstalled())
+                return;
+            InstallProxy();
+        }
+        public static void Disable() {
+            if (!IsProxyInstalled())
+                return;
+            UninstallProxy();
+        }
 
-        public static bool IsProxyInstalled() {
+    public static bool IsProxyInstalled() {
             if (!File.Exists(RealSpotifyPath))
                 return false;
             return !IsInvalidStateAfterSpotifyUpdate();
