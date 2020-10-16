@@ -5,15 +5,13 @@ using EZBlocker3.Interop;
 using EZBlocker3.Logging;
 using EZBlocker3.Utils;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Lazy;
-using WindowEvent = EZBlocker3.Interop.NativeMethods.WindowEvent;
-using AccessibleObjectID = EZBlocker3.Interop.NativeMethods.AccessibleObjectID;
 using static EZBlocker3.Spotify.SpotifyHook;
+using WinEventHook;
 
 namespace EZBlocker3.Spotify {
     /// <summary>
@@ -221,7 +219,7 @@ namespace EZBlocker3.Spotify {
                 return;
 
             // make sure that the created control is a window.
-            if (idObject != AccessibleObjectID.OBJID_WINDOW || idChild != NativeMethods.CHILDID_SELF)
+            if (idObject != AccessibleObjectID.OBJID_WINDOW || idChild != WindowEventHook.CHILDID_SELF)
                 return;
 
             // queue events and handle one after another
@@ -286,7 +284,7 @@ namespace EZBlocker3.Spotify {
                 return;
 
             // make sure that the destroyed control was a window.
-            if (idObject != AccessibleObjectID.OBJID_WINDOW || idChild != NativeMethods.CHILDID_SELF)
+            if (idObject != AccessibleObjectID.OBJID_WINDOW || idChild != WindowEventHook.CHILDID_SELF)
                 return;
 
             // queue events and handle one after another
@@ -313,7 +311,7 @@ namespace EZBlocker3.Spotify {
                 return;
 
             // make sure that it was a window name that changed.
-            if (idObject != AccessibleObjectID.OBJID_WINDOW || idChild != NativeMethods.CHILDID_SELF)
+            if (idObject != AccessibleObjectID.OBJID_WINDOW || idChild != WindowEventHook.CHILDID_SELF)
                 return;
 
             // queue events and handle one after another
@@ -630,53 +628,13 @@ namespace EZBlocker3.Spotify {
             _titleChangeEventHook?.Dispose();
             _windowDestructionEventHook?.Dispose();
         }
-
-        private class ReentrancySafeEventProcessor<T> {
-
-            private bool _processing = false;
-            private readonly Queue<T> _eventQueue = new Queue<T>();
-            private readonly Action<T> _eventProcessor;
-
-            public ReentrancySafeEventProcessor(Action<T> eventProcessor) {
-                _eventProcessor = eventProcessor;
-            }
-
-            public void EnqueueAndProcess(T eventData) {
-                // check if already executing
-                if (_processing) {
-                    // some call already reached processing.
-                    _eventQueue.Enqueue(eventData);
-                    return;
-                }
-
-                // first call, so we start executing
-                _processing = true;
-
-                try {
-                    // process own event data
-                    _eventProcessor(eventData);
-
-                    // process queued events
-                    while (_eventQueue.TryDequeue(out var data)) {
-                        _eventProcessor(data);
-                    }
-                } finally {
-                    // stop executing
-                    _processing = false;
-                }
-            }
-
-            public void FlushQueue() {
-                _eventQueue.Clear();
-            }
-        }
     }
 
     #region EventArgs
     public class SpotifyStateChangedEventArgs : EventArgs {
 
-        public SpotifyState PreviousState { get; private set; }
-        public SpotifyState NewState { get; private set; }
+        public SpotifyState PreviousState { get;  }
+        public SpotifyState NewState { get; }
 
         public SpotifyStateChangedEventArgs(SpotifyState previousState, SpotifyState newState) {
             PreviousState = previousState;
