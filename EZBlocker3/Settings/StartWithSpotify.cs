@@ -46,6 +46,7 @@ namespace EZBlocker3.Settings {
             try {
                 using var spotifyIcon = Icon.ExtractAssociatedIcon(SpotifyPath);
                 using var spotifyIconBitmap = spotifyIcon.ToBitmap();
+                File.Delete(tempIconFilePath);
                 BitmapUtils.SaveAsIcon(spotifyIconBitmap, tempIconFilePath);
 
                 File.Delete(ProxyTempPath);

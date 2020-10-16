@@ -99,32 +99,20 @@ namespace EZBlocker3.Spotify {
         /// <summary>
         /// Occurs whenever the currently playing song changes.
         /// </summary>
-        public event ActiveSongChangedEventHandler? ActiveSongChanged;
-        /// <summary>
-        /// Represents an event handler for the ActiveSongChanged event.
-        /// </summary>
-        public delegate void ActiveSongChangedEventHandler(object sender, ActiveSongChangedEventArgs eventArgs);
+        public event EventHandler<ActiveSongChangedEventArgs>? ActiveSongChanged;
         /// <summary>
         /// Occurs whenever a new spotify process is hooked or an exisiting one is unhooked.
         /// </summary>
-        public event HookChangedEventHandler? HookChanged;
-        /// <summary>
-        /// Represents an event handler for the HookChanged event.
-        /// </summary>
-        public delegate void HookChangedEventHandler(object sender, EventArgs eventArgs);
+        public event EventHandler<EventArgs>? HookChanged;
         /// <summary>
         /// Occurs whenever spotify changes its state.
         /// </summary>
-        public event SpotifyStateChangedEventHandler? SpotifyStateChanged;
-        /// <summary>
-        /// Represents an event handler for the SpotifyStateChanged event.
-        /// </summary>
-        public delegate void SpotifyStateChangedEventHandler(object sender, SpotifyStateChangedEventArgs eventArgs);
+        public event EventHandler<SpotifyStateChangedEventArgs>? SpotifyStateChanged;
 
         /// <summary>
         /// The current audio session if spotify is running and a session has been initialized.
         /// </summary>
-        private AudioSession? _audioSession = null;
+        private AudioSession? _audioSession;
         public AudioSession? AudioSession => _audioSession ?? FetchAudioSession();
 
         private readonly WindowEventHook _titleChangeEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_NAMECHANGE);
@@ -193,7 +181,7 @@ namespace EZBlocker3.Spotify {
             var processes = Process.GetProcesses().Where(IsSpotifyProcess).ToArray();
 
             // find the main window process
-            var mainProcess = processes.Where(process => !string.IsNullOrWhiteSpace(process.MainWindowTitle)).FirstOrDefault();
+            var mainProcess = processes.FirstOrDefault(process => !string.IsNullOrWhiteSpace(process.MainWindowTitle));
 
             if (mainProcess == null)
                 return false;
@@ -461,7 +449,7 @@ namespace EZBlocker3.Spotify {
                     break;
                 // Advertisment playing or Starting up
                 case "Spotify":
-                    if (oldWindowTitle == "") {
+                    if (oldWindowTitle?.Length == 0) {
                         UpdateState(SpotifyState.StartingUp);
                     } else if (oldWindowTitle == null) {
                         if (MainWindowProcess is null)
@@ -501,7 +489,7 @@ namespace EZBlocker3.Spotify {
         /// OnSpotifyClosed is called whenever spotify is hooked.
         /// </summary>
         protected virtual void OnSpotifyClosed() {
-            Logger.LogWarning($"SpotifyHook: Spotify closed.");
+            Logger.LogWarning("SpotifyHook: Spotify closed.");
 
             ClearHookData();
 
@@ -527,9 +515,9 @@ namespace EZBlocker3.Spotify {
             ActiveSong = null;
             State = SpotifyState.Unknown;
 
-            _windowCreationEventHook.Unhook(throwIfNotHooked: false);
-            _titleChangeEventHook.Unhook(throwIfNotHooked: false);
-            _windowDestructionEventHook.Unhook(throwIfNotHooked: false);
+            _windowCreationEventHook.Unhook(throwIfNotHooked: false, throwOnFailure: false);
+            _titleChangeEventHook.Unhook(throwIfNotHooked: false, throwOnFailure: false);
+            _windowDestructionEventHook.Unhook(throwIfNotHooked: false, throwOnFailure: false);
         }
 
         /// <summary>
@@ -645,8 +633,8 @@ namespace EZBlocker3.Spotify {
 
     public class ActiveSongChangedEventArgs : EventArgs {
 
-        public SongInfo? PreviousActiveSong { get; private set; }
-        public SongInfo? NewActiveSong { get; private set; }
+        public SongInfo? PreviousActiveSong { get; }
+        public SongInfo? NewActiveSong { get; }
 
         public ActiveSongChangedEventArgs(SongInfo? previousActiveSong, SongInfo? newActiveSong) {
             PreviousActiveSong = previousActiveSong;

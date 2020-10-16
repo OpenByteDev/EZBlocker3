@@ -43,6 +43,8 @@ namespace EZBlocker3.Spotify {
                 for (var i = 0; i < 10; i++) {
                     await Task.Delay(50);
                     var peakVolume = SpotifyHook.AudioSession?.PeakVolume;
+                    if (peakVolume is null)
+                        break;
                     if (peakVolume == 0) {
                         SpotifyHook.Unmute();
                         break;

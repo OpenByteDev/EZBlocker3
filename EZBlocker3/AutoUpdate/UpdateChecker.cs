@@ -48,7 +48,7 @@ namespace EZBlocker3.AutoUpdate {
             var latestReleaseInfo = releases?[0];
             var latestVersionString = latestReleaseInfo?.Value<string>("tag_name");
             if (latestVersionString is null) {
-                Logger.LogError($"AutoUpdate: Update check failed (Failed to detect latest version)");
+                Logger.LogError("AutoUpdate: Update check failed (Failed to detect latest version)");
                 return null;
             }
 
@@ -64,7 +64,7 @@ namespace EZBlocker3.AutoUpdate {
                 .Select(e => e.Value<string>("browser_download_url"))
                 .FirstOrDefault();
             if (downloadUrl is null) {
-                Logger.LogError($"AutoUpdate: Update check failed (Failed to find download url)");
+                Logger.LogError("AutoUpdate: Update check failed (Failed to find download url)");
                 return null;
             }
             return new UpdateInfo(downloadUrl, currentVersion, latestVersion);

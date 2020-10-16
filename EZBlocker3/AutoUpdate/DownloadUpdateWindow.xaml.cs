@@ -58,7 +58,7 @@ namespace EZBlocker3.AutoUpdate {
             }
 
             await Dispatcher.InvokeAsync(() => {
-                downloadState.Text = $"Installing...";
+                downloadState.Text = "Installing...";
                 Owner.TaskbarItemInfo = new TaskbarItemInfo() {
                     ProgressState = TaskbarItemProgressState.Indeterminate
                 };

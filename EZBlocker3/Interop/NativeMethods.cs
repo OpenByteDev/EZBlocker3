@@ -222,7 +222,7 @@ namespace EZBlocker3.Interop {
             /// Flash both the window caption and taskbar button.
             /// This is equivalent to setting the <see cref="FLASHW_CAPTION" /> | <see cref="FLASHW_TRAY" /> flags.
             /// </summary>
-            FLASHW_ALL = 3,
+            FLASHW_ALL = FLASHW_CAPTION | FLASHW_TRAY,
             /// <summary>
             /// Flash continuously, until the <see cref="FLASHW_STOP" /> flag is set.
             /// </summary>

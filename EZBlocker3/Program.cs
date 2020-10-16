@@ -43,7 +43,7 @@ namespace EZBlocker3 {
             if (notAlreadyRunning) { // we are the only one around :(
                 var cancellationTokenSource = new CancellationTokenSource();
                 Task.Run(() => RunPipeServer(cancellationTokenSource.Token), cancellationTokenSource.Token);
-                
+
                 var exitCode = RunApp();
 
                 cancellationTokenSource.Cancel();

@@ -61,8 +61,9 @@ namespace EZBlocker3 {
 
             // if the screen configuration did not change, we restore the window position
             if (new Size(SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight) == Properties.Settings.Default.VirtualScreenSize
-                && Properties.Settings.Default.MainWindowPosition is Point position)
+                && Properties.Settings.Default.MainWindowPosition is Point position) {
                 (Left, Top) = position;
+            }
 
             if (Properties.Settings.Default.StartMinimized)
                 Minimize();
@@ -79,9 +80,10 @@ namespace EZBlocker3 {
         private IntPtr WindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled) {
             switch (msg) {
                 case (int)NativeMethods.WindowProcMessage.WM_SYSCOMMAND:
-                    if ((int)wParam == (int)NativeMethods.WindowMessageSystemCommand.SC_CLOSE)
+                    if ((int)wParam == (int)NativeMethods.WindowMessageSystemCommand.SC_CLOSE) {
                         // we manually close here, so that the "close window" command in the taskbar keeps working even if there is a dialog open.
                         Close();
+                    }
                     break;
             }
             return IntPtr.Zero;
@@ -119,8 +121,7 @@ namespace EZBlocker3 {
                     return;
 
                 await Dispatcher.InvokeAsync(() => {
-                    var decision = ShowUpdateFoundWindow(update);
-                    switch (decision) {
+                    switch (ShowUpdateFoundWindow(update)) {
                         case UpdateDecision.Accept:
                             Logger.LogInfo($"AutoUpdate: Accepted update to {update.UpdateVersion}");
                             ShowDownloadWindow(update);

@@ -1,7 +1,6 @@
 ﻿using EZBlocker3.Logging;
 using EZBlocker3.Settings;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Reflection;
@@ -66,16 +65,16 @@ namespace EZBlocker3 {
                 settings.AppPath = App.Location;
             }
 
-            if (settings.StartWithSpotify)
-                Task.Run(() => {
+            if (settings.StartWithSpotify) {
+                Task.Run(static () => {
                     // Ensure that the proxy is still installed correctly if enabled.
-                    StartWithSpotify.SetEnabled(settings.StartWithSpotify);
+                    StartWithSpotify.Enable();
 
                     // start spotify if start with spotify is enabled but we did not start through the proxy
                     if (!Program.CliArgs.IsProxyStart)
                         StartWithSpotify.StartSpotify();
                 });
-
+            }
         }
 
         protected override void OnExit(ExitEventArgs e) {
