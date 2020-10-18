@@ -9,8 +9,7 @@ using System.Threading.Tasks;
 namespace EZBlocker3.AutoUpdate {
     public class UpdateDownloader {
 
-        public event DownloadProgressEventHandler? Progress;
-        public delegate void DownloadProgressEventHandler(object sender, DownloadProgressEventArgs eventArgs);
+        public event EventHandler<DownloadProgressEventArgs>? Progress;
 
         public Task<DownloadedUpdate> Download(UpdateInfo update) => Download(update, CancellationToken.None);
         public async Task<DownloadedUpdate> Download(UpdateInfo update, CancellationToken cancellationToken) {
@@ -37,7 +36,7 @@ namespace EZBlocker3.AutoUpdate {
                 });
                 await contentStream.CopyToAsync(memoryStream, progressHandler, cancellationToken);
             } else {
-                Logger.LogWarning($"AutoUpdate: Failed to determine response content length.");
+                Logger.LogWarning("AutoUpdate: Failed to determine response content length.");
                 await contentStream.CopyToAsync(memoryStream, cancellationToken);
             }
             memoryStream.Seek(0, SeekOrigin.Begin);

@@ -20,7 +20,7 @@ namespace EZBlocker3.Audio.Com {
 			[Out][MarshalAs(UnmanagedType.I4)] out int count);
 
 		/// <summary>
-		/// Gets the audio session specified by an audio session number. 
+		/// Gets the audio session specified by an audio session number.
 		/// </summary>
 		/// <param name="index">The zero-based index of the session.</param>
 		/// <param name="session">Receives an <see cref="IAudioSessionControl2"/> session object in the collection that is maintained by the session enumerator.</param>

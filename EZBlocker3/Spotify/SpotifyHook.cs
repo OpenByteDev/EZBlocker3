@@ -181,7 +181,7 @@ namespace EZBlocker3.Spotify {
             var processes = Process.GetProcesses().Where(IsSpotifyProcess).ToArray();
 
             // find the main window process
-            var mainProcess = processes.FirstOrDefault(process => !string.IsNullOrWhiteSpace(process.MainWindowTitle));
+            var mainProcess = Array.Find(processes, process => !string.IsNullOrWhiteSpace(process.MainWindowTitle));
 
             if (mainProcess == null)
                 return false;

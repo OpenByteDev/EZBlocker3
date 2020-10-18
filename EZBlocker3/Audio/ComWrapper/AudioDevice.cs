@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 namespace EZBlocker3.Audio.ComWrapper {
     public class AudioDevice : ComWrapper<IMMDevice> {
 
-        private AudioDevice(IMMDevice device) : base(device) { }
+        public AudioDevice(IMMDevice device) : base(device) { }
 
         public static AudioDevice GetDefaultAudioDevice(EDataFlow dataFlow, ERole role) {
             IMMDeviceEnumerator? deviceEnumerator = null;

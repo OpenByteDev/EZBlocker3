@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace EZBlocker3.Audio.Com {
 	/// <summary>
-	/// Enables a client to control the master volume level of an audio session. 
+	/// Enables a client to control the master volume level of an audio session.
 	/// </summary>
 	/// <remarks>
 	/// MSDN Reference: http://msdn.microsoft.com/en-us/library/dd316531.aspx

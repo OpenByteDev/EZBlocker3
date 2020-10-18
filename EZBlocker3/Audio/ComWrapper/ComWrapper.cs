@@ -6,7 +6,7 @@ namespace EZBlocker3.Audio {
 
         protected readonly T ComObject;
 
-        public ComWrapper(T obj) {
+        protected ComWrapper(T obj) {
             ComObject = obj;
         }
 
