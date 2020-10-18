@@ -12,8 +12,7 @@ using System.Threading.Tasks;
 namespace EZBlocker3.AutoUpdate {
     public static class UpdateChecker {
 
-        private const string API_BASE_URL = "https://api.github.com/";
-        private const string RELEASES_ENDPOINT = API_BASE_URL+"repos/OpenByteDev/EZBlocker3/releases";
+        private const string RELEASES_ENDPOINT = "https://api.github.com/repos/OpenByteDev/EZBlocker3/releases";
 
         private static Version GetCurrentVersion() {
             if (App.ForceUpdate)
@@ -45,7 +44,9 @@ namespace EZBlocker3.AutoUpdate {
             using var reader = new JsonTextReader(new StreamReader(responseStream));
 
             var releases = await JToken.ReadFromAsync(reader, cancellationToken);
-            var latestReleaseInfo = releases?[0];
+            var latestReleaseInfo = releases?
+                .Where(e => !e.Value<bool>("prerelease"))
+                .FirstOrDefault();
             var latestVersionString = latestReleaseInfo?.Value<string>("tag_name");
             if (latestVersionString is null) {
                 Logger.LogError("AutoUpdate: Update check failed (Failed to detect latest version)");
