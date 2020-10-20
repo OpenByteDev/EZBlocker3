@@ -16,6 +16,10 @@ namespace EZBlocker3.Settings {
         private static string RealSpotifyPath => Path.ChangeExtension(SpotifyPath, "real.exe");
         [Lazy]
         private static string ProxyTempPath => Path.ChangeExtension(SpotifyPath, "proxy.exe");
+        [Lazy]
+        private static bool IsSpotifyDesktopInstalled => File.Exists(SpotifyPath);
+
+        public static bool Available =>  IsSpotifyDesktopInstalled;
 
         public static void SetEnabled(bool enabled) {
             if (enabled)
@@ -24,22 +28,28 @@ namespace EZBlocker3.Settings {
                 Disable();
         }
         public static void Enable() {
+            if (!IsSpotifyDesktopInstalled)
+                return;
+
             if (IsProxyInstalled())
                 return;
             InstallProxy();
         }
         public static void Disable() {
+            if (!IsSpotifyDesktopInstalled)
+                return;
+
             if (!IsProxyInstalled())
                 return;
             UninstallProxy();
         }
 
-    public static bool IsProxyInstalled() {
+        private static bool IsProxyInstalled() {
             if (!File.Exists(RealSpotifyPath))
                 return false;
             return !IsInvalidStateAfterSpotifyUpdate();
         }
-        public static void InstallProxy() {
+        private static void InstallProxy() {
             HandleInvalidStateAfterUpdate();
 
             var tempIconFilePath = Path.ChangeExtension(SpotifyPath, ".ico.temp");
@@ -64,7 +74,7 @@ namespace EZBlocker3.Settings {
                 File.Delete(tempIconFilePath);
             }
         }
-        public static void UninstallProxy() {
+        private static void UninstallProxy() {
             HandleInvalidStateAfterUpdate();
 
             if (File.Exists(RealSpotifyPath)) {
@@ -94,7 +104,7 @@ namespace EZBlocker3.Settings {
             }
         }
 
-        public static bool GenerateProxy(string executablePath, string iconPath) {
+        private static bool GenerateProxy(string executablePath, string iconPath) {
             var parameters = new CompilerParameters {
                 GenerateExecutable = true,
                 OutputAssembly = executablePath,
@@ -114,6 +124,9 @@ namespace EZBlocker3.Settings {
         }
 
         public static void TransformToProxied() {
+            if (!IsSpotifyDesktopInstalled)
+                return;
+
             HandleProxiedStart();
             if (!Program.CliArgs.IsProxyStart)
                 Program.CliArgs = Program.CliArgs with { IsProxyStart = true };
@@ -135,6 +148,9 @@ namespace EZBlocker3.Settings {
             }
         }
         public static void HandleProxiedExit() {
+            if (!IsSpotifyDesktopInstalled)
+                return;
+
             Logger.LogInfo("Reset proxy executable");
 
             if (!File.Exists(ProxyTempPath)) {
@@ -150,7 +166,9 @@ namespace EZBlocker3.Settings {
             }
         }
         public static void StartSpotify() {
-            TransformToProxied();
+            if (!IsSpotifyDesktopInstalled)
+                return;
+
             Process.Start(SpotifyPath).Dispose();
         }
 

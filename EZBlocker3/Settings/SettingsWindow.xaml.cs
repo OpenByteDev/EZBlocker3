@@ -16,6 +16,8 @@ namespace EZBlocker3.Settings {
             startOnLoginCheckBox.IsChecked = Properties.Settings.Default.StartOnLogin;
             startWithSpotifyCheckBox.IsChecked = Properties.Settings.Default.StartWithSpotify;
 
+            startWithSpotifyCheckBox.IsEnabled = StartWithSpotify.Available;
+
             saveButton.Click += (_, __) => { SaveSettings(); Close(); };
             cancelButton.Click += (_, __) => { Close(); };
             uninstallButton.Click += (_, __) => {
@@ -38,7 +40,8 @@ namespace EZBlocker3.Settings {
             Properties.Settings.Default.StartWithSpotify = startWithSpotifyCheckBox.IsChecked ?? Properties.Settings.Default.StartWithSpotify;
 
             Autostart.SetEnabled(Properties.Settings.Default.StartOnLogin);
-            StartWithSpotify.SetEnabled(Properties.Settings.Default.StartWithSpotify);
+            if (StartWithSpotify.Available)
+                StartWithSpotify.SetEnabled(Properties.Settings.Default.StartWithSpotify);
 
             Properties.Settings.Default.Save();
         }
