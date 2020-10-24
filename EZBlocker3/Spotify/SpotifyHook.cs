@@ -216,7 +216,7 @@ namespace EZBlocker3.Spotify {
         }
 
         [Lazy]
-        private Func<uint, Process> _getProcessByIdFastFunc {
+        private static Func<uint, Process> _getProcessByIdFastFunc {
             get {
                 // Expression Trees let us change a private field and are faster than reflection (if called multiple times)
                 var processIdParameter = Expression.Parameter(typeof(uint), "processId");

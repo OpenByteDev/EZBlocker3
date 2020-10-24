@@ -106,6 +106,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Description>EZBlocker 3 is a Spotify Ad Muter/Blocker for Windows written in C#. It mutes Spotify while an advertisement is playing.</Description>
     <StartupObject>EZBlocker3.Program</StartupObject>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
   </PropertyGroup>
 
 </Project>

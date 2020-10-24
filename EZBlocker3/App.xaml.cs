@@ -1,4 +1,5 @@
-﻿using EZBlocker3.Logging;
+﻿using EZBlocker3.Extensions;
+using EZBlocker3.Logging;
 using EZBlocker3.Settings;
 using System;
 using System.IO;
@@ -27,8 +28,8 @@ namespace EZBlocker3 {
 # endif
         public static bool ForceDebugMode = false;
         public static bool DebugModeEnabled => IsDebugBuild || ForceDebugMode || EZBlocker3.Properties.Settings.Default.DebugMode;
-        public static bool ForceUpdate = false;
-        public static bool ForceUpdateCheck = IsDebugBuild || ForceUpdate;
+        public static readonly bool ForceUpdate = false;
+        public static readonly bool ForceUpdateCheck = IsDebugBuild || ForceUpdate;
         public static bool SaveSettingsOnClose = true;
 
         protected override void OnStartup(StartupEventArgs eventArgs) {
@@ -82,7 +83,6 @@ namespace EZBlocker3 {
 
         protected override void OnExit(ExitEventArgs e) {
             base.OnExit(e);
-
             GlobalSingletons.Dispose();
         }
 

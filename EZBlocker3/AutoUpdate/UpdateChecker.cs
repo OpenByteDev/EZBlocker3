@@ -17,7 +17,8 @@ namespace EZBlocker3.AutoUpdate {
         private static Version GetCurrentVersion() {
             if (App.ForceUpdate)
                 return new Version("0.0.0.0");
-            return App.Version;
+            else 
+                return App.Version;
         }
 
         public static Task<UpdateInfo?> CheckForUpdate() => CheckForUpdate(CancellationToken.None);

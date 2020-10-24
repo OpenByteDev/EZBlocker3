@@ -14,5 +14,8 @@ namespace EZBlocker3.Extensions {
         public static DispatcherOperation BeginInvoke(this Dispatcher dispatcher, Action callback) =>
             dispatcher.BeginInvoke(DispatcherPriority.Normal, callback);
 
+        public static void BeginInvokeShutdown(this Dispatcher dispatcher) =>
+            dispatcher.BeginInvokeShutdown(DispatcherPriority.Normal);
+
     }
 }
