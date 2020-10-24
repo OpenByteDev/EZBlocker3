@@ -72,10 +72,10 @@ namespace EZBlocker3 {
                     StartWithSpotify.Enable();
 
                     // start spotify if start with spotify is enabled but we did not start through the proxy
-                    if (!Program.CliArgs.IsProxyStart) {
-                        StartWithSpotify.TransformToProxied();
-                        StartWithSpotify.StartSpotify();
-                    }
+                    // if (!Program.CliArgs.IsProxyStart) {
+                        // StartWithSpotify.TransformToProxied();
+                        // StartWithSpotify.StartSpotify();
+                    // }
                 });
             }
         }
