@@ -21,7 +21,7 @@
         <CheckBox x:Name="debugModeCheckBox" Content="Debug Mode" IsChecked="False" ToolTip="Enabling debug mode will create a log file in the directory of the executable." />
         <CheckBox x:Name="startMinimizedCheckBox" Content="Start Minimized" IsChecked="False" />
         <CheckBox x:Name="startOnLoginCheckBox" Content="Start on Login" IsChecked="False" ToolTip="Should EZBlocker 3 automatically start with Windows" />
-        <CheckBox x:Name="startWithSpotifyCheckBox" Content="Start with Spotify" IsChecked="False" ToolTip="Start EZBlocker 3 when Spotify is started." />
+        <CheckBox x:Name="startWithSpotifyCheckBox" Content="Start with Spotify (experimental)" IsChecked="False" ToolTip="Start EZBlocker 3 when Spotify is started." />
         <ui:SimpleStackPanel Orientation="Horizontal" Margin="0 10 0 0" HorizontalAlignment="Center" Spacing="10">
             <Button x:Name="uninstallButton" Content="Uninstall" Padding="20 5" />
             <Button x:Name="cancelButton" Content="Cancel" Padding="20 5" />
