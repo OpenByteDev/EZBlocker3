@@ -86,5 +86,13 @@ namespace EZBlocker3 {
             GlobalSingletons.Dispose();
         }
 
+        protected override void OnSessionEnding(SessionEndingCancelEventArgs e) {
+            // Cancel forced shutdown and shutdown normally.
+            // This allows the cleanup code after the app.Run() method in Program.cs to run.
+            e.Cancel = true;
+            Shutdown();
+
+            base.OnSessionEnding(e);
+        }
     }
 }
