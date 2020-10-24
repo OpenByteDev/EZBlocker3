@@ -183,6 +183,7 @@ public static class Proxy {
         var spotifyArgs = @""" + spotifyArgs + @""";
 
         Process.Start(spotifyPath, spotifyArgs).Dispose();
+        Thread.Sleep(2000);
         Process.Start(appPath, appArgs).Dispose();
     }
 }";
