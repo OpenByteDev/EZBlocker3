@@ -45,8 +45,10 @@ namespace EZBlocker3.Settings {
         }
 
         private static bool IsProxyInstalled() {
-            if (!File.Exists(RealSpotifyPath))
-                return false;
+            if (File.Exists(RealSpotifyPath))
+                return true;
+            if (Program.CliArgs.IsProxyStart && File.Exists(ProxyTempPath))
+                return true;
             return !IsInvalidStateAfterSpotifyUpdate();
         }
         private static void InstallProxy() {
@@ -124,12 +126,14 @@ namespace EZBlocker3.Settings {
         }
 
         public static void TransformToProxied() {
+            if (Program.CliArgs.IsProxyStart)
+                throw new InvalidOperationException("Already running as proxied.");
+
             if (!IsSpotifyDesktopInstalled)
                 return;
 
+            Program.CliArgs = Program.CliArgs with { IsProxyStart = true };
             HandleProxiedStart();
-            if (!Program.CliArgs.IsProxyStart)
-                Program.CliArgs = Program.CliArgs with { IsProxyStart = true };
         }
         public static void HandleProxiedStart() {
             Logger.LogInfo("Started through proxy executable");
@@ -143,6 +147,7 @@ namespace EZBlocker3.Settings {
                 File.Delete(ProxyTempPath);
                 File.Move(SpotifyPath, ProxyTempPath);
                 File.Move(RealSpotifyPath, SpotifyPath);
+                StartSpotify();
             } catch (Exception e) {
                 Logger.LogException("Failed to handle proxied start:", e);
             }
@@ -182,8 +187,7 @@ public static class Proxy {
         var spotifyPath = @""" + spotifyPath + @""";
         var spotifyArgs = @""" + spotifyArgs + @""";
 
-        Process.Start(spotifyPath, spotifyArgs).Dispose();
-        Thread.Sleep(2000);
+        // Process.Start(spotifyPath, spotifyArgs).Dispose();
         Process.Start(appPath, appArgs).Dispose();
     }
 }";

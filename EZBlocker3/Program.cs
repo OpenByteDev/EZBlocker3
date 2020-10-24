@@ -89,7 +89,7 @@ namespace EZBlocker3 {
 
             using var reader = new StreamReader(server);
             if (await reader.ReadLineAsync() is string line) {
-                if (line == CliArgs.ProxyStartOption) {
+                if (line == CliArgs.ProxyStartOption && !CliArgs.IsProxyStart) {
                     StartWithSpotify.TransformToProxied();
                 }
             }
