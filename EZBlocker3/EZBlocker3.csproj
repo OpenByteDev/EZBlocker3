@@ -73,12 +73,12 @@
     <TargetFramework>net472</TargetFramework>
     <LangVersion>9.0</LangVersion>
     <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
-    <PublishTrimmed>True</PublishTrimmed>
-    <PublishSingleFile>True</PublishSingleFile>
     <PublishReadyToRun>True</PublishReadyToRun>
     <PublishReadyToRunShowWarnings>True</PublishReadyToRunShowWarnings>
     <DeleteExistingFiles>True</DeleteExistingFiles>
-    <SelfContained>True</SelfContained>
+    <!--SelfContained>True</SelfContained-->
+    <!--PublishTrimmed>True</PublishTrimmed-->
+    <!--PublishSingleFile>True</PublishSingleFile-->
     <NoStandardLibraries>True</NoStandardLibraries>
     <TieredCompilationQuickJit>True</TieredCompilationQuickJit>
     <AutoGenerateBindingRedirects>True</AutoGenerateBindingRedirects>
