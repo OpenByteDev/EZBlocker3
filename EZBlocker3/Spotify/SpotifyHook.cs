@@ -115,6 +115,8 @@ namespace EZBlocker3.Spotify {
         private AudioSession? _audioSession;
         public AudioSession? AudioSession => _audioSession ?? FetchAudioSession();
 
+        public bool AssumeAdOnUnknownState { get; init; }
+
         private readonly WindowEventHook _titleChangeEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_NAMECHANGE);
         private readonly WindowEventHook _windowDestructionEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_DESTROY);
         private readonly WindowEventHook _windowCreationEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_SHOW);
@@ -479,8 +481,13 @@ namespace EZBlocker3.Spotify {
                     break;
                 // What is happening?
                 default:
-                    UpdateState(SpotifyState.Unknown);
                     Logger.LogWarning($"SpotifyHook: Spotify entered an unknown state. (WindowTitle={newWindowTitle})");
+                    if (AssumeAdOnUnknownState) {
+                        Logger.LogInfo($"SpotifyHook: Assuming WindowTitle={newWindowTitle} marks an ad.");
+                        UpdateState(SpotifyState.PlayingAdvertisement);
+                    } else {
+                        UpdateState(SpotifyState.Unknown);
+                    }
                     break;
             }
         }

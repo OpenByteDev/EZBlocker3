@@ -240,7 +240,9 @@ namespace EZBlocker3 {
 
         #region SpotifyHook
         private void SetupSpotifyHook() {
-            _spotifyHook = new SpotifyHook();
+            _spotifyHook = new SpotifyHook() {
+                AssumeAdOnUnknownState = Properties.Settings.Default.AssumeAdOnUnknownState
+            };
             _spotifyMuter = new SpotifyMuter(_spotifyHook);
 
             _spotifyHook.SpotifyStateChanged += (_, __) => UpdateStatusLabel();

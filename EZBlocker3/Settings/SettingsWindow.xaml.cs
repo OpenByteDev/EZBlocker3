@@ -12,6 +12,7 @@ namespace EZBlocker3.Settings {
             minimizeToTaskbarRadioButton.IsChecked = !Properties.Settings.Default.MinimizeToTray;
             checkForUpdatesCheckBox.IsChecked = Properties.Settings.Default.CheckForUpdates;
             debugModeCheckBox.IsChecked = Properties.Settings.Default.DebugMode;
+            assumeAdOnUnknowsStateCheckBox.IsChecked = Properties.Settings.Default.AssumeAdOnUnknownState;
             startMinimizedCheckBox.IsChecked = Properties.Settings.Default.StartMinimized;
             startOnLoginCheckBox.IsChecked = Properties.Settings.Default.StartOnLogin;
             startWithSpotifyCheckBox.IsChecked = Properties.Settings.Default.StartWithSpotify;
@@ -35,6 +36,7 @@ namespace EZBlocker3.Settings {
             Properties.Settings.Default.MinimizeToTray = minimizeToTrayRadioButton.IsChecked ?? Properties.Settings.Default.MinimizeToTray;
             Properties.Settings.Default.CheckForUpdates = checkForUpdatesCheckBox.IsChecked ?? Properties.Settings.Default.CheckForUpdates;
             Properties.Settings.Default.DebugMode = debugModeCheckBox.IsChecked ?? Properties.Settings.Default.DebugMode;
+            Properties.Settings.Default.AssumeAdOnUnknownState = assumeAdOnUnknowsStateCheckBox.IsChecked ?? Properties.Settings.Default.AssumeAdOnUnknownState;
             Properties.Settings.Default.StartMinimized = startMinimizedCheckBox.IsChecked ?? Properties.Settings.Default.StartMinimized;
             Properties.Settings.Default.StartOnLogin = startOnLoginCheckBox.IsChecked ?? Properties.Settings.Default.StartOnLogin;
             Properties.Settings.Default.StartWithSpotify = startWithSpotifyCheckBox.IsChecked ?? Properties.Settings.Default.StartWithSpotify;

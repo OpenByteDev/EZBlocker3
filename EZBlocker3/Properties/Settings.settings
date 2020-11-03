@@ -41,5 +41,8 @@
     <Setting Name="LastUpdateCheck" Type="System.Nullable`1[System.DateTime]" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="AssumeAdOnUnknownState" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>
