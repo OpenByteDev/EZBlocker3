@@ -275,7 +275,7 @@ namespace EZBlocker3 {
                         return "Spotify is starting...";
                     case SpotifyState.ShuttingDown:
                         return "Spotify is shutting down...";
-                    case SpotifyState.Unknown:
+                    // case SpotifyState.Unknown:
                     default:
                         return "Spotify is an unknown state.";
                 }
@@ -289,10 +289,14 @@ namespace EZBlocker3 {
 
         public void Minimize() {
             WindowState = WindowState.Minimized;
+
+            OnStateChanged(EventArgs.Empty);
         }
         public void Deminimize() {
             WindowState = WindowState.Normal;
             Activate();
+
+            OnStateChanged(EventArgs.Empty);
         }
 
         private (Brush, Thickness)? _defaultBorder;
