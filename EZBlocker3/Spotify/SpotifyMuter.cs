@@ -23,12 +23,7 @@ namespace EZBlocker3.Spotify {
             if (oldState == SpotifyState.StartingUp && newState == SpotifyState.Paused)
                 return;
 
-            if (oldState == SpotifyState.PlayingAdvertisement) {
-                SpotifyHook.Unmute();
-                return;
-            }
-
-            if (!WaitForAudioFade) {
+            if (!WaitForAudioFade || oldState != SpotifyState.PlayingAdvertisement) {
                 SpotifyHook.SetMute(mute: SpotifyHook.IsAdPlaying);
                 return;
             }
@@ -39,16 +34,18 @@ namespace EZBlocker3.Spotify {
             }
 
             Task.Run(async () => {
+                /*
                 for (var i = 0; i < 10; i++) {
                     await Task.Delay(50);
                     var peakVolume = SpotifyHook.AudioSession?.PeakVolume;
+                    Logging.Logger.LogDebug("peakVolume: " + peakVolume);
                     if (peakVolume is null)
                         break;
-                    if (peakVolume == 0) {
-                        SpotifyHook.Unmute();
+                    if (peakVolume < 0.01)
                         break;
-                    }
-                }
+                }*/
+                await Task.Delay(600).ConfigureAwait(false);
+                SpotifyHook.Unmute();
             });
         }
     }
