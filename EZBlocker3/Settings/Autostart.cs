@@ -3,7 +3,6 @@ using Microsoft.Win32;
 
 namespace EZBlocker3.Settings {
     public static class Autostart {
-
         private const string StartupApprovedRunKey = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run";
         private const string RunKey = @"Software\Microsoft\Windows\CurrentVersion\Run";
 

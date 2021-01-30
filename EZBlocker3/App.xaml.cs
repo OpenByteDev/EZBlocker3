@@ -1,5 +1,4 @@
-﻿using EZBlocker3.Extensions;
-using EZBlocker3.Logging;
+﻿using EZBlocker3.Logging;
 using EZBlocker3.Settings;
 using System;
 using System.IO;
@@ -10,7 +9,6 @@ using System.Windows;
 
 namespace EZBlocker3 {
     public partial class App : Application {
-
         public static readonly Assembly Assembly = Assembly.GetExecutingAssembly();
         public static readonly AssemblyName AssemblyName = Assembly.GetName();
         public static readonly string Name = AssemblyName.Name;
@@ -26,11 +24,11 @@ namespace EZBlocker3 {
 #else
             false;
 # endif
-        public static bool ForceDebugMode = false;
+        internal static bool ForceDebugMode = false;
         public static bool DebugModeEnabled => IsDebugBuild || ForceDebugMode || EZBlocker3.Properties.Settings.Default.DebugMode;
         public static readonly bool ForceUpdate = false;
         public static readonly bool ForceUpdateCheck = IsDebugBuild || ForceUpdate;
-        public static bool SaveSettingsOnClose = true;
+        internal static bool SaveSettingsOnClose = true;
 
         protected override void OnStartup(StartupEventArgs eventArgs) {
             base.OnStartup(eventArgs);
@@ -55,7 +53,7 @@ namespace EZBlocker3 {
             }
 
             // check if executable has moved
-            if (App.Location != settings.AppPath) {
+            if (Location != settings.AppPath) {
                 try {
                     if (settings.StartOnLogin)
                         Autostart.SetEnabled(settings.StartOnLogin);
@@ -64,7 +62,7 @@ namespace EZBlocker3 {
                     Logger.LogException("Failed to adjust to changed app path:", e);
                 }
 
-                settings.AppPath = App.Location;
+                settings.AppPath = Location;
             }
 
             if (settings.StartWithSpotify) {

@@ -3,7 +3,6 @@ using System.Windows;
 
 namespace EZBlocker3.Utils {
     internal static class WindowHelper {
-
         public static void ApplySizeToContentFix(Window window) {
             void Handler(object sender, EventArgs eventArgs) {
                 window.InvalidateMeasure();
@@ -34,6 +33,5 @@ namespace EZBlocker3.Utils {
             if (newValue && obj is Window window)
                 ApplySizeToContentFix(window);
         }
-
     }
 }

@@ -9,7 +9,6 @@ using System.IO;
 
 namespace EZBlocker3.Settings {
     public static class StartWithSpotify {
-
         [Lazy]
         private static string SpotifyPath => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Spotify\Spotify.exe";
         [Lazy]

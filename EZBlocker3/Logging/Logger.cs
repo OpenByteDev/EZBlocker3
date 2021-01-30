@@ -7,7 +7,6 @@ using System.Runtime.InteropServices;
 
 namespace EZBlocker3.Logging {
     public static class Logger {
-
         [Lazy]
         private static string _logFilePath {
             get {
@@ -16,7 +15,7 @@ namespace EZBlocker3.Logging {
             }
         }
 
-        private static readonly object _lock_logFile = new object();
+        private static readonly object _lock_logFile = new();
         public static void Log(LogLevel level, string message) {
             if (App.DebugModeEnabled) {
                 var formatted = $"[{DateTime.Now}][{level}] {message}";
@@ -40,6 +39,5 @@ namespace EZBlocker3.Logging {
         public static void LogException(string message, Exception exception) {
             LogError(message + "\n" + exception.ToString());
         }
-
     }
 }

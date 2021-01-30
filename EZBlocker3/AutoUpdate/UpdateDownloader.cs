@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 namespace EZBlocker3.AutoUpdate {
     public class UpdateDownloader {
-
         public event EventHandler<DownloadProgressEventArgs>? Progress;
 
         public Task<DownloadedUpdate> Download(UpdateInfo update) => Download(update, CancellationToken.None);
@@ -19,12 +18,12 @@ namespace EZBlocker3.AutoUpdate {
 
             // download file
             var client = GlobalSingletons.HttpClient;
-            var response = await client.GetAsync(update.DownloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
+            var response = await client.GetAsync(update.DownloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
             Logger.LogDebug("AutoUpdate: Received response headers");
 
-            using var contentStream = await response.Content.ReadAsStreamAsync();
+            using var contentStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
             var contentLength = response.Content.Headers.ContentLength;
 
             // copy to memory stream
@@ -34,10 +33,10 @@ namespace EZBlocker3.AutoUpdate {
                     Progress?.Invoke(this, new DownloadProgressEventArgs(bytesReceived, totalBytes));
                     Logger.LogDebug($"AutoUpdate: Received {bytesReceived}/{totalBytes} bytes");
                 });
-                await contentStream.CopyToAsync(memoryStream, progressHandler, cancellationToken);
+                await contentStream.CopyToAsync(memoryStream, progressHandler, cancellationToken).ConfigureAwait(false);
             } else {
                 Logger.LogWarning("AutoUpdate: Failed to determine response content length.");
-                await contentStream.CopyToAsync(memoryStream, cancellationToken);
+                await contentStream.CopyToAsync(memoryStream, cancellationToken).ConfigureAwait(false);
             }
             memoryStream.Seek(0, SeekOrigin.Begin);
 
@@ -45,11 +44,9 @@ namespace EZBlocker3.AutoUpdate {
 
             return new DownloadedUpdate(memoryStream);
         }
-
     }
 
     public class DownloadProgressEventArgs : EventArgs {
-
         public float DownloadPercentage => (float)BytesReceived / TotalBytesToReceive;
         public long BytesReceived { get; }
         public long TotalBytesToReceive { get; }
@@ -58,6 +55,5 @@ namespace EZBlocker3.AutoUpdate {
             BytesReceived = bytesReceived;
             TotalBytesToReceive = totalBytesToReceive;
         }
-
     }
 }

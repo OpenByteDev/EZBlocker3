@@ -9,7 +9,6 @@ using System.Windows;
 
 namespace EZBlocker3.AutoUpdate {
     public static class UpdateInstaller {
-
         [Lazy]
         private static string TempOldAppPath => Path.ChangeExtension(App.Location, ".exe.bak");
 
@@ -39,9 +38,7 @@ namespace EZBlocker3.AutoUpdate {
 
                 Logger.LogDebug("AutoUpdate: Restarting");
                 Process.Start(App.Location, "/updateRestart").Dispose();
-                Application.Current.Dispatcher.Invoke(() => {
-                    Application.Current.Shutdown();
-                });
+                Application.Current.Dispatcher.Invoke(() => Application.Current.Shutdown());
             } catch(Exception e) {
                 Logger.LogException("AutoUpdate: Installation failed:", e);
                 Logger.LogInfo("AutoUpdate: Starting failure cleanup");
@@ -67,7 +64,7 @@ namespace EZBlocker3.AutoUpdate {
 
         public static void CleanupUpdate() {
             Task.Run(async () => {
-                await Task.Delay(10000);
+                await Task.Delay(10000).ConfigureAwait(false);
                 File.Delete(TempOldAppPath);
             });
         }

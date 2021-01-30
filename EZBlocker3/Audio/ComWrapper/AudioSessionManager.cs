@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 
 namespace EZBlocker3.Audio.ComWrapper {
     public class AudioSessionManager : ComWrapper<IAudioSessionManager2> {
-
         public AudioSessionManager(IAudioSessionManager2 sessionManager) : base(sessionManager) { }
 
         public AudioSessionCollection GetSessionCollection() {
@@ -17,6 +16,5 @@ namespace EZBlocker3.Audio.ComWrapper {
                 throw;
             }
         }
-
     }
 }

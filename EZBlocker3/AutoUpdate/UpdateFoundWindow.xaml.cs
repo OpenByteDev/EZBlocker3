@@ -2,7 +2,6 @@
 
 namespace EZBlocker3.AutoUpdate {
     public partial class UpdateFoundWindow : Window {
-
         public enum UpdateDecision {
             Accept,
             NotNow,
@@ -16,15 +15,9 @@ namespace EZBlocker3.AutoUpdate {
 
             versionInfoLabel.Text = $"{update.CurrentVersion} -> {update.UpdateVersion}";
 
-            acceptDownloadButton.Click += (_, __) => {
-                Close(UpdateDecision.Accept);
-            };
-            notNowButton.Click += (_, __) => {
-                Close(UpdateDecision.NotNow);
-            };
-            ignoreUpdateButton.Click += (_, __) => {
-                Close(UpdateDecision.IgnoreUpdate);
-            };
+            acceptDownloadButton.Click += (_, __) => Close(UpdateDecision.Accept);
+            notNowButton.Click += (_, __) => Close(UpdateDecision.NotNow);
+            ignoreUpdateButton.Click += (_, __) => Close(UpdateDecision.IgnoreUpdate);
         }
 
         private void Close(UpdateDecision decision) {

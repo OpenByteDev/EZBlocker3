@@ -2,7 +2,6 @@
 
 namespace EZBlocker3.Extensions {
     internal static class DirectoryInfoExtensions {
-
         public static void RecursiveDelete(this DirectoryInfo directory) {
             if (!directory.Exists)
                 return;
@@ -12,6 +11,5 @@ namespace EZBlocker3.Extensions {
 
             directory.Delete(recursive: true);
         }
-
     }
 }

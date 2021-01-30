@@ -2,7 +2,6 @@
 
 namespace EZBlocker3.Extensions {
     internal static class ArrayExtensions {
-
         public static void Deconstruct<T>(this T[] items, out T t0) {
             t0 = items.Length > 0 ? items[0] : default;
         }
@@ -51,6 +50,5 @@ namespace EZBlocker3.Extensions {
             t5 = items.Length > 5 ? items[5] : default;
             t6 = items.Length > 6 ? items[6] : default;
         }
-
     }
 }

@@ -27,11 +27,10 @@ using Size = System.Windows.Size;
 
 namespace EZBlocker3 {
     public partial class MainWindow : Window {
-
         private SpotifyHook _spotifyHook;
         private SpotifyMuter _spotifyMuter;
         private NotifyIcon _notifyIcon;
-        private readonly CancellationTokenSource _cancellationSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource _cancellationSource = new();
 
 #pragma warning disable CS8618
         public MainWindow() {
@@ -113,8 +112,8 @@ namespace EZBlocker3 {
         }
         private async Task RunUpdateCheck() {
             try {
-                var result = await UpdateChecker.CheckForUpdate(_cancellationSource.Token);
-                if (!(result is UpdateInfo update)) // No update found
+                var result = await UpdateChecker.CheckForUpdate(_cancellationSource.Token).ConfigureAwait(false);
+                if (result is not UpdateInfo update) // No update found
                     return;
 
                 if (Properties.Settings.Default.IgnoreUpdate == update.UpdateVersion.ToString())
@@ -141,15 +140,17 @@ namespace EZBlocker3 {
         }
 
         private UpdateDecision? ShowUpdateFoundWindow(UpdateInfo update) {
-            var updateWindow = new UpdateFoundWindow(update);
-            updateWindow.Owner = this;
+            var updateWindow = new UpdateFoundWindow(update) {
+                Owner = this
+            };
             updateWindow.ShowDialog();
             return updateWindow.Decision;
         }
 
         private bool? ShowDownloadWindow(UpdateInfo update) {
-            var downloadUpdateWindow = new DownloadUpdateWindow(update);
-            downloadUpdateWindow.Owner = this;
+            var downloadUpdateWindow = new DownloadUpdateWindow(update) {
+                Owner = this
+            };
             return downloadUpdateWindow.ShowDialog();
         }
         #endregion
@@ -160,8 +161,9 @@ namespace EZBlocker3 {
         }
 
         private bool? ShowSettingsWindow() {
-            var settingsWindow = new SettingsWindow();
-            settingsWindow.Owner = this;
+            var settingsWindow = new SettingsWindow {
+                Owner = this
+            };
             return settingsWindow.ShowDialog();
         }
 
@@ -185,9 +187,7 @@ namespace EZBlocker3 {
                         break;
                 }
             };
-            _notifyIcon.BalloonTipClicked += (_, __) => {
-                Deminimize();
-            };
+            _notifyIcon.BalloonTipClicked += (_, __) => Deminimize();
             StateChanged += (_, __) => {
                 if (WindowState == WindowState.Minimized && !ShowInTaskbar)
                     _notifyIcon.ShowBalloonTip(5000, "EZBlocker3", "EZBlocker3 is hidden. Click this icon to restore.", ToolTipIcon.None);
@@ -253,9 +253,7 @@ namespace EZBlocker3 {
         }
 
         private void UpdateStatusLabel() {
-            Dispatcher.BeginInvoke(() => {
-                StateLabel.Text = GetStateText();
-            });
+            Dispatcher.BeginInvoke(() => StateLabel.Text = GetStateText());
         }
 
         private string GetStateText() {
@@ -266,7 +264,7 @@ namespace EZBlocker3 {
                     case SpotifyState.Paused:
                         return "Spotify is paused.";
                     case SpotifyState.PlayingSong:
-                        if (!(_spotifyHook.ActiveSong is SongInfo song)) {
+                        if (_spotifyHook.ActiveSong is not SongInfo song) {
                             Logger.LogError("SpotifyHook: Active song is undefined in PlayingSong state.");
                             throw new IllegalStateException();
                         }
@@ -342,6 +340,5 @@ namespace EZBlocker3 {
                 _spotifyHook.Dispose();
             }
         }
-
     }
 }

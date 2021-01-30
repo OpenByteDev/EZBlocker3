@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 namespace EZBlocker3.Extensions {
     internal static class StreamExtensions {
-
         // https://referencesource.microsoft.com/#mscorlib/system/io/stream.cs,2a0f078c2e0c0aa8
         private const int DefaultCopyBufferSize = 81920;
 
@@ -13,13 +12,11 @@ namespace EZBlocker3.Extensions {
             source.CopyToAsync(destination, DefaultCopyBufferSize, cancellationToken);
         public static Task CopyToAsync(this Stream source, Stream destination, IProgress<long>? progress = null, CancellationToken cancellationToken = default) =>
             CopyToAsync(source, destination, DefaultCopyBufferSize, progress, cancellationToken);
-        public static async Task CopyToAsync(this Stream source, Stream destination, int bufferSize, IProgress<long>? progress = null, CancellationToken cancellationToken = default) {
+        public static Task CopyToAsync(this Stream source, Stream destination, int bufferSize, IProgress<long>? progress = null, CancellationToken cancellationToken = default) {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
-            if (progress == null) {
-                await source.CopyToAsync(destination, bufferSize, cancellationToken);
-                return;
-            }
+            if (progress == null)
+                return source.CopyToAsync(destination, bufferSize, cancellationToken);
 
             // from https://referencesource.microsoft.com/#mscorlib/system/io/unmanagedmemorystreamwrapper.cs,05bf6506f3abc6ed
             if (destination == null)
@@ -35,13 +32,17 @@ namespace EZBlocker3.Extensions {
             if (!destination.CanWrite)
                 throw new NotSupportedException("Stream does not support writing."); // Environment.GetResourceString("NotSupported_UnwritableStream");
 
-            var buffer = new byte[bufferSize];
-            long totalBytesRead = 0;
-            int bytesRead;
-            while ((bytesRead = await source.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) != 0) {
-                await destination.WriteAsync(buffer, 0, bytesRead, cancellationToken);
-                totalBytesRead += bytesRead;
-                progress.Report(totalBytesRead);
+            return Core();
+
+            async Task Core() {
+                var buffer = new byte[bufferSize];
+                long totalBytesRead = 0;
+                int bytesRead;
+                while ((bytesRead = await source.ReadAsync(buffer, 0, buffer.Length, cancellationToken).ConfigureAwait(false)) != 0) {
+                    await destination.WriteAsync(buffer, 0, bytesRead, cancellationToken).ConfigureAwait(false);
+                    totalBytesRead += bytesRead;
+                    progress.Report(totalBytesRead);
+                }
             }
         }
     }

@@ -10,7 +10,6 @@ namespace EZBlocker3.Audio.Com {
     /// </remarks>
     [Guid("A95664D2-9614-4F35-A746-DE8DB63617E6"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface IMMDeviceEnumerator {
-
         /*
         /// <summary>
         /// Generates a collection of audio endpoint devices that meet the specified criteria.

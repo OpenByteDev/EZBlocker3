@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 
 namespace EZBlocker3.Audio.ComWrapper {
     public class AudioSession : IDisposable {
-
         private readonly IAudioSessionControl _audioSessionControl;
         private readonly IAudioSessionControl2? _audioSessionControl2;
         private readonly ISimpleAudioVolume? _simpleAudioVolume;

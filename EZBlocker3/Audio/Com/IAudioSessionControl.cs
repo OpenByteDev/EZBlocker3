@@ -107,6 +107,5 @@ namespace EZBlocker3.Audio.Com {
             [In] IAudioSessionEvents client);
         */
 		void NotImpl2();
-
 	}
 }

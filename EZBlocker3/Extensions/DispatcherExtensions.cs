@@ -4,7 +4,6 @@ using System.Windows.Threading;
 
 namespace EZBlocker3.Extensions {
     internal static class DispatcherExtensions {
-
         public static DispatcherOperation InvokeAsync(this Dispatcher dispatcher, Action callback, CancellationToken cancellationToken) =>
             dispatcher.InvokeAsync(callback, DispatcherPriority.Normal, cancellationToken);
 
@@ -16,6 +15,5 @@ namespace EZBlocker3.Extensions {
 
         public static void BeginInvokeShutdown(this Dispatcher dispatcher) =>
             dispatcher.BeginInvokeShutdown(DispatcherPriority.Normal);
-
     }
 }

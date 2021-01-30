@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 
 namespace EZBlocker3.Extensions {
     internal static class ProcessExtensions {
-
         [Lazy]
         private static Func<Process, bool> _getProcessAssociatedFunc {
             get {
@@ -21,6 +20,5 @@ namespace EZBlocker3.Extensions {
         public static bool IsAssociated(this Process process) {
             return _getProcessAssociatedFunc(process);
         }
-
     }
 }

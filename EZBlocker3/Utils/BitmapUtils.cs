@@ -4,7 +4,6 @@ using System.IO;
 
 namespace EZBlocker3.Utils {
     internal static class BitmapUtils {
-
         // based on https://stackoverflow.com/a/11448060/6304917
         public static void SaveAsIcon(Bitmap sourceBitmap, string filePath) {
             using var file = new FileStream(filePath, FileMode.Create);

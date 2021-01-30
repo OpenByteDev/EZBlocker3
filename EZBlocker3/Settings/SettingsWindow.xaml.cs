@@ -3,7 +3,6 @@ using MessageBox = ModernWpf.MessageBox;
 
 namespace EZBlocker3.Settings {
     public partial class SettingsWindow : Window {
-
         public SettingsWindow() {
             InitializeComponent();
 
@@ -20,7 +19,7 @@ namespace EZBlocker3.Settings {
             startWithSpotifyCheckBox.IsEnabled = StartWithSpotify.Available;
 
             saveButton.Click += (_, __) => { SaveSettings(); Close(); };
-            cancelButton.Click += (_, __) => { Close(); };
+            cancelButton.Click += (_, __) => Close();
             uninstallButton.Click += (_, __) => {
                 if (MessageBox.Show("Do you really want to uninstall EZBlocker 3?", "Confirm Uninstall", MessageBoxButton.YesNo) == MessageBoxResult.Yes) {
                     Uninstall.Run();
@@ -47,6 +46,5 @@ namespace EZBlocker3.Settings {
 
             Properties.Settings.Default.Save();
         }
-
     }
 }

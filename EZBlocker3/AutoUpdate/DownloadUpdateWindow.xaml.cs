@@ -8,9 +8,8 @@ using System.Windows.Shell;
 
 namespace EZBlocker3.AutoUpdate {
     public partial class DownloadUpdateWindow : Window {
-
         private readonly UpdateInfo Update;
-        private readonly CancellationTokenSource _cancellationSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource _cancellationSource = new();
 
         public DownloadUpdateWindow(UpdateInfo update) {
             Update = update;
@@ -47,7 +46,7 @@ namespace EZBlocker3.AutoUpdate {
 
             DownloadedUpdate? downloadedUpdate = null;
             try {
-                downloadedUpdate = await downloader.Download(Update, _cancellationSource.Token);
+                downloadedUpdate = await downloader.Download(Update, _cancellationSource.Token).ConfigureAwait(false);
             } catch (Exception e) {
                 Logger.LogException("AutoUpdate: Update download failed", e);
                 await Dispatcher.InvokeAsync(() => {

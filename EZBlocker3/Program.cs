@@ -11,7 +11,6 @@ using System.Windows;
 
 namespace EZBlocker3 {
     internal static class Program {
-
         private static readonly string SingletonMutexName = App.Name + "_SingletonMutex";
         private static readonly string PipeName = App.Name + "_IPC";
 
@@ -77,27 +76,23 @@ namespace EZBlocker3 {
                     server.Disconnect();
                 server.Dispose();
             });
-            await server.WaitForConnectionAsync(cancellationToken);
+            await server.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
 
             // we received a connection, which means another instance was started -> we bring the window to the front
             _ = Application.Current.Dispatcher.BeginInvoke(() => {
                 var mainWindow = (MainWindow)Application.Current.MainWindow;
-                mainWindow.Dispatcher.BeginInvoke(() => {
-                    mainWindow.Deminimize();
-                });
+                mainWindow.Dispatcher.BeginInvoke(() => mainWindow.Deminimize());
             });
 
             using var reader = new StreamReader(server);
-            if (await reader.ReadLineAsync() is string line) {
-                if (line == CliArgs.ProxyStartOption && !CliArgs.IsProxyStart) {
-                    StartWithSpotify.TransformToProxied();
-                }
+            if (await reader.ReadLineAsync().ConfigureAwait(false) is string line && line == CliArgs.ProxyStartOption && !CliArgs.IsProxyStart) {
+                StartWithSpotify.TransformToProxied();
             }
 
             server.Disconnect();
 
             // restart server
-            await RunPipeServer(cancellationToken);
+            await RunPipeServer(cancellationToken).ConfigureAwait(false);
         }
 
         private static int RunApp() {
@@ -111,9 +106,8 @@ namespace EZBlocker3 {
             app.InitializeComponent();
             app.ShutdownMode = ShutdownMode.OnMainWindowClose;
             app.DispatcherUnhandledException += (s, e) => OnUnhandledException(e.Exception);
-            TaskScheduler.UnobservedTaskException += (s, e) => {
+            TaskScheduler.UnobservedTaskException += (s, e) =>
                 Logger.LogException("Unobserved task exception: ", e.Exception);
-            };
 
             var exitCode = app.Run();
 

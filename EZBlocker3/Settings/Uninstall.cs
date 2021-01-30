@@ -7,7 +7,6 @@ using System.Windows;
 
 namespace EZBlocker3.Settings {
     public static class Uninstall {
-
         public static void Run(bool deleteSettings = false) {
             Autostart.Disable();
             StartWithSpotify.Disable();
@@ -42,6 +41,5 @@ namespace EZBlocker3.Settings {
                     containerDiretory.Delete();
             }
         }
-
     }
 }

@@ -12,13 +12,13 @@ using System.Reflection;
 using Lazy;
 using static EZBlocker3.Spotify.SpotifyHook;
 using WinEventHook;
+using System.Runtime.InteropServices;
 
 namespace EZBlocker3.Spotify {
     /// <summary>
     /// Represents a hook to the spotify process.
     /// </summary>
     public class SpotifyHook : IDisposable {
-
         /// <summary>
         /// The main window process if spotify is running.
         /// </summary>
@@ -117,9 +117,9 @@ namespace EZBlocker3.Spotify {
 
         public bool AssumeAdOnUnknownState { get; init; }
 
-        private readonly WindowEventHook _titleChangeEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_NAMECHANGE);
-        private readonly WindowEventHook _windowDestructionEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_DESTROY);
-        private readonly WindowEventHook _windowCreationEventHook = new WindowEventHook(WindowEvent.EVENT_OBJECT_SHOW);
+        private readonly WindowEventHook _titleChangeEventHook = new(WindowEvent.EVENT_OBJECT_NAMECHANGE);
+        private readonly WindowEventHook _windowDestructionEventHook = new(WindowEvent.EVENT_OBJECT_DESTROY);
+        private readonly WindowEventHook _windowCreationEventHook = new(WindowEvent.EVENT_OBJECT_SHOW);
 
         private readonly ReentrancySafeEventProcessor<IntPtr> _windowCreationEventProcessor;
         private readonly ReentrancySafeEventProcessor<IntPtr> _titleChangeEventProcessor;
@@ -233,7 +233,7 @@ namespace EZBlocker3.Spotify {
 
         private void HandleWindowCreation(IntPtr windowHandle) {
             // get created process
-            NativeMethods.GetWindowThreadProcessId(windowHandle, out uint processId);
+            Marshal.ThrowExceptionForHR((int) NativeMethods.GetWindowThreadProcessId(windowHandle, out uint processId));
 
             // avoid semi costly validation checks
             var process = _getProcessByIdFastFunc(processId);
@@ -614,6 +614,8 @@ namespace EZBlocker3.Spotify {
         }
 
         public void Dispose() {
+            GC.SuppressFinalize(this);
+
             MainWindowProcess?.Dispose();
             _processesCache?.DisposeAll();
 
@@ -627,7 +629,6 @@ namespace EZBlocker3.Spotify {
 
     #region EventArgs
     public class SpotifyStateChangedEventArgs : EventArgs {
-
         public SpotifyState PreviousState { get;  }
         public SpotifyState NewState { get; }
 
@@ -635,11 +636,9 @@ namespace EZBlocker3.Spotify {
             PreviousState = previousState;
             NewState = newState;
         }
-
     }
 
     public class ActiveSongChangedEventArgs : EventArgs {
-
         public SongInfo? PreviousActiveSong { get; }
         public SongInfo? NewActiveSong { get; }
 
@@ -647,7 +646,6 @@ namespace EZBlocker3.Spotify {
             PreviousActiveSong = previousActiveSong;
             NewActiveSong = newActiveSong;
         }
-
     }
     #endregion
 }

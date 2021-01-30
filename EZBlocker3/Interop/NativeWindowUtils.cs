@@ -4,7 +4,6 @@ using System.Text;
 
 namespace EZBlocker3.Interop {
     internal static class NativeWindowUtils {
-
         public static string GetWindowTitle(IntPtr handle) {
             var titleLength = NativeMethods.GetWindowTextLength(handle);
             if (titleLength == 0)
@@ -14,6 +13,5 @@ namespace EZBlocker3.Interop {
                 throw new Win32Exception();
             return builder.ToString();
         }
-
     }
 }
