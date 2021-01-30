@@ -3,7 +3,6 @@ using static EZBlocker3.Spotify.SpotifyHook;
 
 namespace EZBlocker3.Spotify {
     public class SpotifyMuter {
-
         public SpotifyHook SpotifyHook { get; private init; }
 
         public bool WaitForAudioFade { get; set; } = true;
@@ -52,6 +51,5 @@ namespace EZBlocker3.Spotify {
                 }
             });
         }
-
     }
 }
