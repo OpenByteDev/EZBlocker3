@@ -77,6 +77,18 @@ namespace EZBlocker3 {
                     // }
                 });
             }
+
+            // create main window
+            var mainWindow = new MainWindow();
+            if (EZBlocker3.Properties.Settings.Default.StartMinimized) {
+                mainWindow.ShowActivated = false;
+                mainWindow.Minimize();
+
+                if (!EZBlocker3.Properties.Settings.Default.MinimizeToTray)
+                    mainWindow.Show();
+            } else {
+                mainWindow.Show();
+            }
         }
 
         protected override void OnExit(ExitEventArgs e) {

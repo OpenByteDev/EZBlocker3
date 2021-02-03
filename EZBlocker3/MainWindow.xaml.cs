@@ -60,16 +60,17 @@ namespace EZBlocker3 {
 
             // if the screen configuration did not change, we restore the window position
             if (new Size(SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight) == Properties.Settings.Default.VirtualScreenSize
-                && Properties.Settings.Default.MainWindowPosition is Point position) {
+                && Properties.Settings.Default.MainWindowPosition is Point position && position.X >= 0 && position.Y >= 0) {
                 (Left, Top) = position;
             }
-
-            if (Properties.Settings.Default.StartMinimized)
-                Minimize();
 
             MaybePerformUpdateCheck();
         }
 #pragma warning restore CS8618
+
+        protected override void OnSourceInitialized(EventArgs e) {
+            base.OnSourceInitialized(e);
+        }
 
         #region WindowProc
         private void MainWindow_Loaded(object sender, RoutedEventArgs e) {
@@ -294,6 +295,7 @@ namespace EZBlocker3 {
         }
         public void Deminimize() {
             WindowState = WindowState.Normal;
+            Show();
             Activate();
 
             OnStateChanged(EventArgs.Empty);
@@ -319,8 +321,10 @@ namespace EZBlocker3 {
                 if (!App.SaveSettingsOnClose)
                     return;
 
-                Properties.Settings.Default.MainWindowPosition = new Point(Left, Top);
-                Properties.Settings.Default.VirtualScreenSize = new Size(SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight);
+                if (Left >= 0 && Top >= 0) {
+                    Properties.Settings.Default.MainWindowPosition = new Point(Left, Top);
+                    Properties.Settings.Default.VirtualScreenSize = new Size(SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight);
+                }
                 Properties.Settings.Default.Save();
             }
         }
