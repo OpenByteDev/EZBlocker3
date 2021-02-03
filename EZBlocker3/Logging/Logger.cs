@@ -1,9 +1,9 @@
-﻿using Lazy;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using Lazy;
 
 namespace EZBlocker3.Logging {
     public static class Logger {

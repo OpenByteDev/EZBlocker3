@@ -1,11 +1,11 @@
-﻿using EZBlocker3.Logging;
-using EZBlocker3.Settings;
-using Lazy;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
+using EZBlocker3.Logging;
+using EZBlocker3.Settings;
+using Lazy;
 
 namespace EZBlocker3.AutoUpdate {
     public static class UpdateInstaller {
@@ -39,7 +39,7 @@ namespace EZBlocker3.AutoUpdate {
                 Logger.LogDebug("AutoUpdate: Restarting");
                 Process.Start(App.Location, "/updateRestart").Dispose();
                 Application.Current.Dispatcher.Invoke(() => Application.Current.Shutdown());
-            } catch(Exception e) {
+            } catch (Exception e) {
                 Logger.LogException("AutoUpdate: Installation failed:", e);
                 Logger.LogInfo("AutoUpdate: Starting failure cleanup");
                 // cleanup failed installation

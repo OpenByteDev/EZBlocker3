@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 
 namespace EZBlocker3.Utils {
     internal sealed class ValueDisposableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, IDisposable

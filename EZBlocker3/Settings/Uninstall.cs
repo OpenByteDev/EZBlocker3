@@ -1,9 +1,9 @@
-﻿using EZBlocker3.Extensions;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using EZBlocker3.Extensions;
 
 namespace EZBlocker3.Settings {
     public static class Uninstall {

@@ -1,11 +1,11 @@
-﻿using EZBlocker3.Logging;
-using EZBlocker3.Settings;
-using System;
+﻿using System;
 using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
+using EZBlocker3.Logging;
+using EZBlocker3.Settings;
 
 namespace EZBlocker3 {
     public partial class App : Application {
@@ -72,8 +72,8 @@ namespace EZBlocker3 {
 
                     // start spotify if start with spotify is enabled but we did not start through the proxy
                     // if (!Program.CliArgs.IsProxyStart) {
-                        // StartWithSpotify.TransformToProxied();
-                        // StartWithSpotify.StartSpotify();
+                    // StartWithSpotify.TransformToProxied();
+                    // StartWithSpotify.StartSpotify();
                     // }
                 });
             }

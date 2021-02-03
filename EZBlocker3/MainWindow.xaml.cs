@@ -1,11 +1,4 @@
-﻿using EZBlocker3.Audio;
-using EZBlocker3.AutoUpdate;
-using EZBlocker3.Extensions;
-using EZBlocker3.Interop;
-using EZBlocker3.Logging;
-using EZBlocker3.Settings;
-using EZBlocker3.Spotify;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -16,6 +9,13 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using EZBlocker3.Audio;
+using EZBlocker3.AutoUpdate;
+using EZBlocker3.Extensions;
+using EZBlocker3.Interop;
+using EZBlocker3.Logging;
+using EZBlocker3.Settings;
+using EZBlocker3.Spotify;
 using static EZBlocker3.AutoUpdate.UpdateFoundWindow;
 using static EZBlocker3.Spotify.SpotifyHook;
 using Application = System.Windows.Application;
@@ -67,10 +67,6 @@ namespace EZBlocker3 {
             MaybePerformUpdateCheck();
         }
 #pragma warning restore CS8618
-
-        protected override void OnSourceInitialized(EventArgs e) {
-            base.OnSourceInitialized(e);
-        }
 
         #region WindowProc
         private void MainWindow_Loaded(object sender, RoutedEventArgs e) {

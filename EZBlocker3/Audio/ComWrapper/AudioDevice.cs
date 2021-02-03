@@ -1,6 +1,6 @@
-﻿using EZBlocker3.Audio.Com;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
+using EZBlocker3.Audio.Com;
 
 namespace EZBlocker3.Audio.ComWrapper {
     public class AudioDevice : ComWrapper<IMMDevice> {

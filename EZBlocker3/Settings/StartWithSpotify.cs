@@ -1,11 +1,11 @@
-﻿using EZBlocker3.Logging;
-using EZBlocker3.Utils;
-using Lazy;
-using System;
+﻿using System;
 using System.CodeDom.Compiler;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using EZBlocker3.Logging;
+using EZBlocker3.Utils;
+using Lazy;
 
 namespace EZBlocker3.Settings {
     public static class StartWithSpotify {
@@ -18,7 +18,7 @@ namespace EZBlocker3.Settings {
         [Lazy]
         private static bool IsSpotifyDesktopInstalled => File.Exists(SpotifyPath);
 
-        public static bool Available =>  IsSpotifyDesktopInstalled;
+        public static bool Available => IsSpotifyDesktopInstalled;
 
         public static void SetEnabled(bool enabled) {
             if (enabled)

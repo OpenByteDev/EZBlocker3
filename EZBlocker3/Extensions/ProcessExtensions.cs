@@ -1,7 +1,7 @@
-﻿using Lazy;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Linq.Expressions;
+using Lazy;
 
 namespace EZBlocker3.Extensions {
     internal static class ProcessExtensions {

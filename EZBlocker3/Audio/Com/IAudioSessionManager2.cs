@@ -1,18 +1,18 @@
 ﻿using System.Runtime.InteropServices;
 
 namespace EZBlocker3.Audio.Com {
-	/// <summary>
-	/// Enables an application to manage submixes for the audio device.
-	/// </summary>
-	/// <remarks>
-	/// MSDN Reference: http://msdn.microsoft.com/en-us/library/dd370950.aspx
-	/// </remarks>
-	[Guid("77AA99A0-1BD6-484F-8BC7-2C654C9A9B6F"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-	public partial interface IAudioSessionManager2 {
-		// Note: We can't derive from IAudioSessionControl, as that will produce the wrong vtable.
+    /// <summary>
+    /// Enables an application to manage submixes for the audio device.
+    /// </summary>
+    /// <remarks>
+    /// MSDN Reference: http://msdn.microsoft.com/en-us/library/dd370950.aspx
+    /// </remarks>
+    [Guid("77AA99A0-1BD6-484F-8BC7-2C654C9A9B6F"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    public partial interface IAudioSessionManager2 {
+        // Note: We can't derive from IAudioSessionControl, as that will produce the wrong vtable.
 
-		#region IAudioSessionManager Methods
-		/*
+        #region IAudioSessionManager Methods
+        /*
 		/// <summary>
 		/// Retrieves an audio session control.
 		/// </summary>
@@ -26,9 +26,9 @@ namespace EZBlocker3.Audio.Com {
 			[In][MarshalAs(UnmanagedType.U4)] UInt32 streamFlags,
 			[Out][MarshalAs(UnmanagedType.Interface)] out IAudioSessionControl sessionControl);
 		*/
-		void NotImpl0();
+        void NotImpl0();
 
-		/*
+        /*
 		/// <summary>
 		/// Retrieves a simple audio volume control.
 		/// </summary>
@@ -44,19 +44,19 @@ namespace EZBlocker3.Audio.Com {
 
 		#endregion
 		*/
-		void NotImpl1();
-		#endregion
+        void NotImpl1();
+        #endregion
 
-		/// <summary>
-		/// Gets a pointer to the audio session enumerator object used to enumerate sessions.
-		/// </summary>
-		/// <param name="sessionList">Receives the session enumerator object that the client can use to enumerate audio sessions on the audio device.</param>
-		/// <returns>An HRESULT code indicating whether the operation succeeded of failed.</returns>
-		[PreserveSig]
-		int GetSessionEnumerator(
-			[Out][MarshalAs(UnmanagedType.Interface)] out IAudioSessionEnumerator sessionList);
+        /// <summary>
+        /// Gets a pointer to the audio session enumerator object used to enumerate sessions.
+        /// </summary>
+        /// <param name="sessionList">Receives the session enumerator object that the client can use to enumerate audio sessions on the audio device.</param>
+        /// <returns>An HRESULT code indicating whether the operation succeeded of failed.</returns>
+        [PreserveSig]
+        int GetSessionEnumerator(
+            [Out][MarshalAs(UnmanagedType.Interface)] out IAudioSessionEnumerator sessionList);
 
-		/*
+        /*
 		/// <summary>
 		/// Registers the application to receive a notification when a session is created.
 		/// </summary>
@@ -67,7 +67,7 @@ namespace EZBlocker3.Audio.Com {
 			[In] IAudioSessionNotification client);
 		*/
 
-		/*
+        /*
 		/// <summary>
 		/// Deletes the registration to receive a notification when a session is created.
 		/// </summary>
@@ -78,7 +78,7 @@ namespace EZBlocker3.Audio.Com {
 			[In] IAudioSessionNotification client);
 		*/
 
-		/*
+        /*
 		/// <summary>
 		/// Registers the application to receive ducking notifications.
 		/// </summary>
@@ -91,7 +91,7 @@ namespace EZBlocker3.Audio.Com {
 			[In] IAudioVolumeDuckNotification client);
 		*/
 
-		/*
+        /*
 		/// <summary>
 		/// Deletes the registration to receive ducking notifications.
 		/// </summary>
@@ -101,5 +101,5 @@ namespace EZBlocker3.Audio.Com {
 		int UnregisterDuckNotification(
 			[In] IAudioVolumeDuckNotification client);
 		*/
-	}
+    }
 }

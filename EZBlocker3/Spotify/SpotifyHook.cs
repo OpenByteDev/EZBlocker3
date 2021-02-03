@@ -1,18 +1,18 @@
-﻿using EZBlocker3.Audio.Com;
+﻿using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using EZBlocker3.Audio.Com;
 using EZBlocker3.Audio.ComWrapper;
 using EZBlocker3.Extensions;
 using EZBlocker3.Interop;
 using EZBlocker3.Logging;
 using EZBlocker3.Utils;
-using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using Lazy;
-using static EZBlocker3.Spotify.SpotifyHook;
 using WinEventHook;
-using System.Runtime.InteropServices;
+using static EZBlocker3.Spotify.SpotifyHook;
 
 namespace EZBlocker3.Spotify {
     /// <summary>
@@ -233,7 +233,7 @@ namespace EZBlocker3.Spotify {
 
         private void HandleWindowCreation(IntPtr windowHandle) {
             // get created process
-            Marshal.ThrowExceptionForHR((int) NativeMethods.GetWindowThreadProcessId(windowHandle, out uint processId));
+            Marshal.ThrowExceptionForHR((int)NativeMethods.GetWindowThreadProcessId(windowHandle, out uint processId));
 
             // avoid semi costly validation checks
             var process = _getProcessByIdFastFunc(processId);
@@ -629,7 +629,7 @@ namespace EZBlocker3.Spotify {
 
     #region EventArgs
     public class SpotifyStateChangedEventArgs : EventArgs {
-        public SpotifyState PreviousState { get;  }
+        public SpotifyState PreviousState { get; }
         public SpotifyState NewState { get; }
 
         public SpotifyStateChangedEventArgs(SpotifyState previousState, SpotifyState newState) {

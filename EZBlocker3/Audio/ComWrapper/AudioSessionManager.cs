@@ -1,5 +1,5 @@
-﻿using EZBlocker3.Audio.Com;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
+using EZBlocker3.Audio.Com;
 
 namespace EZBlocker3.Audio.ComWrapper {
     public class AudioSessionManager : ComWrapper<IAudioSessionManager2> {

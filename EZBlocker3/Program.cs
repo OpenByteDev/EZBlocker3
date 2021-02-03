@@ -1,13 +1,13 @@
-﻿using EZBlocker3.AutoUpdate;
-using EZBlocker3.Logging;
-using EZBlocker3.Extensions;
-using EZBlocker3.Settings;
-using System;
+﻿using System;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using EZBlocker3.AutoUpdate;
+using EZBlocker3.Extensions;
+using EZBlocker3.Logging;
+using EZBlocker3.Settings;
 
 namespace EZBlocker3 {
     internal static class Program {
@@ -76,6 +76,8 @@ namespace EZBlocker3 {
                     server.Disconnect();
                 server.Dispose();
             });
+            cancellationToken.ThrowIfCancellationRequested();
+
             await server.WaitForConnectionAsync(cancellationToken).ConfigureAwait(false);
 
             // we received a connection, which means another instance was started -> we bring the window to the front

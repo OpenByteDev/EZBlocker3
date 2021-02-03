@@ -1,10 +1,10 @@
-﻿using EZBlocker3.Extensions;
-using EZBlocker3.Logging;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Shell;
+using EZBlocker3.Extensions;
+using EZBlocker3.Logging;
 
 namespace EZBlocker3.AutoUpdate {
     public partial class DownloadUpdateWindow : Window {
@@ -64,7 +64,7 @@ namespace EZBlocker3.AutoUpdate {
 
                 try {
                     UpdateInstaller.InstallUpdateAndRestart(downloadedUpdate);
-                } catch(Exception e) {
+                } catch (Exception e) {
                     Logger.LogException("AutoUpdate: Update install failed", e);
                     MessageBox.Show("Failed to install update!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                     Close();
