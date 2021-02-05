@@ -134,9 +134,9 @@ namespace EZBlocker3.Spotify {
         /// Creates a new inactive spotify hook.
         /// </summary>
         public SpotifyHook() {
-            _windowCreationEventHook.WinEventProc += _windowCreationEventHook_WinEventProc;
-            _titleChangeEventHook.WinEventProc += _titleChangeEventHook_WinEventProc;
-            _windowDestructionEventHook.WinEventProc += _windowDestructionEventHook_WinEventProc;
+            _windowCreationEventHook.EventReceived += WindowCreationEventReceived;
+            _titleChangeEventHook.EventReceived += TitleChangeEventReceived;
+            _windowDestructionEventHook.EventReceived += WindowDestructionEventReceived;
 
             _windowCreationEventProcessor = new ReentrancySafeEventProcessor<IntPtr>(HandleWindowCreation);
             _titleChangeEventProcessor = new ReentrancySafeEventProcessor<IntPtr>(HandleWindowTitleChange);
@@ -203,18 +203,18 @@ namespace EZBlocker3.Spotify {
             return process.ProcessName.StartsWith("spotify", StringComparison.OrdinalIgnoreCase);
         }
 
-        private void _windowCreationEventHook_WinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, AccessibleObjectID idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
+        private void WindowCreationEventReceived(object sender, WinEventHookEventArgs e) {
             // ignore event if we are already hooked.
             if (IsHooked)
                 return;
 
             // make sure that the created control is a window.
-            if (idObject != AccessibleObjectID.OBJID_WINDOW || idChild != WindowEventHook.CHILDID_SELF)
+            if (e.ObjectId != AccessibleObjectID.OBJID_WINDOW || e.IsChildEvent)
                 return;
 
             // queue events and handle one after another
             // needed because this method gets called multiple times by the same thread at the same time (reentrant)
-            _windowCreationEventProcessor.EnqueueAndProcess(hwnd);
+            _windowCreationEventProcessor.EnqueueAndProcess(e.WindowHandle);
         }
 
         [Lazy]
@@ -268,18 +268,18 @@ namespace EZBlocker3.Spotify {
             _windowCreationEventProcessor.FlushQueue();
         }
 
-        private void _windowDestructionEventHook_WinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, AccessibleObjectID idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
+        private void WindowDestructionEventReceived(object sender, WinEventHookEventArgs e) {
             // ignore event if we are already unhooked.
             if (!IsHooked)
                 return;
 
             // make sure that the destroyed control was a window.
-            if (idObject != AccessibleObjectID.OBJID_WINDOW || idChild != WindowEventHook.CHILDID_SELF)
+            if (e.ObjectId != AccessibleObjectID.OBJID_WINDOW || e.IsChildEvent)
                 return;
 
             // queue events and handle one after another
             // needed because this method gets called multiple times by the same thread at the same time (reentrant)
-            _windowDestructionEventProcessor.EnqueueAndProcess(hwnd);
+            _windowDestructionEventProcessor.EnqueueAndProcess(e.WindowHandle);
         }
 
         private void HandleWindowDestruction(IntPtr windowHandle) {
@@ -295,18 +295,18 @@ namespace EZBlocker3.Spotify {
             OnSpotifyClosed();
         }
 
-        private void _titleChangeEventHook_WinEventProc(IntPtr hWinEventHook, WindowEvent eventType, IntPtr hwnd, AccessibleObjectID idObject, int idChild, uint dwEventThread, uint dwmsEventTime) {
+        private void TitleChangeEventReceived(object sender, WinEventHookEventArgs e) {
             // ignore event if we are not hooked.
             if (!IsHooked)
                 return;
 
             // make sure that it was a window name that changed.
-            if (idObject != AccessibleObjectID.OBJID_WINDOW || idChild != WindowEventHook.CHILDID_SELF)
+            if (IsWindowEvent() e.ObjectId != AccessibleObjectID.OBJID_WINDOW || e.IsChildEvent)
                 return;
 
             // queue events and handle one after another
             // needed because this method gets called multiple times by the same thread at the same time (reentrant)
-            _titleChangeEventProcessor.EnqueueAndProcess(hwnd);
+            _titleChangeEventProcessor.EnqueueAndProcess(e.WindowHandle);
         }
 
         private void HandleWindowTitleChange(IntPtr windowHandle) {
@@ -330,7 +330,8 @@ namespace EZBlocker3.Spotify {
 
             MainWindowProcess = mainProcess;
 
-            _windowCreationEventHook.Unhook(throwIfNotHooked: false);
+            if (_windowCreationEventHook.Hooked)
+                _windowCreationEventHook.Unhook();
 
             // TODO multi event hook
             _titleChangeEventHook.HookToProcess(mainProcess);
@@ -520,9 +521,9 @@ namespace EZBlocker3.Spotify {
             ActiveSong = null;
             State = SpotifyState.Unknown;
 
-            _windowCreationEventHook.Unhook(throwIfNotHooked: false, throwOnFailure: false);
-            _titleChangeEventHook.Unhook(throwIfNotHooked: false, throwOnFailure: false);
-            _windowDestructionEventHook.Unhook(throwIfNotHooked: false, throwOnFailure: false);
+            _windowCreationEventHook.TryUnhook();
+            _titleChangeEventHook.TryUnhook();
+            _windowDestructionEventHook.TryUnhook();
         }
 
         /// <summary>
