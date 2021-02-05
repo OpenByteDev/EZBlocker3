@@ -10,8 +10,7 @@ namespace EZBlocker3.AutoUpdate {
     public class UpdateDownloader {
         public event EventHandler<DownloadProgressEventArgs>? Progress;
 
-        public Task<DownloadedUpdate> Download(UpdateInfo update) => Download(update, CancellationToken.None);
-        public async Task<DownloadedUpdate> Download(UpdateInfo update, CancellationToken cancellationToken) {
+        public async Task<DownloadedUpdate> Download(UpdateInfo update, CancellationToken cancellationToken = default) {
             Logger.LogInfo("AutoUpdate: Start downloading update");
 
             cancellationToken.ThrowIfCancellationRequested();

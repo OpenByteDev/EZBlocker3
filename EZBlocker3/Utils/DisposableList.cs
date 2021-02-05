@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 
 namespace EZBlocker3.Utils {
-    internal sealed class DisposableList<T> : List<T>, IDisposable where T : IDisposable {
+    internal sealed class DisposableList<T> : List<T>, IDisposable where T : IDisposable? {
         public DisposableList() { }
         public DisposableList(int capacity) : base(capacity) { }
         public DisposableList(IEnumerable<T> collection) : base(collection) { }

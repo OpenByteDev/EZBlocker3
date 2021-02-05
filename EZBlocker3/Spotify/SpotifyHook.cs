@@ -113,7 +113,7 @@ namespace EZBlocker3.Spotify {
         /// The current audio session if spotify is running and a session has been initialized.
         /// </summary>
         private AudioSession? _audioSession;
-        public AudioSession? AudioSession => _audioSession ?? FetchAudioSession();
+        public AudioSession? AudioSession => _audioSession ??= FetchAudioSession();
 
         public bool AssumeAdOnUnknownState { get; init; }
 
@@ -359,8 +359,7 @@ namespace EZBlocker3.Spotify {
                 var session = sessions[i];
                 if (session.ProcessID == MainWindowProcess?.Id) {
                     Logger.LogInfo("SpotifyHook: Successfully fetched audio session using main window process.");
-                    _audioSession = session;
-                    return _audioSession;
+                    return session;
                 } else {
                     // Store non-spotify sessions in disposable list to make sure that they the underlying COM objects are disposed.
                     sessionCache.Add(session);
@@ -387,7 +386,6 @@ namespace EZBlocker3.Spotify {
                     continue;
 
                 if (sessionMap.TryGetValue(processId, out AudioSession session)) {
-                    _audioSession = session;
                     Logger.LogInfo("SpotifyHook: Successfully fetched audio session using secondary spotify processes.");
 
                     // remove from map to avoid disposal

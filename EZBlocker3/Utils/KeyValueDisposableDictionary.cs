@@ -4,8 +4,8 @@ using EZBlocker3.Extensions;
 
 namespace EZBlocker3.Utils {
     internal sealed class KeyValueDisposableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, IDisposable
-        where TKey : IDisposable
-        where TValue : IDisposable {
+        where TKey : IDisposable?
+        where TValue : IDisposable? {
         public KeyValueDisposableDictionary() { }
         public KeyValueDisposableDictionary(int capacity) : base(capacity) { }
         public KeyValueDisposableDictionary(IEqualityComparer<TKey> comparer) : base(comparer) { }

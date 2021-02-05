@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace EZBlocker3.Utils {
     internal sealed class ValueDisposableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, IDisposable
-        where TValue : IDisposable {
+        where TValue : IDisposable? {
         public ValueDisposableDictionary() { }
         public ValueDisposableDictionary(int capacity) : base(capacity) { }
         public ValueDisposableDictionary(IEqualityComparer<TKey> comparer) : base(comparer) { }

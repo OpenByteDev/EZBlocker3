@@ -67,7 +67,7 @@ namespace EZBlocker3.Audio.ComWrapper {
         protected virtual void Dispose(bool disposing) {
             if (!_disposed) {
                 if (disposing) {
-                    // dispose managed state
+                    // no managed objects to dispose
                 }
 
                 // free unmanaged resources
@@ -85,12 +85,10 @@ namespace EZBlocker3.Audio.ComWrapper {
         }
 
         ~AudioSession() {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: false);
         }
 
         public void Dispose() {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
         }

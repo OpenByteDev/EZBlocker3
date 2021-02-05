@@ -22,7 +22,6 @@ namespace EZBlocker3.AutoUpdate {
                 File.Delete(TempNewAppPath);
                 using (var tempNewAppFile = File.OpenWrite(TempNewAppPath))
                     update.UpdateBytes.WriteTo(tempNewAppFile);
-                update.Dispose();
 
                 Logger.LogDebug("AutoUpdate: Extracted update");
 
@@ -59,6 +58,8 @@ namespace EZBlocker3.AutoUpdate {
 
                 // rethrow exception
                 throw;
+            } finally {
+                update.Dispose();
             }
         }
 

@@ -20,8 +20,7 @@ namespace EZBlocker3.AutoUpdate {
                 return App.Version;
         }
 
-        public static Task<UpdateInfo?> CheckForUpdate() => CheckForUpdate(CancellationToken.None);
-        public static async Task<UpdateInfo?> CheckForUpdate(CancellationToken cancellationToken) {
+        public static async Task<UpdateInfo?> CheckForUpdate(CancellationToken cancellationToken = default) {
             Logger.LogDebug("AutoUpdate: Start update check");
 
             cancellationToken.ThrowIfCancellationRequested();
