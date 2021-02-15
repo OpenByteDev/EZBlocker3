@@ -44,5 +44,11 @@
     <Setting Name="AssumeAdOnUnknownState" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">True</Value>
     </Setting>
+    <Setting Name="Hook" Type="System.String" Scope="User">
+      <Value Profile="(Default)">ProcessAndWindowEventSpotifyHook</Value>
+    </Setting>
+    <Setting Name="BlockType" Type="System.String" Scope="User">
+      <Value Profile="(Default)">mute</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

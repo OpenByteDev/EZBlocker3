@@ -17,30 +17,30 @@ namespace EZBlocker3.AutoUpdate {
 
         public static void InstallUpdateAndRestart(DownloadedUpdate update) {
             try {
-                Logger.LogDebug("AutoUpdate: Begin install");
+                Logger.AutoUpdate.LogDebug("Begin install");
 
                 File.Delete(TempNewAppPath);
                 using (var tempNewAppFile = File.OpenWrite(TempNewAppPath))
                     update.UpdateBytes.WriteTo(tempNewAppFile);
 
-                Logger.LogDebug("AutoUpdate: Extracted update");
+                Logger.AutoUpdate.LogDebug("Extracted update");
 
                 File.Delete(TempOldAppPath);
                 File.Move(App.Location, TempOldAppPath);
                 File.Move(TempNewAppPath, App.Location);
 
-                Logger.LogDebug("AutoUpdate: Replaced executable");
+                Logger.AutoUpdate.LogDebug("Replaced executable");
 
                 // disable settings with external state before upgrade, as the new version maybe uses a different system.
                 StartWithSpotify.Disable();
                 Autostart.Disable();
 
-                Logger.LogDebug("AutoUpdate: Restarting");
+                Logger.AutoUpdate.LogDebug("Restarting");
                 Process.Start(App.Location, "/updateRestart").Dispose();
                 Application.Current.Dispatcher.Invoke(() => Application.Current.Shutdown());
             } catch (Exception e) {
-                Logger.LogException("AutoUpdate: Installation failed:", e);
-                Logger.LogInfo("AutoUpdate: Starting failure cleanup");
+                Logger.AutoUpdate.LogException("Installation failed:", e);
+                Logger.AutoUpdate.LogInfo("Starting failure cleanup");
                 // cleanup failed installation
 
                 // try to restore app executable
@@ -54,7 +54,7 @@ namespace EZBlocker3.AutoUpdate {
                 // delete update file if it still exists
                 File.Delete(TempNewAppPath);
 
-                Logger.LogInfo("AutoUpdate: Finished failure cleanup");
+                Logger.AutoUpdate.LogInfo("Finished failure cleanup");
 
                 // rethrow exception
                 throw;

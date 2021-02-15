@@ -9,12 +9,9 @@ using Lazy;
 
 namespace EZBlocker3.Settings {
     public static class StartWithSpotify {
-        [Lazy]
-        private static string SpotifyPath => Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Spotify\Spotify.exe";
-        [Lazy]
-        private static string RealSpotifyPath => Path.ChangeExtension(SpotifyPath, "real.exe");
-        [Lazy]
-        private static string ProxyTempPath => Path.ChangeExtension(SpotifyPath, "proxy.exe");
+        public static readonly string SpotifyPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\Spotify\Spotify.exe";
+        private static readonly string RealSpotifyPath = Path.ChangeExtension(SpotifyPath, "real.exe");
+        private static readonly string ProxyTempPath = Path.ChangeExtension(SpotifyPath, "proxy.exe");
         [Lazy]
         private static bool IsSpotifyDesktopInstalled => File.Exists(SpotifyPath);
 

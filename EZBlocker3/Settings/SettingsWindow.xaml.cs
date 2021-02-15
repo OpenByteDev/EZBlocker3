@@ -15,8 +15,19 @@ namespace EZBlocker3.Settings {
             startMinimizedCheckBox.IsChecked = Properties.Settings.Default.StartMinimized;
             startOnLoginCheckBox.IsChecked = Properties.Settings.Default.StartOnLogin;
             startWithSpotifyCheckBox.IsChecked = Properties.Settings.Default.StartWithSpotify;
+            mediaControlHookButton.IsChecked = Equals(Properties.Settings.Default.Hook, mediaControlHookButton.Tag);
+            processAndWindowHookButton.IsChecked = !mediaControlHookButton.IsChecked; // Equals(Properties.Settings.Default.Hook, processAndWindowHookButton.Tag);
+            skipBlockTypeButton.IsChecked = Equals(Properties.Settings.Default.BlockType, skipBlockTypeButton.Tag);
+            muteBlockTypeButton.IsChecked = !skipBlockTypeButton.IsChecked; // Equals(Properties.Settings.Default.BlockType, muteBlockTypeButton.Tag);
 
             startWithSpotifyCheckBox.IsEnabled = StartWithSpotify.Available;
+
+            mediaControlHookButton.Checked += (_, __) => {
+                if (mediaControlHookButton.IsChecked == true) {
+                    muteBlockTypeButton.IsChecked = false;
+                    skipBlockTypeButton.IsChecked = true;
+                }
+            };
 
             saveButton.Click += (_, __) => { SaveSettings(); Close(); };
             cancelButton.Click += (_, __) => Close();
@@ -39,6 +50,8 @@ namespace EZBlocker3.Settings {
             Properties.Settings.Default.StartMinimized = startMinimizedCheckBox.IsChecked ?? Properties.Settings.Default.StartMinimized;
             Properties.Settings.Default.StartOnLogin = startOnLoginCheckBox.IsChecked ?? Properties.Settings.Default.StartOnLogin;
             Properties.Settings.Default.StartWithSpotify = startWithSpotifyCheckBox.IsChecked ?? Properties.Settings.Default.StartWithSpotify;
+            Properties.Settings.Default.Hook = mediaControlHookButton.IsChecked == true ? (string)mediaControlHookButton.Tag : (string)processAndWindowHookButton.Tag;
+            Properties.Settings.Default.BlockType = skipBlockTypeButton.IsChecked == true ? (string)skipBlockTypeButton.Tag : (string)muteBlockTypeButton.Tag;
 
             Autostart.SetEnabled(Properties.Settings.Default.StartOnLogin);
             if (StartWithSpotify.Available)

@@ -13,17 +13,44 @@
         ShowInTaskbar="False" WindowStyle="ToolWindow" WindowStartupLocation="CenterOwner"
         ui:WindowHelper.UseModernWindowStyle="True" utils:WindowHelper.ApplySizeToContentFix="True">
     <StackPanel Orientation="Vertical" Margin="10">
-        <StackPanel Orientation="Horizontal">
-            <RadioButton x:Name="minimizeToTrayRadioButton" Content="Minimize to tray" Tag="tray" IsChecked="True" Margin="0 0 10 0" GroupName="Minimize"  />
-            <RadioButton x:Name="minimizeToTaskbarRadioButton" Content="Minimize to taskbar" Tag="taskbar" GroupName="Minimize" />
-        </StackPanel>
-        <CheckBox x:Name="unmuteOnCloseCheckBox" Content="Unmute on close" IsChecked="True" ToolTip="Should Spotify be unmuted when EZBlocker 3 exits." />
-        <CheckBox x:Name="checkForUpdatesCheckBox" Content="Check for Updates" IsChecked="True" ToolTip="Should EZBlocker 3 check for new versions on startup." />
-        <CheckBox x:Name="debugModeCheckBox" Content="Debug Mode" IsChecked="False" ToolTip="Enabling debug mode will create a log file in the directory of the executable." />
-        <CheckBox x:Name="assumeAdOnUnknowsStateCheckBox" Content="Assume ad in case of doubt" IsChecked="True" ToolTip="Should EZBlocker 3 assume that an ad is playing if the spotify state can not be determined?" />
-        <CheckBox x:Name="startMinimizedCheckBox" Content="Start Minimized" IsChecked="False" />
-        <CheckBox x:Name="startOnLoginCheckBox" Content="Start on Login" IsChecked="False" ToolTip="Should EZBlocker 3 automatically start with Windows" />
-        <CheckBox x:Name="startWithSpotifyCheckBox" Content="Start with Spotify (experimental)" IsChecked="False" ToolTip="Start EZBlocker 3 when Spotify is started." />
+        <GroupBox Header="Startup">
+            <StackPanel Orientation="Vertical">
+                <CheckBox x:Name="startMinimizedCheckBox" Content="Start Minimized" IsChecked="False" />
+                <CheckBox x:Name="startOnLoginCheckBox" Content="Start on Login" IsChecked="False" ToolTip="Should EZBlocker 3 automatically start with Windows" />
+                <CheckBox x:Name="startWithSpotifyCheckBox" Content="Start with Spotify (experimental)" IsChecked="False" ToolTip="Start EZBlocker 3 when Spotify is started." />
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Header="Ad blocking">
+            <GroupBox.Resources>
+                <BooleanToVisibilityConverter x:Key="b2v" />
+            </GroupBox.Resources>
+            <StackPanel Orientation="Vertical">
+                <Label>How should spotify be hooked?</Label>
+                <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
+                    <RadioButton x:Name="mediaControlHookButton" Content="MediaSession API" Tag="GlobalSystemMediaTransportControlSpotifyHook" Margin="0 0 10 0" GroupName="Hook"  />
+                    <RadioButton x:Name="processAndWindowHookButton" Content="Process &amp; Window" IsChecked="True" Tag="ProcessAndWindowEventSpotifyHook" GroupName="Hook" />
+                </StackPanel>
+                <Label>How should Ads be blocked?</Label>
+                <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
+                    <RadioButton x:Name="muteBlockTypeButton" Content="Mute Spotify" Tag="mute" Margin="0 0 10 0" GroupName="BlockType"  />
+                    <RadioButton x:Name="skipBlockTypeButton" Content="Skip Ads (Kill &amp; Restart)" Tag="skip" IsChecked="True" GroupName="BlockType" />
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Visibility="{Binding IsChecked, ElementName=muteBlockTypeButton, Converter={StaticResource b2v}}">
+                    <CheckBox x:Name="assumeAdOnUnknowsStateCheckBox" Content="Aggressive Muting" IsChecked="True" ToolTip="Should EZBlocker 3 assume that an ad is playing if spotify is in an unknow state?" />
+                    <CheckBox x:Name="unmuteOnCloseCheckBox" Content="Unmute on close" IsChecked="True" ToolTip="Should Spotify be unmuted when EZBlocker 3 exits." />
+                </StackPanel>
+            </StackPanel>
+        </GroupBox>
+        <GroupBox Header="Other">
+            <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton x:Name="minimizeToTrayRadioButton" Content="Minimize to tray" Tag="tray" IsChecked="True" Margin="0 0 10 0" GroupName="Minimize"  />
+                    <RadioButton x:Name="minimizeToTaskbarRadioButton" Content="Minimize to taskbar" Tag="taskbar" GroupName="Minimize" />
+                </StackPanel>
+                <CheckBox x:Name="checkForUpdatesCheckBox" Content="Check for Updates" IsChecked="True" ToolTip="Should EZBlocker 3 check for new versions on startup." />
+                <CheckBox x:Name="debugModeCheckBox" Content="Debug Mode" IsChecked="False" ToolTip="Enabling debug mode will create a log file in the directory of the executable." />
+            </StackPanel>
+        </GroupBox>
         <ui:SimpleStackPanel Orientation="Horizontal" Margin="0 10 0 0" HorizontalAlignment="Center" Spacing="10">
             <Button x:Name="uninstallButton" Content="Uninstall" Padding="20 5" />
             <Button x:Name="cancelButton" Content="Cancel" Padding="20 5" />

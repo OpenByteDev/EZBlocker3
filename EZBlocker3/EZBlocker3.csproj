@@ -5,19 +5,22 @@
     <UseWindowsForms>True</UseWindowsForms>
     <Nullable>Enable</Nullable>
     <ApplicationIcon>Icon/icon256.ico</ApplicationIcon>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+    <EnableNETAnalyzers>True</EnableNETAnalyzers>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Costura.Fody" Version="4.1.0" />
-    <PackageReference Include="Lazy.Fody" Version="1.9.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.3">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="ModernWpf.MessageBox" Version="0.4.0" />
+    <PackageReference Include="Costura.Fody" Version="5.0.2" PrivateAssets="All" />
+    <PackageReference Include="Lazy.Fody" Version="1.9.0" PrivateAssets="All"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="5.0.3" PrivateAssets="All" />
+    <PackageReference Include="ModernWpf.MessageBox" Version="0.4.2" />
     <PackageReference Include="ModernWpfUI" Version="0.9.3" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     <PackageReference Include="WinEventHook" Version="0.3.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Interop\Interop.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -109,7 +112,6 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Description>EZBlocker 3 is a Spotify Ad Muter/Blocker for Windows written in C#. It mutes Spotify while an advertisement is playing.</Description>
     <StartupObject>EZBlocker3.Program</StartupObject>
-    <EnableNETAnalyzers>true</EnableNETAnalyzers>
   </PropertyGroup>
 
 </Project>

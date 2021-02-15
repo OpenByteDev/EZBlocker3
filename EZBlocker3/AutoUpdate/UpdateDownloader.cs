@@ -11,7 +11,7 @@ namespace EZBlocker3.AutoUpdate {
         public event EventHandler<DownloadProgressEventArgs>? Progress;
 
         public async Task<DownloadedUpdate> Download(UpdateInfo update, CancellationToken cancellationToken = default) {
-            Logger.LogInfo("AutoUpdate: Start downloading update");
+            Logger.AutoUpdate.LogInfo("Start downloading update");
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -20,7 +20,7 @@ namespace EZBlocker3.AutoUpdate {
             var response = await client.GetAsync(update.DownloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
-            Logger.LogDebug("AutoUpdate: Received response headers");
+            Logger.AutoUpdate.LogDebug("Received response headers");
 
             using var contentStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
             var contentLength = response.Content.Headers.ContentLength;
@@ -30,16 +30,16 @@ namespace EZBlocker3.AutoUpdate {
             if (contentLength is long totalBytes) {
                 var progressHandler = new Progress<long>(bytesReceived => {
                     Progress?.Invoke(this, new DownloadProgressEventArgs(bytesReceived, totalBytes));
-                    Logger.LogDebug($"AutoUpdate: Received {bytesReceived}/{totalBytes} bytes");
+                    Logger.AutoUpdate.LogDebug($"Received {bytesReceived}/{totalBytes} bytes");
                 });
                 await contentStream.CopyToAsync(memoryStream, progressHandler, cancellationToken).ConfigureAwait(false);
             } else {
-                Logger.LogWarning("AutoUpdate: Failed to determine response content length.");
+                Logger.AutoUpdate.LogWarning("Failed to determine response content length.");
                 await contentStream.CopyToAsync(memoryStream, cancellationToken).ConfigureAwait(false);
             }
             memoryStream.Seek(0, SeekOrigin.Begin);
 
-            Logger.LogInfo("AutoUpdate: Completed update download");
+            Logger.AutoUpdate.LogInfo("Completed update download");
 
             return new DownloadedUpdate(memoryStream);
         }

@@ -1,5 +1,5 @@
 ﻿namespace EZBlocker3.Logging {
-    public enum LogLevel {
+    internal enum LogLevel {
         Debug,
         Information,
         Warning,

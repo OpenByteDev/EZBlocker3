@@ -1,0 +1,35 @@
+﻿// Win32
+SendMessage
+WM_CLOSE
+WM_QUIT
+WM_DESTROY
+WM_NCDESTROY
+WM_APPCOMMAND
+WM_SYSCOMMAND
+SC_CLOSE
+EnumWindows
+GetWindowText
+GetWindowTextLength
+GWL_STYLE
+GetWindowThreadProcessId
+GetWindow
+WS_POPUP
+GW_OWNER
+GW_CHILD
+CoCreateInstance
+CLSCTX
+EnumThreadWindows
+
+// COM
+MMDeviceEnumerator
+IMMDeviceEnumerator
+ISimpleAudioVolume
+IMMDevice
+IAudioSessionManager2
+IAudioSessionEnumerator
+IAudioSessionControl2
+IAudioSessionControl
+IAudioMeterInformation
+ERole
+EDataFlow
+S_OK

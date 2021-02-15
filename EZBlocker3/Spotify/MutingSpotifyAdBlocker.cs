@@ -1,18 +1,19 @@
 ﻿using System.Threading.Tasks;
-using static EZBlocker3.Spotify.SpotifyHook;
 
 namespace EZBlocker3.Spotify {
-    public class SpotifyMuter {
-        public SpotifyHook SpotifyHook { get; private init; }
+    public class MutingSpotifyAdBlocker : AbstractSpotifyAdBlocker {
+        private readonly IMutingSpotifyHook muter;
 
+        // TODO
         public bool WaitForAudioFade { get; set; } = true;
+        public bool AggressiveMuting { get; set; } = false;
 
-        public SpotifyMuter(SpotifyHook hook) {
-            SpotifyHook = hook;
-            SpotifyHook.SpotifyStateChanged += OnSpotifyStateChanged;
+        public MutingSpotifyAdBlocker(ProcessAndWindowEventSpotifyHook hook) : this(hook, hook) { }
+        public MutingSpotifyAdBlocker(ISpotifyHook hook, IMutingSpotifyHook muter) : base(hook) {
+            this.muter = muter;
         }
 
-        protected virtual void OnSpotifyStateChanged(object sender, SpotifyStateChangedEventArgs eventArgs) {
+        protected override void OnSpotifyStateChanged(object sender, SpotifyStateChangedEventArgs eventArgs) {
             var oldState = eventArgs.PreviousState;
             var newState = eventArgs.NewState;
 
@@ -23,13 +24,18 @@ namespace EZBlocker3.Spotify {
             if (oldState == SpotifyState.StartingUp && newState == SpotifyState.Paused)
                 return;
 
-            if (!WaitForAudioFade || oldState != SpotifyState.PlayingAdvertisement) {
-                SpotifyHook.SetMute(mute: SpotifyHook.IsAdPlaying);
+            if (AggressiveMuting) {
+                muter.SetMute(newState != SpotifyState.PlayingSong);
                 return;
             }
 
-            if (SpotifyHook.IsAdPlaying) {
-                SpotifyHook.Mute();
+            if (!WaitForAudioFade || oldState != SpotifyState.PlayingAdvertisement) {
+                muter.SetMute(mute: newState == SpotifyState.PlayingAdvertisement);
+                return;
+            }
+
+            if (newState == SpotifyState.PlayingAdvertisement) {
+                muter.Mute();
                 return;
             }
 
@@ -45,7 +51,7 @@ namespace EZBlocker3.Spotify {
                         break;
                 }*/
                 await Task.Delay(600).ConfigureAwait(false);
-                SpotifyHook.Unmute();
+                muter.Unmute();
             });
         }
     }

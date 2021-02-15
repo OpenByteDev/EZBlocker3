@@ -187,5 +187,29 @@ namespace EZBlocker3.Properties {
                 this["AssumeAdOnUnknownState"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("ProcessAndWindowEventSpotifyHook")]
+        public string Hook {
+            get {
+                return ((string)(this["Hook"]));
+            }
+            set {
+                this["Hook"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("mute")]
+        public string BlockType {
+            get {
+                return ((string)(this["BlockType"]));
+            }
+            set {
+                this["BlockType"] = value;
+            }
+        }
     }
 }

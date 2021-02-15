@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq.Expressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Lazy;
 
 namespace EZBlocker3.Extensions {
@@ -19,6 +21,31 @@ namespace EZBlocker3.Extensions {
         }
         public static bool IsAssociated(this Process process) {
             return _getProcessAssociatedFunc(process);
+        }
+
+        public static async Task WaitForExitAsync(this Process process, CancellationToken cancellationToken = default) {
+            var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            try {
+                if (process.HasExited)
+                    return;
+
+                process.EnableRaisingEvents = true;
+                process.Exited += Process_Exited;
+
+                using var registration = cancellationToken.Register(() => tcs.TrySetCanceled(), false);
+                await tcs.Task.ConfigureAwait(false);
+            } finally {
+                process.Exited -= Process_Exited;
+            }
+
+            void Process_Exited(object sender, EventArgs e) {
+                tcs.TrySetResult(true);
+            }
+        }
+
+        public static Task WaitForExitAsync(this Process process, TimeSpan timeout, CancellationToken cancellationToken = default) {
+            return Task.WhenAny(process.WaitForExitAsync(cancellationToken), Task.Delay(timeout, cancellationToken)).Unwrap();
         }
     }
 }
