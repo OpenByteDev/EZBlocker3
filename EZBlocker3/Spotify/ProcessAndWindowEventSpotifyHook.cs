@@ -451,6 +451,8 @@ namespace EZBlocker3.Spotify {
         }
 
         protected override void Dispose(bool disposing) {
+            base.Dispose(disposing);
+
             if (!disposing)
                 return;
 

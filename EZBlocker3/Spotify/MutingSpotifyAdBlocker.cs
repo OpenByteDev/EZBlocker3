@@ -14,6 +14,8 @@ namespace EZBlocker3.Spotify {
         }
 
         protected override void OnSpotifyStateChanged(object sender, SpotifyStateChangedEventArgs eventArgs) {
+            base.OnSpotifyStateChanged(sender, eventArgs);
+
             var oldState = eventArgs.PreviousState;
             var newState = eventArgs.NewState;
 

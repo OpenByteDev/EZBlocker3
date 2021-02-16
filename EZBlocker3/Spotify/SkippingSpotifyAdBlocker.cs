@@ -12,6 +12,8 @@ namespace EZBlocker3.Spotify {
         public SkippingSpotifyAdBlocker(ISpotifyHook hook) : base(hook) { }
 
         protected override void OnSpotifyStateChanged(object sender, SpotifyStateChangedEventArgs e) {
+            base.OnSpotifyStateChanged(sender, e);
+
             if (e.NewState == SpotifyState.PlayingAdvertisement) {
                 Task.Run(() => KillAndRestartSpotifyAsync());
             }
