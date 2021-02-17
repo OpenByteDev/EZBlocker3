@@ -166,9 +166,14 @@ namespace EZBlocker3.Settings {
                 Logger.Proxy.LogException("Failed to handle proxied exit:", e);
             }
         }
-        public static void StartSpotify() {
+        public static void StartSpotify(bool ignoreProxy = false) {
             if (!IsSpotifyDesktopInstalled)
                 return;
+
+            if (ignoreProxy && File.Exists(RealSpotifyPath)) {
+                Process.Start(RealSpotifyPath).Dispose();
+                return;
+            }
 
             Process.Start(SpotifyPath).Dispose();
         }

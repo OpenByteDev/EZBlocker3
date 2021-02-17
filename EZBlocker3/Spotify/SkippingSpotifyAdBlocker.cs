@@ -75,7 +75,7 @@ namespace EZBlocker3.Spotify {
         private void RestartSpotify() {
             Hook.SpotifyStateChanged += Handler1;
 
-            StartWithSpotify.StartSpotify();
+            StartWithSpotify.StartSpotify(ignoreProxy: false);
 
             // TODO simplify or find better names
             void Handler1(object sender, EventArgs _) {
