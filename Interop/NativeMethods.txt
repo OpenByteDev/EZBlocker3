@@ -19,6 +19,12 @@ GW_CHILD
 CoCreateInstance
 CLSCTX
 EnumThreadWindows
+TranslateMessage
+DispatchMessage
+GetMessage
+CloseWindow
+DestroyWindow
+GetClassName
 
 // COM
 MMDeviceEnumerator

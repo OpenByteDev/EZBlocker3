@@ -5,12 +5,13 @@ using System.Linq;
 using EZBlocker3.Interop;
 
 namespace EZBlocker3.Spotify {
-    public static class SpotifyProcessUtils {
+    public static class SpotifyUtils {
         public static IEnumerable<Process> GetSpotifyProcesses() {
             return Process.GetProcesses().Where(p => IsSpotifyProcess(p));
         }
+
         public static Process? GetMainSpotifyProcess() {
-            return Array.Find(Process.GetProcesses(), p => IsMainWindowSpotifyProcess(p));
+            return Array.Find(Process.GetProcesses(), p => IsMainSpotifyProcess(p));
         }
 
         public static bool IsSpotifyProcess(Process? process) {
@@ -23,17 +24,26 @@ namespace EZBlocker3.Spotify {
             return true;
         }
 
-        public static bool IsMainWindowSpotifyProcess(Process? process) {
+        public static bool IsMainSpotifyProcess(Process? process) {
             if (!IsSpotifyProcess(process))
                 return false;
 
-            var mainWindowTitle = NativeUtils.GetMainWindowTitle(process!);
+            return NativeUtils.GetAllWindowsOfProcess(process!).Any(hwnd => IsMainSpotifyWindow(hwnd));
+        }
 
-            if (string.IsNullOrWhiteSpace(mainWindowTitle))
+        public static bool IsMainSpotifyWindow(IntPtr windowHandle) {
+            var windowTitle = NativeUtils.GetWindowTitle(windowHandle);
+
+            if (string.IsNullOrWhiteSpace(windowTitle))
                 return false;
 
-            if (mainWindowTitle == "G")
-                return false; // dont ask me why a G window sometimes appears in the spotify process.
+            if (windowTitle == "G" || windowTitle == "Default IME")
+                return false;
+
+            var windowClassName = NativeUtils.GetWindowClassName(windowHandle);
+
+            if (windowClassName == "IME".AsSpan())
+                return false;
 
             return true;
         }

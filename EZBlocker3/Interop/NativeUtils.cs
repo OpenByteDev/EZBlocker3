@@ -92,5 +92,25 @@ namespace EZBlocker3.Interop {
 
             return GetWindowTitle(mainWindowHandle);
         }
+
+        public static ReadOnlySpan<char> GetWindowClassName(IntPtr windowHandle) {
+            var name = new string(' ', 256); // 256 is the max name length
+
+            var actualNameLength = PInvoke.GetClassName((HWND)windowHandle, name, name.Length);
+            if (actualNameLength == 0)
+                throw new Win32Exception();
+
+            return name.AsSpan(0, actualNameLength);
+        }
+
+        public static void CloseWindow(IntPtr windowHandle) {
+            if (!PInvoke.CloseWindow((HWND)windowHandle))
+                throw new Win32Exception();
+        }
+
+        public static void DestroyWindow(IntPtr windowHandle) {
+            if (!PInvoke.DestroyWindow((HWND)windowHandle))
+                throw new Win32Exception();
+        }
     }
 }

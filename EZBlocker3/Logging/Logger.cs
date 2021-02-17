@@ -7,7 +7,7 @@ using Lazy;
 namespace EZBlocker3.Logging {
     internal static class Logger {
         [Lazy]
-        private static string _logFilePath => Path.Combine(App.Directory, "log.txt");
+        private static string LogFilePath => Path.Combine(App.Directory, "log.txt");
 
         private static readonly object _lock_logFile = new();
 
@@ -25,7 +25,7 @@ namespace EZBlocker3.Logging {
                 Trace.WriteLine(formatted);
 
                 lock (_lock_logFile) {
-                    using var writer = new StreamWriter(_logFilePath, append: true);
+                    using var writer = new StreamWriter(LogFilePath, append: true);
                     writer.WriteLine(formatted);
                 }
             }
@@ -42,5 +42,6 @@ namespace EZBlocker3.Logging {
 
         public static NamedLogger AutoUpdate = GetNamed("AutoUpdate");
         public static NamedLogger Hook = GetNamed("SpotifyHook");
+        public static NamedLogger AdSkipper = GetNamed("Ad Skipper");
     }
 }

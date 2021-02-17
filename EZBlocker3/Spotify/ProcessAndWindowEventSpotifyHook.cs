@@ -100,7 +100,7 @@ namespace EZBlocker3.Spotify {
             var processes = FetchSpotifyProcesses();
 
             // find the main window process
-            var mainProcess = Array.Find(processes, p => SpotifyProcessUtils.IsMainWindowSpotifyProcess(p));
+            var mainProcess = Array.Find(processes, p => SpotifyUtils.IsMainSpotifyProcess(p));
 
             if (mainProcess == null)
                 return false;
@@ -132,7 +132,7 @@ namespace EZBlocker3.Spotify {
         }
 
         [Lazy]
-        private static Func<uint, Process> _getProcessByIdFastFunc {
+        private static Func<uint, Process> GetProcessByIdFastFunc {
             get {
                 // Expression Trees let us change a private field and are faster than reflection (if called multiple times)
                 var processIdParameter = Expression.Parameter(typeof(uint), "processId");
@@ -150,25 +150,13 @@ namespace EZBlocker3.Spotify {
             var processId = NativeUtils.GetWindowThreadProcessId(windowHandle);
 
             // avoid semi costly validation checks
-            var process = _getProcessByIdFastFunc(processId);
+            var process = GetProcessByIdFastFunc(processId);
 
             // confirm that its a spotify process with a window.
-            if (!SpotifyProcessUtils.IsMainWindowSpotifyProcess(process)) {
+            if (!SpotifyUtils.IsMainSpotifyWindow(windowHandle)) {
                 process.Dispose();
                 return;
             }
-
-            // confirm the process still runs
-            // if (process.HasExited)
-            //    return;
-
-            // confirm that we have the correct window.
-            // if (GetWindowClassName(windowHandle) != "OleMainThreadWndClass")
-            //    return;
-
-            // ignore the "Start with Spotify" proxy.
-            // if (process.MainModule.FileVersionInfo.InternalName != "Spotify")
-            //    return;
 
             OnSpotifyHooked(process);
 
@@ -311,9 +299,9 @@ namespace EZBlocker3.Spotify {
         /// Fetches all running processes with the name "spotify". This method uses caching, but makes sure that the returned processes are running.
         /// </summary>
         /// <returns>An array of running spotify processes.</returns>
-        internal Process[] FetchSpotifyProcesses() {
-            if (_processesCache is null || _processesCache.Any(process => !process.IsAssociated() || process.HasExited))
-                return SpotifyProcessUtils.GetSpotifyProcesses().ToArray();
+        internal Process[] FetchSpotifyProcesses(bool useCache = true) {
+            if (!useCache || _processesCache?.Any(process => !process.IsAssociated() || process.HasExited) != false)
+                return _processesCache = SpotifyUtils.GetSpotifyProcesses().ToArray();
 
             return _processesCache;
         }
