@@ -59,11 +59,11 @@ namespace EZBlocker3.Settings {
 
                 File.Delete(ProxyTempPath);
                 if (GenerateProxy(ProxyTempPath, tempIconFilePath)) {
-                    Logger.LogInfo("Settings: Successfully generated proxy executable");
+                    Logger.Proxy.LogInfo("Settings: Successfully generated proxy executable");
                     File.Move(SpotifyPath, RealSpotifyPath);
                     File.Move(ProxyTempPath, SpotifyPath);
                 } else {
-                    Logger.LogError("Settings: Failed to generate proxy executable");
+                    Logger.Proxy.LogError("Settings: Failed to generate proxy executable");
                 }
             } catch {
                 File.Delete(ProxyTempPath);
@@ -116,7 +116,7 @@ namespace EZBlocker3.Settings {
             var result = provider.CompileAssemblyFromSource(parameters, code);
 
             foreach (CompilerError error in result.Errors)
-                Logger.LogWarning($"Settings: Redirection executable generation {(error.IsWarning ? "warning" : "error")}:\n{error.ErrorText}");
+                Logger.Proxy.LogWarning($"Settings: Redirection executable generation {(error.IsWarning ? "warning" : "error")}:\n{error.ErrorText}");
 
             return result.Errors.Count == 0;
         }
@@ -132,10 +132,10 @@ namespace EZBlocker3.Settings {
             HandleProxiedStart();
         }
         public static void HandleProxiedStart() {
-            Logger.LogInfo("Started through proxy executable");
+            Logger.Proxy.LogInfo("Started through proxy executable");
 
             if (!File.Exists(RealSpotifyPath)) {
-                Logger.LogWarning("Started through proxy executable when no proxy is present");
+                Logger.Proxy.LogWarning("Started through proxy executable when no proxy is present");
                 return;
             }
 
@@ -145,17 +145,17 @@ namespace EZBlocker3.Settings {
                 File.Move(RealSpotifyPath, SpotifyPath);
                 StartSpotify();
             } catch (Exception e) {
-                Logger.LogException("Failed to handle proxied start:", e);
+                Logger.Proxy.LogException("Failed to handle proxied start:", e);
             }
         }
         public static void HandleProxiedExit() {
             if (!IsSpotifyDesktopInstalled)
                 return;
 
-            Logger.LogInfo("Reset proxy executable");
+            Logger.Proxy.LogInfo("Reset proxy executable");
 
             if (!File.Exists(ProxyTempPath)) {
-                Logger.LogWarning("Failed to reset proxy as no proxy is present");
+                Logger.Proxy.LogWarning("Failed to reset proxy as no proxy is present");
                 return;
             }
 
@@ -163,7 +163,7 @@ namespace EZBlocker3.Settings {
                 File.Move(SpotifyPath, RealSpotifyPath);
                 File.Move(ProxyTempPath, SpotifyPath);
             } catch (Exception e) {
-                Logger.LogException("Failed to handle proxied exit:", e);
+                Logger.Proxy.LogException("Failed to handle proxied exit:", e);
             }
         }
         public static void StartSpotify() {

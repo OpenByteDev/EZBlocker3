@@ -43,5 +43,6 @@ namespace EZBlocker3.Logging {
         public static NamedLogger AutoUpdate = GetNamed("AutoUpdate");
         public static NamedLogger Hook = GetNamed("SpotifyHook");
         public static NamedLogger AdSkipper = GetNamed("Ad Skipper");
+        public static NamedLogger Proxy = GetNamed("Proxy");
     }
 }
