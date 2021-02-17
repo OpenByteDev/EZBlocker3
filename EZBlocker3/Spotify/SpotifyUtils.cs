@@ -42,10 +42,18 @@ namespace EZBlocker3.Spotify {
 
             var windowClassName = NativeUtils.GetWindowClassName(windowHandle);
 
-            if (windowClassName == "IME".AsSpan())
+            // if (windowClassName == "IME".AsSpan() || windowClassName.Contains("GDI".AsSpan(), StringComparison.OrdinalIgnoreCase))
+            //     return false;
+
+            if (!windowClassName.Equals("Chrome_WidgetWin_0".AsSpan(), StringComparison.Ordinal))
                 return false;
 
             return true;
+        }
+
+        public static IntPtr? GetMainSpotifyWindow(Process process) {
+            var window = NativeUtils.GetAllWindowsOfProcess(process).Find(window => IsMainSpotifyWindow(window));
+            return window == default ? null : window;
         }
     }
 }

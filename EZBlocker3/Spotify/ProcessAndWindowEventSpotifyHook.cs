@@ -21,6 +21,12 @@ namespace EZBlocker3.Spotify {
         /// The main window process if spotify is running.
         /// </summary>
         public Process? MainWindowProcess { get; private set; }
+
+        /// <summary>
+        /// The main window handle if spotify is running.
+        /// </summary>
+        public IntPtr? MainWindowHandle { get; private set; }
+
         /// <summary>
         /// The current window title of the main window.
         /// </summary>
@@ -97,10 +103,19 @@ namespace EZBlocker3.Spotify {
         /// </summary>
         /// <returns>A value indicating whether spotify could be hooked.</returns>
         protected bool TryHookSpotify() {
-            var processes = FetchSpotifyProcesses();
+            var processes = FetchSpotifyProcesses(false);
 
-            // find the main window process
-            var mainProcess = Array.Find(processes, p => SpotifyUtils.IsMainSpotifyProcess(p));
+            // find the main window process and handle
+            Process? mainProcess = null;
+            IntPtr mainWindowHandle = default;
+            foreach (var process in processes) {
+                var window = SpotifyUtils.GetMainSpotifyWindow(process);
+                if (window is IntPtr handle) {
+                    mainProcess = process;
+                    mainWindowHandle = handle;
+                    break;
+                }
+            }
 
             if (mainProcess == null)
                 return false;
@@ -108,7 +123,7 @@ namespace EZBlocker3.Spotify {
             if (IsHooked)
                 return true;
 
-            OnSpotifyHooked(mainProcess);
+            OnSpotifyHooked(mainProcess, mainWindowHandle);
 
             return true;
         }
@@ -158,7 +173,7 @@ namespace EZBlocker3.Spotify {
                 return;
             }
 
-            OnSpotifyHooked(process);
+            OnSpotifyHooked(process, windowHandle);
 
             // ignore later events
             _windowCreationEventProcessor.FlushQueue();
@@ -171,6 +186,10 @@ namespace EZBlocker3.Spotify {
 
             // make sure that the destroyed control was a window.
             if (!IsWindowEvent(e))
+                return;
+
+            // make sure that the destroyed window was the main one.
+            if (e.WindowHandle != MainWindowHandle)
                 return;
 
             // queue events and handle one after another
@@ -200,6 +219,10 @@ namespace EZBlocker3.Spotify {
             if (!IsWindowEvent(e))
                 return;
 
+            // make sure that the source nmn  window was the main one.
+            if (e.WindowHandle != MainWindowHandle)
+                return;
+
             // queue events and handle one after another
             // needed because this method gets called multiple times by the same thread at the same time (reentrant)
             _titleChangeEventProcessor.EnqueueAndProcess(e.WindowHandle);
@@ -213,12 +236,13 @@ namespace EZBlocker3.Spotify {
         /// OnSpotifyHooked is called whenever spotify is hooked.
         /// </summary>
         /// <param name="mainProcess">The main window spotify process.</param>
-        protected virtual void OnSpotifyHooked(Process mainProcess) {
+        protected virtual void OnSpotifyHooked(Process mainProcess, IntPtr mainWindowHandle) {
             // ignore if already hooked
             if (IsHooked)
                 return;
 
             MainWindowProcess = mainProcess;
+            MainWindowHandle = mainWindowHandle;
 
             if (_windowCreationEventHook.Hooked)
                 _windowCreationEventHook.Unhook();
@@ -231,7 +255,7 @@ namespace EZBlocker3.Spotify {
 
             IsHooked = true;
 
-            UpdateWindowTitle(NativeUtils.GetMainWindowTitle(mainProcess)!);
+            UpdateWindowTitle(NativeUtils.GetWindowTitle(mainWindowHandle));
         }
 
         /// <summary>
@@ -406,6 +430,7 @@ namespace EZBlocker3.Spotify {
             _audioSession?.Dispose();
 
             MainWindowProcess = null;
+            MainWindowHandle = null;
             _processesCache = null;
             _audioSession = null;
             WindowTitle = null;
