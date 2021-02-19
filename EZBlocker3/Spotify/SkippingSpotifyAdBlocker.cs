@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -40,19 +39,15 @@ namespace EZBlocker3.Spotify {
         private static async Task KillSpotifyAsync() {
             var processes = SpotifyUtils.GetSpotifyProcesses().ToArray();
 
-            // Close all spotify windows
-            foreach (var process in processes) {
-                foreach (HWND windowHandle in NativeUtils.GetAllWindowsOfProcess(process)) {
-                    // sequence of relevants messages sent during shutdown induced by "Exit" entry in context menu when minimized to tray.
-                    try {
-                        NativeUtils.CloseWindow(windowHandle);
-                        NativeUtils.DestroyWindow(windowHandle);
-                    } catch (Win32Exception) { }
-                    // PInvoke.SendMessage(windowHandle, Constants.WM_CLOSE, default, default);
-                    // PInvoke.SendMessage(windowHandle, Constants.WM_QUIT, default, default); // does the trick if not in tray
-                    // PInvoke.SendMessage(windowHandle, Constants.WM_DESTROY, default, default);
-                    // PInvoke.SendMessage(windowHandle, Constants.WM_NCDESTROY, default, default); // is needed when minimized to tray
-                }
+            // Simulate closing the main window
+            var mainWindowHandle = (HWND?)processes.Select(process => SpotifyUtils.GetMainSpotifyWindow(process)).FirstOrDefault(e => e != null);
+            if (mainWindowHandle is HWND hwnd) {
+                PInvoke.SendMessage(hwnd, 0x14, default, default);
+                PInvoke.SendMessage(hwnd, 0x46, default, default);
+                PInvoke.SendMessage(hwnd, 0x90 /* WM_ACCESS_WINDOW */, default, default);
+                PInvoke.SendMessage(hwnd, 0x272 /* WM_UNREGISTER_WINDOW_SERVICES */, default, default);
+                PInvoke.SendMessage(hwnd, Constants.WM_DESTROY, default, default);
+                PInvoke.SendMessage(hwnd, Constants.WM_NCDESTROY, default, default);
             }
 
             // we need to wait for all processes to exit or otherwise spotify will show an error when we try to start it again.
@@ -75,7 +70,7 @@ namespace EZBlocker3.Spotify {
         private void RestartSpotify() {
             Hook.SpotifyStateChanged += Handler1;
 
-            StartWithSpotify.StartSpotify(ignoreProxy: false);
+            StartWithSpotify.StartSpotify(ignoreProxy: true);
 
             // TODO simplify or find better names
             void Handler1(object sender, EventArgs _) {
@@ -106,12 +101,12 @@ namespace EZBlocker3.Spotify {
         }
 
         public enum SpotifyAppCommands : int {
-            Mute = 0x80000,
+            // Mute = 0x80000, mutes everything?
             VolumeDown = 0x90000,
             VolumeUp = 0xA0000,
             NextTrack = 0xB0000,
             PreviousTrack = 0xC0000,
-            Stop = 0xD0000,
+            // Stop = 0xD0000, does not seam to work
             PlayPause = 0xE0000
         }
     }
