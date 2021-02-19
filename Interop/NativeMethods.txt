@@ -23,7 +23,6 @@ TranslateMessage
 DispatchMessage
 GetMessage
 CloseWindow
-DestroyWindow
 GetClassName
 
 // COM

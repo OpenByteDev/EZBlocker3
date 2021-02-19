@@ -107,10 +107,5 @@ namespace EZBlocker3.Interop {
             if (!PInvoke.CloseWindow((HWND)windowHandle))
                 throw new Win32Exception();
         }
-
-        public static void DestroyWindow(IntPtr windowHandle) {
-            if (!PInvoke.DestroyWindow((HWND)windowHandle))
-                throw new Win32Exception();
-        }
     }
 }

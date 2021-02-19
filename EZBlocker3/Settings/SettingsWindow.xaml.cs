@@ -42,6 +42,9 @@ namespace EZBlocker3.Settings {
             if (!App.SaveSettingsOnClose)
                 return;
 
+            var hookBefore = Properties.Settings.Default.Hook;
+            var blockTypeBefore = Properties.Settings.Default.BlockType;
+
             Properties.Settings.Default.UnmuteOnClose = unmuteOnCloseCheckBox.IsChecked ?? Properties.Settings.Default.UnmuteOnClose;
             Properties.Settings.Default.MinimizeToTray = minimizeToTrayRadioButton.IsChecked ?? Properties.Settings.Default.MinimizeToTray;
             Properties.Settings.Default.CheckForUpdates = checkForUpdatesCheckBox.IsChecked ?? Properties.Settings.Default.CheckForUpdates;
@@ -58,6 +61,10 @@ namespace EZBlocker3.Settings {
                 StartWithSpotify.SetEnabled(Properties.Settings.Default.StartWithSpotify);
 
             Properties.Settings.Default.Save();
+
+            if (hookBefore != Properties.Settings.Default.Hook || blockTypeBefore != Properties.Settings.Default.BlockType) {
+                MessageBox.Show("You need to restart EZBlocker 3 for the changes to take effect.", "Restart required", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
     }
 }
