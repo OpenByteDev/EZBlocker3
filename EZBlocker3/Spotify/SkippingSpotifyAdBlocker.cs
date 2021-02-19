@@ -56,7 +56,7 @@ namespace EZBlocker3.Spotify {
             var timeoutTask = Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
             var processesExitedTask = Task.WhenAll(processes.Select(p => p.WaitForExitAsync(cancellationToken)));
             if (await Task.WhenAny(timeoutTask, processesExitedTask).ConfigureAwait(false) == timeoutTask) {
-                Logger.AdSkipper.LogInfo("Spotify did not shut down - kill it with fire! (=> .Kill())");
+                Logger.AdSkipper.LogInfo("Spotify did not shut down - kill it with fire!");
                 // some processes did not shut down in time -> kill them
                 foreach (var process in processes) {
                     if (!process.HasExited)

@@ -17,7 +17,7 @@ namespace EZBlocker3.AutoUpdate {
 
             // download file
             var client = GlobalSingletons.HttpClient;
-            var response = await client.GetAsync(update.DownloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+            using var response = await client.GetAsync(update.DownloadUrl, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
             Logger.AutoUpdate.LogDebug("Received response headers");
