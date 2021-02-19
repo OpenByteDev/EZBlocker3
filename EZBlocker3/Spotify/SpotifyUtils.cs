@@ -45,7 +45,7 @@ namespace EZBlocker3.Spotify {
             // if (windowClassName == "IME".AsSpan() || windowClassName.Contains("GDI".AsSpan(), StringComparison.OrdinalIgnoreCase))
             //     return false;
 
-            if (!windowClassName.Equals("Chrome_WidgetWin_0".AsSpan(), StringComparison.Ordinal))
+            if (!windowClassName.ToString().Equals("Chrome_WidgetWin_0", StringComparison.Ordinal))
                 return false;
 
             return true;
