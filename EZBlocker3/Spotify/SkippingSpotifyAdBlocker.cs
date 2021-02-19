@@ -42,8 +42,9 @@ namespace EZBlocker3.Spotify {
             // Simulate closing the main window
             var mainWindowHandle = (HWND?)processes.Select(process => SpotifyUtils.GetMainSpotifyWindow(process)).FirstOrDefault(e => e != null);
             if (mainWindowHandle is HWND hwnd) {
-                PInvoke.SendMessage(hwnd, 0x14, default, default);
-                PInvoke.SendMessage(hwnd, 0x46, default, default);
+                PInvoke.SendMessage(hwnd, Constants.WM_APPCOMMAND, default, (LPARAM)(IntPtr)SpotifyAppCommands.PlayPause);
+                PInvoke.SendMessage(hwnd, Constants.WM_ERASEBKGND, default, default);
+                PInvoke.SendMessage(hwnd, Constants.WM_WINDOWPOSCHANGING, default, default);
                 PInvoke.SendMessage(hwnd, 0x90 /* WM_ACCESS_WINDOW */, default, default);
                 PInvoke.SendMessage(hwnd, 0x272 /* WM_UNREGISTER_WINDOW_SERVICES */, default, default);
                 PInvoke.SendMessage(hwnd, Constants.WM_DESTROY, default, default);

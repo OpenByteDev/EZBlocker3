@@ -24,6 +24,8 @@ DispatchMessage
 GetMessage
 CloseWindow
 GetClassName
+WM_WINDOWPOSCHANGING
+WM_ERASEBKGND
 
 // COM
 MMDeviceEnumerator
