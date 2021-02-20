@@ -8,7 +8,7 @@ using Lazy;
 namespace EZBlocker3.Extensions {
     internal static class ProcessExtensions {
         [Lazy]
-        private static Func<Process, bool> _getProcessAssociatedFunc {
+        private static Func<Process, bool> getProcessAssociatedFunc {
             get {
                 // Expression Trees let us change a private field and are faster than reflection (if called multiple times)
                 var processParamter = Expression.Parameter(typeof(Process), "process");
@@ -20,7 +20,7 @@ namespace EZBlocker3.Extensions {
             }
         }
         public static bool IsAssociated(this Process process) {
-            return _getProcessAssociatedFunc(process);
+            return getProcessAssociatedFunc(process);
         }
 
         public static async Task WaitForExitAsync(this Process process, CancellationToken cancellationToken = default) {

@@ -32,6 +32,7 @@ namespace EZBlocker3 {
 
 #pragma warning disable CS8618
         public MainWindow() {
+#pragma warning restore CS8618
             InitializeComponent();
 
             // add version to window title
@@ -64,7 +65,6 @@ namespace EZBlocker3 {
 
             MaybePerformUpdateCheck();
         }
-#pragma warning restore CS8618
 
         #region WindowProc
         private void MainWindow_Loaded(object sender, RoutedEventArgs e) {
@@ -276,7 +276,7 @@ namespace EZBlocker3 {
         #endregion
 
         private void OpenVolumeControlButton_Click(object sender, RoutedEventArgs e) {
-            Task.Run(VolumeMixer.Open, cancellationSource.Token);
+            Task.Run(() => VolumeMixer.Open(), cancellationSource.Token);
         }
 
         public void Minimize() {

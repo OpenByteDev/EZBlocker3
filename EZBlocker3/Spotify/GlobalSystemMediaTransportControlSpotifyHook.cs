@@ -102,6 +102,11 @@ namespace EZBlocker3.Spotify {
         }
 
         private void HandleSpotifyStateChanged() {
+            if (session is null) {
+                Logger.Hook.LogError("Spotify Media Session is null when it shouldn't.");
+                return;
+            }
+
             try {
                 var mediaProperties = session.TryGetMediaPropertiesAsync().AsTask().GetAwaiter().GetResult();
                 var playbackInfo = session.GetPlaybackInfo();

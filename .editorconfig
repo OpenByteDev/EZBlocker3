@@ -1,0 +1,4 @@
+﻿[*.cs]
+
+# U2U1012: Parameter types should be specific
+dotnet_diagnostic.U2U1012.severity = none

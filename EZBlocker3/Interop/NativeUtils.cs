@@ -63,7 +63,7 @@ namespace EZBlocker3.Interop {
 
             return mainWindowHandle;
 
-            BOOL EnumWindowsCallback(HWND handle, LPARAM extraParameter) {
+            BOOL EnumWindowsCallback(HWND handle, LPARAM _) {
                 var processId = GetWindowThreadProcessId(handle);
 
                 // belongs to correct process?

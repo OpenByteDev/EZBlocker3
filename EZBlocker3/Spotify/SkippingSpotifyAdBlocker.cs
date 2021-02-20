@@ -49,6 +49,8 @@ namespace EZBlocker3.Spotify {
                 PInvoke.SendMessage(hwnd, 0x272 /* WM_UNREGISTER_WINDOW_SERVICES */, default, default);
                 PInvoke.SendMessage(hwnd, Constants.WM_DESTROY, default, default);
                 PInvoke.SendMessage(hwnd, Constants.WM_NCDESTROY, default, default);
+            } else {
+                Logger.AdSkipper.LogInfo("Failed to find main spotify window handle");
             }
 
             // we need to wait for all processes to exit or otherwise spotify will show an error when we try to start it again.
@@ -56,7 +58,7 @@ namespace EZBlocker3.Spotify {
             var cancellationToken = cancellationSource.Token;
             var timeoutTask = Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
             var processesExitedTask = Task.WhenAll(processes.Select(p => p.WaitForExitAsync(cancellationToken)));
-            if (await Task.WhenAny(timeoutTask, processesExitedTask).ConfigureAwait(false) == timeoutTask) {
+            if (mainWindowHandle is null || await Task.WhenAny(timeoutTask, processesExitedTask).ConfigureAwait(false) == timeoutTask) {
                 Logger.AdSkipper.LogInfo("Spotify did not shut down - kill it with fire!");
                 // some processes did not shut down in time -> kill them
                 foreach (var process in processes) {
@@ -74,7 +76,7 @@ namespace EZBlocker3.Spotify {
             StartWithSpotify.StartSpotify(ignoreProxy: true);
 
             // TODO simplify or find better names
-            void Handler1(object sender, EventArgs _) {
+            void Handler1(object sender, SpotifyStateChangedEventArgs _) {
                 if (Hook.State == SpotifyState.Paused) {
                     Hook.SpotifyStateChanged -= Handler1;
                     var process = SpotifyUtils.GetMainSpotifyProcess();
@@ -83,7 +85,7 @@ namespace EZBlocker3.Spotify {
                     Task.Run(async () => {
                         await Task.Delay(1000).ConfigureAwait(false); // if we do not wait here spotify wont update the window title and we wont detect a state change.
 
-                        void Handler2(object sender, EventArgs _) {
+                        void Handler2(object sender, SpotifyStateChangedEventArgs _) {
                             if (Hook.State == SpotifyState.PlayingSong && windowHandle != IntPtr.Zero) {
                                 Hook.SpotifyStateChanged -= Handler2;
                                 if (Hook.ActiveSong is SongInfo current && lastActiveSong is SongInfo previous && current == previous) {
