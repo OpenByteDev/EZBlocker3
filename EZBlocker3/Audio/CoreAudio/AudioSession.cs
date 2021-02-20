@@ -37,12 +37,12 @@ namespace EZBlocker3.Audio.CoreAudio {
                 if (simpleAudioVolume is null)
                     throw new NotSupportedException();
                 Marshal.ThrowExceptionForHR(simpleAudioVolume->GetMute(out var isMuted));
-                return isMuted == Constants.S_OK;
+                return isMuted;
             }
             set {
                 if (simpleAudioVolume is null)
                     throw new NotSupportedException();
-                Marshal.ThrowExceptionForHR(simpleAudioVolume->SetMute(value ? 1 : 0, default));
+                Marshal.ThrowExceptionForHR(simpleAudioVolume->SetMute(value, default));
             }
         }
 
@@ -64,8 +64,7 @@ namespace EZBlocker3.Audio.CoreAudio {
             get {
                 if (audioMeterInformation is null)
                     throw new NotSupportedException();
-                var peak = 0f;
-                Marshal.ThrowExceptionForHR(audioMeterInformation->GetPeakValue(ref peak));
+                Marshal.ThrowExceptionForHR(audioMeterInformation->GetPeakValue(out var peak));
                 return peak;
             }
         }

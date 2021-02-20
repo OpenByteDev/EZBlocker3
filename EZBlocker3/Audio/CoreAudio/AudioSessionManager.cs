@@ -12,9 +12,8 @@ namespace EZBlocker3.Audio.CoreAudio {
         }
 
         public AudioSessionCollection GetSessionCollection() {
-            IAudioSessionEnumerator* sessionEnumerator = null;
+            Marshal.ThrowExceptionForHR(sessionManager->GetSessionEnumerator(out var sessionEnumerator));
             try {
-                Marshal.ThrowExceptionForHR(sessionManager->GetSessionEnumerator(ref sessionEnumerator));
                 return new AudioSessionCollection(sessionEnumerator);
             } catch {
                 if (sessionEnumerator != null)

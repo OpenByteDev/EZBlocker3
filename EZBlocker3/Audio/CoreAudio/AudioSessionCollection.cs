@@ -13,16 +13,14 @@ namespace EZBlocker3.Audio.CoreAudio {
 
         public AudioSession this[int index] {
             get {
-                IAudioSessionControl* session = null;
-                Marshal.ThrowExceptionForHR(sessionEnumerator->GetSession(index, ref session));
+                Marshal.ThrowExceptionForHR(sessionEnumerator->GetSession(index, out var session));
                 return new AudioSession(session);
             }
         }
 
         public int Count {
             get {
-                var count = 0;
-                Marshal.ThrowExceptionForHR(sessionEnumerator->GetCount(ref count));
+                Marshal.ThrowExceptionForHR(sessionEnumerator->GetCount(out var count));
                 return count;
             }
         }
