@@ -35,7 +35,7 @@ namespace EZBlocker3.Interop {
         }
 
         public static List<IntPtr> GetAllWindowsOfProcess(Process process) {
-            var handles = new List<IntPtr>();
+            var handles = new List<IntPtr>(0);
 
             var callback = new WNDENUMPROC((hWnd, _) => { handles.Add(hWnd); return true; });
             foreach (ProcessThread thread in process.Threads) {
