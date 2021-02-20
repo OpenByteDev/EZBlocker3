@@ -30,9 +30,9 @@ namespace EZBlocker3.Spotify {
         }
 
         private async Task KillAndRestartSpotifyAsync() {
-            Logger.AdSkipper.LogInfo("Killing spotify");
+            Logger.AdSkipper.LogInfo("Killing spotify...");
             await KillSpotifyAsync().ConfigureAwait(false);
-            Logger.AdSkipper.LogInfo("Restarting spotify");
+            Logger.AdSkipper.LogInfo("Restarting spotify...");
             RestartSpotify();
         }
 
@@ -84,7 +84,7 @@ namespace EZBlocker3.Spotify {
                     var windowHandle = NativeUtils.GetMainWindowOfProcess(process!);
 
                     Task.Run(async () => {
-                        await Task.Delay(1000).ConfigureAwait(false); // if we do not wait here spotify wont update the window title and we wont detect a state change.
+                        await Task.Delay(1000).ConfigureAwait(false); // if we do not wait here spotify won't update the window title and we won't detect a state change.
 
                         // handler to catch spotify after playback resumes
                         void Handler2(object sender, SpotifyStateChangedEventArgs _) {
@@ -98,7 +98,7 @@ namespace EZBlocker3.Spotify {
                         }
                         Hook.SpotifyStateChanged += Handler2;
 
-                        Logger.AdSkipper.LogInfo("Resumed playback");
+                        Logger.AdSkipper.LogInfo("Resuming playback...");
                         PInvoke.SendMessage((HWND)windowHandle, Constants.WM_APPCOMMAND, default, (LPARAM)(IntPtr)SpotifyAppCommands.PlayPause);
                     });
                 }

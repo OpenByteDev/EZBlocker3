@@ -117,20 +117,20 @@ namespace EZBlocker3 {
                 await Dispatcher.InvokeAsync(() => {
                     switch (ShowUpdateFoundWindow(update)) {
                         case UpdateDecision.Accept:
-                            Logger.LogInfo($"AutoUpdate: Accepted update to {update.UpdateVersion}");
+                            Logger.AutoUpdate.LogInfo($"Accepted update to {update.UpdateVersion}");
                             ShowDownloadWindow(update);
                             break;
                         case UpdateDecision.NotNow:
-                            Logger.LogInfo($"AutoUpdate: Delayed update to {update.UpdateVersion}");
+                            Logger.AutoUpdate.LogInfo($"Delayed update to {update.UpdateVersion}");
                             break;
                         case UpdateDecision.IgnoreUpdate:
-                            Logger.LogInfo($"AutoUpdate: Ignored update to {update.UpdateVersion}");
+                            Logger.AutoUpdate.LogInfo($"Ignored update to {update.UpdateVersion}");
                             Properties.Settings.Default.IgnoreUpdate = update.UpdateVersion.ToString();
                             break;
                     }
                 }, cancellationSource.Token);
             } catch (Exception e) {
-                Logger.LogException("Auto update failed", e);
+                Logger.AutoUpdate.LogException("Update operation failed", e);
             }
         }
 

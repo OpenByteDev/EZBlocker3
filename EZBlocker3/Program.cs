@@ -24,6 +24,12 @@ namespace EZBlocker3 {
 
             CliArgs = CliArgs.Parse(args);
 
+            if (args.Length == 0) {
+                Logger.LogInfo("Started without cli args");
+            } else {
+                Logger.LogInfo("Started with args: " + string.Join(" ", args));
+            }
+
             using var mutex = new Mutex(initiallyOwned: true, SingletonMutexName, out var notAlreadyRunning);
 
             if (CliArgs.IsUpdateRestart) {
@@ -44,6 +50,7 @@ namespace EZBlocker3 {
                 Task.Run(() => RunPipeServer(cancellationTokenSource.Token), cancellationTokenSource.Token);
 
                 var exitCode = RunApp();
+                Logger.LogInfo($"App exited with code {exitCode}");
 
                 cancellationTokenSource.Cancel();
                 mutex.ReleaseMutex();
@@ -64,7 +71,11 @@ namespace EZBlocker3 {
 
         private static void OnUnhandledException(Exception? exception) {
             try {
-                Logger.LogError("Unhandled exception:\n" + exception);
+                if (exception is not null) {
+                    Logger.LogException("Unhandled exception", exception);
+                } else {
+                    Logger.LogError("Unhandled unknown exception");
+                }
             } catch { }
         }
 
@@ -82,6 +93,7 @@ namespace EZBlocker3 {
 
             // we received a connection, which means another instance was started -> we bring the window to the front
             _ = Application.Current.Dispatcher.BeginInvoke(() => {
+                Logger.LogInfo("App was started while already running -> bringing running window to front.");
                 var mainWindow = (MainWindow)Application.Current.MainWindow;
                 mainWindow.Dispatcher.BeginInvoke(() => mainWindow.Deminimize());
             });
