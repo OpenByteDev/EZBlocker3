@@ -179,12 +179,12 @@ namespace EZBlocker3.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("True")]
-        public bool AssumeAdOnUnknownState {
+        public bool AggressiveMuting {
             get {
-                return ((bool)(this["AssumeAdOnUnknownState"]));
+                return ((bool)(this["AggressiveMuting"]));
             }
             set {
-                this["AssumeAdOnUnknownState"] = value;
+                this["AggressiveMuting"] = value;
             }
         }
         

@@ -4,7 +4,6 @@ namespace EZBlocker3.Spotify {
     public class MutingSpotifyAdBlocker : AbstractSpotifyAdBlocker {
         private readonly IMutingSpotifyHook muter;
 
-        // TODO
         public bool WaitForAudioFade { get; set; } = true;
         public bool AggressiveMuting { get; set; } = false;
 
@@ -42,16 +41,6 @@ namespace EZBlocker3.Spotify {
             }
 
             Task.Run(async () => {
-                /*
-                for (var i = 0; i < 10; i++) {
-                    await Task.Delay(50);
-                    var peakVolume = SpotifyHook.AudioSession?.PeakVolume;
-                    Logging.Logger.LogDebug("peakVolume: " + peakVolume);
-                    if (peakVolume is null)
-                        break;
-                    if (peakVolume < 0.01)
-                        break;
-                }*/
                 await Task.Delay(600).ConfigureAwait(false);
                 muter.Unmute();
             });

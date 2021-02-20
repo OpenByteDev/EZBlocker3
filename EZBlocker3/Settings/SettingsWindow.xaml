@@ -32,11 +32,11 @@
                 </StackPanel>
                 <Label>How should Ads be blocked?</Label>
                 <StackPanel Orientation="Horizontal" Margin="0 0 0 10">
-                    <RadioButton x:Name="muteBlockTypeButton" Content="Mute Spotify" Tag="mute" Margin="0 0 10 0" GroupName="BlockType"  />
-                    <RadioButton x:Name="skipBlockTypeButton" Content="Skip Ads (Kill &amp; Restart)" Tag="skip" IsChecked="True" GroupName="BlockType" />
+                    <RadioButton x:Name="muteBlockTypeButton" Content="Mute Spotify" Tag="MutingSpotifyAdBlocker" Margin="0 0 10 0" GroupName="BlockType"  />
+                    <RadioButton x:Name="skipBlockTypeButton" Content="Skip Ads (Kill &amp; Restart)" Tag="SkippingSpotifyAdBlocker" IsChecked="True" GroupName="BlockType" />
                 </StackPanel>
                 <StackPanel Orientation="Vertical" Visibility="{Binding IsChecked, ElementName=muteBlockTypeButton, Converter={StaticResource b2v}}">
-                    <CheckBox x:Name="assumeAdOnUnknowsStateCheckBox" Content="Aggressive Muting" IsChecked="True" ToolTip="Should EZBlocker 3 assume that an ad is playing if spotify is in an unknow state?" />
+                    <CheckBox x:Name="aggressiveMutingCheckBox" Content="Aggressive Muting" IsChecked="True" ToolTip="Should EZBlocker 3 assume that an ad is playing if spotify is in an unknow state?" />
                     <CheckBox x:Name="unmuteOnCloseCheckBox" Content="Unmute on close" IsChecked="True" ToolTip="Should Spotify be unmuted when EZBlocker 3 exits." />
                 </StackPanel>
             </StackPanel>

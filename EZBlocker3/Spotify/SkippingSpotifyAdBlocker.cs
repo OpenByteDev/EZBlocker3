@@ -75,16 +75,18 @@ namespace EZBlocker3.Spotify {
 
             StartWithSpotify.StartSpotify(ignoreProxy: true);
 
-            // TODO simplify or find better names
+            // handler to catch spotify after restart
             void Handler1(object sender, SpotifyStateChangedEventArgs _) {
                 if (Hook.State == SpotifyState.Paused) {
                     Hook.SpotifyStateChanged -= Handler1;
+
                     var process = SpotifyUtils.GetMainSpotifyProcess();
                     var windowHandle = NativeUtils.GetMainWindowOfProcess(process!);
 
                     Task.Run(async () => {
                         await Task.Delay(1000).ConfigureAwait(false); // if we do not wait here spotify wont update the window title and we wont detect a state change.
 
+                        // handler to catch spotify after playback resumes
                         void Handler2(object sender, SpotifyStateChangedEventArgs _) {
                             if (Hook.State == SpotifyState.PlayingSong && windowHandle != IntPtr.Zero) {
                                 Hook.SpotifyStateChanged -= Handler2;

@@ -19,19 +19,18 @@ namespace EZBlocker3.Spotify {
                 // case nameof(ProcessAndWindowEventSpotifyHook):
                 default:
                     var hook = new ProcessAndWindowEventSpotifyHook() {
-                        AssumeAdOnUnknownState = Properties.Settings.Default.AssumeAdOnUnknownState
+                        AssumeAdOnUnknownState = Properties.Settings.Default.AggressiveMuting
                     };
                     Hook = hook;
                     Muter = hook;
                     break;
             }
 
-            // TODO: do not use magic strings
             AdBlocker = (Properties.Settings.Default.BlockType, Hook) switch {
-                ("mute", IMutingSpotifyHook muter) => new MutingSpotifyAdBlocker(Hook, muter) {
-                    AggressiveMuting = Properties.Settings.Default.AssumeAdOnUnknownState // TODO: rename
+                (nameof(MutingSpotifyAdBlocker), IMutingSpotifyHook muter) => new MutingSpotifyAdBlocker(Hook, muter) {
+                    AggressiveMuting = Properties.Settings.Default.AggressiveMuting
                 },
-                // ("skip", _) => 
+                // (nameof(SkippingSpotifyAdBlocker), _) => 
                 _ => new SkippingSpotifyAdBlocker(Hook),
             };
         }
