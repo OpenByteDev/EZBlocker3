@@ -250,8 +250,8 @@ namespace EZBlocker3.Spotify {
             _titleChangeEventHook.HookToProcess(mainProcess);
             _windowDestructionEventHook.HookToProcess(mainProcess);
 
-            mainProcess.EnableRaisingEvents = true;
-            mainProcess.Exited += (s, e) => OnSpotifyClosed();
+            // mainProcess.EnableRaisingEvents = true;
+            // mainProcess.Exited += (s, e) => OnSpotifyClosed();
 
             IsHooked = true;
 
