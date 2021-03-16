@@ -8,13 +8,19 @@ using Microsoft.Windows.Sdk;
 namespace EZBlocker3.Interop {
     internal static class NativeUtils {
         public static string GetWindowTitle(IntPtr handle) {
+            return TryGetWindowTitle(handle) ?? throw new Win32Exception();
+        }
+        public static unsafe string? TryGetWindowTitle(IntPtr handle) {
             var titleLength = PInvoke.GetWindowTextLength((HWND)handle);
             if (titleLength == 0)
                 return string.Empty;
-            var title = new string('\0', titleLength);
-            if (PInvoke.GetWindowText((HWND)handle, title, titleLength + 1) == 0)
-                throw new Win32Exception(Marshal.GetLastWin32Error());
-            return title;
+
+            fixed (char* ptr = stackalloc char[titleLength]) {
+                var title = new PWSTR(ptr);
+                if (PInvoke.GetWindowText((HWND)handle, title, titleLength + 1) == 0)
+                    return null;
+                return title.ToString();
+            }
         }
 
         public static bool IsPopupWindow(IntPtr handle) {
@@ -93,14 +99,15 @@ namespace EZBlocker3.Interop {
             return GetWindowTitle(mainWindowHandle);
         }
 
-        public static ReadOnlySpan<char> GetWindowClassName(IntPtr windowHandle) {
-            var name = new string(' ', 256); // 256 is the max name length
+        public static unsafe string GetWindowClassName(IntPtr windowHandle) {
+            fixed (char* ptr = stackalloc char[256]) { // 256 is the max name length
+                var name = new PWSTR(ptr);
+                var actualNameLength = PInvoke.GetClassName((HWND)windowHandle, name, 256);
+                if (actualNameLength == 0)
+                    throw new Win32Exception();
 
-            var actualNameLength = PInvoke.GetClassName((HWND)windowHandle, name, name.Length);
-            if (actualNameLength == 0)
-                throw new Win32Exception();
-
-            return name.AsSpan(0, actualNameLength);
+                return name.ToString();
+            }
         }
 
         public static void CloseWindow(IntPtr windowHandle) {

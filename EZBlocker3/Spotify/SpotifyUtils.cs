@@ -42,7 +42,7 @@ namespace EZBlocker3.Spotify {
 
             var windowClassName = NativeUtils.GetWindowClassName(windowHandle);
 
-            return windowClassName.ToString().Equals("Chrome_WidgetWin_0", StringComparison.Ordinal);
+            return windowClassName.Equals("Chrome_WidgetWin_0", StringComparison.Ordinal);
         }
 
         public static IntPtr? GetMainSpotifyWindow(Process process) {
