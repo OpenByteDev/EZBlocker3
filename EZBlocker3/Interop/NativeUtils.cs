@@ -24,12 +24,12 @@ namespace EZBlocker3.Interop {
         }
 
         public static bool IsPopupWindow(IntPtr handle) {
-            var style = PInvokeExtra.GetWindowLongPtr(handle, Constants.GWL_STYLE);
-            return ((long)style & Constants.WS_POPUP) != 0;
+            var style = PInvokeExtra.GetWindowLongPtr(handle, GetWindowLongPtr_nIndex.GWL_STYLE);
+            return (style & WINDOWS_STYLE.WS_POPUP) != 0;
         }
 
         public static bool IsRootWindow(IntPtr handle) {
-            return PInvoke.GetWindow((HWND)handle, Constants.GW_OWNER).Value == 0;
+            return PInvoke.GetWindow((HWND)handle, GetWindow_uCmdFlags.GW_OWNER).Value == 0;
         }
 
         public static uint GetWindowThreadProcessId(IntPtr windowHandle) {
@@ -69,7 +69,7 @@ namespace EZBlocker3.Interop {
 
             return mainWindowHandle;
 
-            bool EnumWindowsCallback(HWND handle, LPARAM _) {
+            BOOL EnumWindowsCallback(HWND handle, LPARAM _) {
                 var processId = GetWindowThreadProcessId(handle);
 
                 // belongs to correct process?

@@ -5,22 +5,22 @@ using Microsoft.Windows.Sdk;
 
 namespace EZBlocker3.Audio.CoreAudio {
     public unsafe class AudioSessionCollection : CriticalFinalizerObject, IDisposable {
-        private readonly IAudioSessionEnumerator* sessionEnumerator;
+        private readonly IAudioSessionEnumerator sessionEnumerator;
 
-        public AudioSessionCollection(IAudioSessionEnumerator* sessionEnumerator) {
+        public AudioSessionCollection(IAudioSessionEnumerator sessionEnumerator) {
             this.sessionEnumerator = sessionEnumerator;
         }
 
         public AudioSession this[int index] {
             get {
-                Marshal.ThrowExceptionForHR(sessionEnumerator->GetSession(index, out var session));
+                sessionEnumerator.GetSession(index, out var session);
                 return new AudioSession(session);
             }
         }
 
         public int Count {
             get {
-                Marshal.ThrowExceptionForHR(sessionEnumerator->GetCount(out var count));
+                sessionEnumerator.GetCount(out var count);
                 return count;
             }
         }
@@ -32,7 +32,7 @@ namespace EZBlocker3.Audio.CoreAudio {
                 _disposed = true;
 
                 if (sessionEnumerator != null)
-                    sessionEnumerator->Release();
+                    Marshal.FinalReleaseComObject(sessionEnumerator);
             }
         }
 

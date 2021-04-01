@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Microsoft.Windows.Sdk;
 
 namespace EZBlocker3.Interop {
     internal static partial class PInvokeExtra {
+        public static WINDOWS_STYLE GetWindowLongPtr(IntPtr hWnd, GetWindowLongPtr_nIndex nIndex) {
+            return (WINDOWS_STYLE) GetWindowLongPtr(hWnd, (int)nIndex);
+        }
+
         /// <summary>
         /// Retrieves information about the specified window.
         /// The function also retrieves the value at a specified offset into the extra window memory.
@@ -14,6 +19,6 @@ namespace EZBlocker3.Interop {
         /// If the function fails, the return value is zero.
         /// </returns>
         [DllImport("user32.dll")]
-        public static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
+        private static extern IntPtr GetWindowLongPtr(IntPtr hWnd, int nIndex);
     }
 }

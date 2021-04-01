@@ -5,29 +5,24 @@ using Microsoft.Windows.Sdk;
 
 namespace EZBlocker3.Audio.CoreAudio {
     public unsafe class AudioSession : CriticalFinalizerObject, IDisposable {
-        private readonly IAudioSessionControl* audioSessionControl;
-        private readonly IAudioSessionControl2* audioSessionControl2;
-        private readonly ISimpleAudioVolume* simpleAudioVolume;
-        private readonly IAudioMeterInformation* audioMeterInformation;
+        private readonly IAudioSessionControl audioSessionControl;
+        private readonly IAudioSessionControl2? audioSessionControl2;
+        private readonly ISimpleAudioVolume? simpleAudioVolume;
+        private readonly IAudioMeterInformation? audioMeterInformation;
 
-        public AudioSession(IAudioSessionControl* session) {
+        public AudioSession(IAudioSessionControl session) {
             audioSessionControl = session;
 
-            session->QueryInterface(typeof(ISimpleAudioVolume).GUID, out var sav);
-            simpleAudioVolume = (ISimpleAudioVolume*)sav;
-
-            session->QueryInterface(typeof(IAudioMeterInformation).GUID, out var ami);
-            audioMeterInformation = (IAudioMeterInformation*)ami;
-
-            session->QueryInterface(typeof(IAudioSessionControl2).GUID, out var asc2);
-            audioSessionControl2 = (IAudioSessionControl2*)asc2;
+            simpleAudioVolume = session as ISimpleAudioVolume;
+            audioMeterInformation = session as IAudioMeterInformation;
+            audioSessionControl2 = session as IAudioSessionControl2;
         }
 
         public uint ProcessID {
             get {
                 if (audioSessionControl2 is null)
                     throw new NotSupportedException();
-                Marshal.ThrowExceptionForHR(audioSessionControl2->GetProcessId(out var processId));
+                audioSessionControl2.GetProcessId(out var processId);
                 return processId;
             }
         }
@@ -36,13 +31,13 @@ namespace EZBlocker3.Audio.CoreAudio {
             get {
                 if (simpleAudioVolume is null)
                     throw new NotSupportedException();
-                Marshal.ThrowExceptionForHR(simpleAudioVolume->GetMute(out var isMuted));
+                simpleAudioVolume.GetMute(out var isMuted);
                 return isMuted;
             }
             set {
                 if (simpleAudioVolume is null)
                     throw new NotSupportedException();
-                Marshal.ThrowExceptionForHR(simpleAudioVolume->SetMute(value, default));
+                simpleAudioVolume.SetMute(value, default);
             }
         }
 
@@ -50,13 +45,13 @@ namespace EZBlocker3.Audio.CoreAudio {
             get {
                 if (simpleAudioVolume is null)
                     throw new NotSupportedException();
-                Marshal.ThrowExceptionForHR(simpleAudioVolume->GetMasterVolume(out var level));
+                simpleAudioVolume.GetMasterVolume(out var level);
                 return level;
             }
             set {
                 if (simpleAudioVolume is null)
                     throw new NotSupportedException();
-                Marshal.ThrowExceptionForHR(simpleAudioVolume->SetMasterVolume(value, default));
+                simpleAudioVolume.SetMasterVolume(value, default);
             }
         }
 
@@ -64,7 +59,7 @@ namespace EZBlocker3.Audio.CoreAudio {
             get {
                 if (audioMeterInformation is null)
                     throw new NotSupportedException();
-                Marshal.ThrowExceptionForHR(audioMeterInformation->GetPeakValue(out var peak));
+                audioMeterInformation.GetPeakValue(out var peak);
                 return peak;
             }
         }
@@ -76,13 +71,13 @@ namespace EZBlocker3.Audio.CoreAudio {
                 _disposed = true;
 
                 if (audioSessionControl != null)
-                    audioSessionControl->Release();
+                    Marshal.FinalReleaseComObject(audioSessionControl);
                 if (audioSessionControl2 != null)
-                    audioSessionControl2->Release();
+                    Marshal.FinalReleaseComObject(audioSessionControl2);
                 if (simpleAudioVolume != null)
-                    simpleAudioVolume->Release();
+                    Marshal.FinalReleaseComObject(simpleAudioVolume);
                 if (audioMeterInformation != null)
-                    audioMeterInformation->Release();
+                    Marshal.FinalReleaseComObject(audioMeterInformation);
             }
         }
 

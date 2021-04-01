@@ -12,12 +12,11 @@ SC_CLOSE
 EnumWindows
 GetWindowText
 GetWindowTextLength
-GWL_STYLE
 GetWindowThreadProcessId
 GetWindow
-WS_POPUP
-GW_OWNER
-GW_CHILD
+WINDOWS_STYLE
+GetWindow_uCmdFlags
+GetWindowLongPtr_nIndex
 CoCreateInstance
 CLSCTX
 EnumThreadWindows

@@ -5,19 +5,20 @@ using Microsoft.Windows.Sdk;
 
 namespace EZBlocker3.Audio.CoreAudio {
     public unsafe class AudioSessionManager : CriticalFinalizerObject, IDisposable {
-        private readonly IAudioSessionManager2* sessionManager;
+        private readonly IAudioSessionManager2 sessionManager;
 
-        public AudioSessionManager(IAudioSessionManager2* sessionManager) {
+        public AudioSessionManager(IAudioSessionManager2 sessionManager) {
             this.sessionManager = sessionManager;
         }
 
         public AudioSessionCollection GetSessionCollection() {
-            Marshal.ThrowExceptionForHR(sessionManager->GetSessionEnumerator(out var sessionEnumerator));
+            IAudioSessionEnumerator? sessionEnumerator = null;
             try {
+                sessionEnumerator = sessionManager.GetSessionEnumerator();
                 return new AudioSessionCollection(sessionEnumerator);
             } catch {
                 if (sessionEnumerator != null)
-                    sessionEnumerator->Release();
+                    Marshal.FinalReleaseComObject(sessionEnumerator);
                 throw;
             }
         }
@@ -29,7 +30,7 @@ namespace EZBlocker3.Audio.CoreAudio {
                 _disposed = true;
 
                 if (sessionManager != null)
-                    sessionManager->Release();
+                    Marshal.FinalReleaseComObject(sessionManager);
             }
         }
 

@@ -73,7 +73,7 @@ namespace EZBlocker3 {
         }
         private IntPtr WindowProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled) {
             switch (msg) {
-                case Constants.WM_SYSCOMMAND:
+                case (int)Constants.WM_SYSCOMMAND:
                     if ((int)wParam == Constants.SC_CLOSE) {
                         // we manually close here, so that the "close window" command in the taskbar keeps working even if there is a dialog open.
                         Close();
